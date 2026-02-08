@@ -2,848 +2,108 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Météo Montagne - Dashboard Ski</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Météo Montagne - Dashboard</title>
     <style>
-        :root {
-            --ice-blue: #d4e9f7;
-            --glacier: #a8d5e2;
-            --deep-blue: #1a5276;
-            --snow-white: #fafbfc;
-            --powder: #e8f4f8;
-            --storm-gray: #34495e;
-            --warning-orange: #e67e22;
-            --fresh-snow: #ecf0f1;
-            --shadow-blue: rgba(26, 82, 118, 0.15);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: linear-gradient(135deg, #1a5276 0%, #2874a6 50%, #5dade2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--storm-gray);
-        }
-
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-            animation: slideDown 0.6s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px 40px;
-            border-radius: 16px 16px 0 0;
-            border-bottom: 4px solid var(--glacier);
-            box-shadow: 0 4px 20px var(--shadow-blue);
-        }
-
-        h1 {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: var(--deep-blue);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 0 var(--glacier);
-        }
-
-        .subtitle {
-            font-size: 0.95rem;
-            color: var(--storm-gray);
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .date-display {
-            flex: 1;
-            padding: 12px 20px;
-            background: var(--powder);
-            border-left: 4px solid var(--deep-blue);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            color: var(--deep-blue);
-            font-weight: 500;
-        }
-
-        .refresh-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--deep-blue), #2874a6);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .refresh-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .main-content {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 40px;
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 10px 40px var(--shadow-blue);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            font-size: 1.2rem;
-            color: var(--deep-blue);
-        }
-
-        .error {
-            background: #ffe5e5;
-            border: 2px solid #ff4444;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            color: #cc0000;
-        }
-
-        .section {
-            margin-bottom: 50px;
-            animation: fadeIn 0.8s ease-out backwards;
-        }
-
-        .section:nth-child(1) { animation-delay: 0.1s; }
-        .section:nth-child(2) { animation-delay: 0.2s; }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h2 {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--deep-blue);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 25px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid var(--glacier);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .icon {
-            font-size: 1.8rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        thead {
-            background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%);
-            color: white;
-        }
-
-        th {
-            padding: 18px 16px;
-            text-align: left;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        th:first-child {
-            border-radius: 12px 0 0 0;
-            font-size: 1.1rem;
-            min-width: 180px;
-        }
-
-        th:last-child {
-            border-radius: 0 12px 0 0;
-            border-right: none;
-        }
-
-        tbody tr {
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        tbody tr:nth-child(even) {
-            background: var(--fresh-snow);
-        }
-
-        tbody tr:hover {
-            background: var(--powder);
-            transform: scale(1.005);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        td {
-            padding: 16px;
-            border-right: 1px solid #e0e0e0;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        td:first-child {
-            font-weight: 600;
-            color: var(--deep-blue);
-            font-size: 1rem;
-            background: rgba(212, 233, 247, 0.3);
-        }
-
-        td:last-child {
-            border-right: none;
-        }
-
-        .snow-value {
-            font-weight: 600;
-            color: var(--deep-blue);
-            font-size: 1.05rem;
-        }
-
-        .heavy-snow {
-            color: var(--warning-orange);
-            font-weight: 700;
-        }
-
-        .date-header {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            display: block;
-            margin-top: 4px;
-            font-weight: 400;
-        }
-
-        .weather-icon {
-            font-size: 1.5rem;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        .temp {
-            font-weight: 600;
-            color: var(--deep-blue);
-        }
-
-        .temp-cold {
-            color: #3498db;
-        }
-
-        .temp-warm {
-            color: var(--warning-orange);
-        }
-
-        .conditions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .wind-info {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-top: 4px;
-        }
-
-        .legend {
-            margin-top: 20px;
-            padding: 15px 20px;
-            background: var(--powder);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--storm-gray);
-            border-left: 4px solid var(--glacier);
-        }
-
-        .legend-item {
-            display: inline-block;
-            margin-right: 25px;
-            margin-bottom: 5px;
-        }
-
-        .past-day {
-            opacity: 0.7;
-            background: #f8f9fa !important;
-        }
-
-        .today {
-            background: linear-gradient(135deg, rgba(168, 213, 226, 0.2), rgba(212, 233, 247, 0.2)) !important;
-            border: 2px solid var(--glacier);
-        }
-
-        .future-day {
-            background: white !important;
-        }
-
-        .add-resort-btn {
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
-            margin-top: 10px;
-        }
-
-        .add-resort-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeInOverlay 0.3s ease-out;
-        }
-
-        @keyframes fadeInOverlay {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideInModal 0.3s ease-out;
-        }
-
-        @keyframes slideInModal {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--deep-blue);
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid var(--glacier);
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            margin-bottom: 20px;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--deep-blue);
-        }
-
-        .search-results {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .search-result-item {
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .search-result-item:hover {
-            background: var(--powder);
-            border-color: var(--glacier);
-            transform: translateX(5px);
-        }
-
-        .result-name {
-            font-weight: 700;
-            color: var(--deep-blue);
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-
-        .result-info {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-btn-cancel {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .modal-btn-cancel:hover {
-            background: #7f8c8d;
-        }
-
-        .loading-search {
-            text-align: center;
-            padding: 20px;
-            color: var(--deep-blue);
-            font-style: italic;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            color: #95a5a6;
-        }
-
-        .resort-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .resort-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
-            background: var(--glacier);
-            color: var(--deep-blue);
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .remove-resort {
-            background: none;
-            border: none;
-            color: var(--deep-blue);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .remove-resort:hover {
-            background: var(--deep-blue);
-            color: white;
-        }
-
-        @media (max-width: 1200px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .main-content {
-                padding: 25px;
-            }
-
-            table {
-                font-size: 0.85rem;
-            }
-
-            th, td {
-                padding: 12px 10px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            h2 {
-                font-size: 1.5rem;
-            }
-
-            .main-content {
-                padding: 20px;
-            }
-
-            table {
-                font-size: 0.75rem;
-            }
-
-            th, td {
-                padding: 10px 6px;
-            }
-
-            .date-header {
-                font-size: 0.7rem;
-            }
-
-            .legend-item {
-                display: block;
-                margin-bottom: 8px;
-            }
-
-            .resort-inputs {
-                grid-template-columns: 1fr;
-            }
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #5bc0de; padding-bottom: 10px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
+        th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #34495e; }
+        td { padding: 10px; border: 1px solid #eee; text-align: center; vertical-align: middle; }
+        .resort-name { text-align: left; font-weight: bold; background-color: #f8f9fa; }
+        .altitude { font-weight: normal; color: #7f8c8d; font-size: 0.85em; }
+        .day-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .temp { font-weight: bold; color: #d9534f; font-size: 1.1em; }
+        .wind { color: #3498db; font-size: 0.8em; font-style: italic; }
+        .icon { font-size: 1.5em; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<div class="container">
+    <h1>🏔️ Dashboard Ski</h1>
+    <p>Mise à jour : <span id="last-update">--</span></p>
 
-        const DEFAULT_RESORTS = [
-            { name: "Pic de Midi de Bigorre", lat: 42.9369, lon: 0.1428, altitude: 2877 },
-            { name: "Col du Pourtalet", lat: 42.8650, lon: -0.4167, altitude: 1794 }
-        ];
+    <table id="weather-table">
+        <thead>
+            <tr id="header-row">
+                <th>SECTEUR</th>
+                </tr>
+        </thead>
+        <tbody id="forecast-body">
+            </tbody>
+    </table>
+</div>
 
-        const API_KEY = '76O0zHESUwlL5kA1';
+<script>
+    const API_KEY = '76O0zHESUwlL5kA1';
 
-        const weatherCodeToIcon = {
-            1: { icon: '☀️', desc: 'Ensoleillé' },
-            2: { icon: '⛅', desc: 'Peu nuageux' },
-            3: { icon: '⛅', desc: 'Partiellement nuageux' },
-            4: { icon: '☁️', desc: 'Nuageux' },
-            5: { icon: '🌧️', desc: 'Pluie' },
-            6: { icon: '🌧️', desc: 'Averses' },
-            7: { icon: '❄️', desc: 'Neige' },
-            8: { icon: '🌨️', desc: 'Averses de neige' },
-            9: { icon: '⛈️', desc: 'Orage' }
-        };
+    const DEFAULT_RESORTS = [
+        { name: "Pic de Midi de Bigorre", lat: 42.9369, lon: 0.1428, altitude: 2877 },
+        { name: "Col du Pourtalet", lat: 42.8650, lon: -0.4167, altitude: 1794 },
+        { name: "Pic de Lurtet", lat: 42.8500, lon: 0.1000, altitude: 2506 },
+        { name: "Station du Lys", lat: 42.8833, lon: -0.1167, altitude: 2450 }
+    ];
 
-        function AddResortModal({ isOpen, onClose, onAdd }) {
-            const [searchQuery, setSearchQuery] = useState('');
-            const [searchResults, setSearchResults] = useState([]);
-            const [isSearching, setIsSearching] = useState(false);
+    const weatherCodeToIcon = {
+        1: '☀️', 2: '🌤️', 3: '⛅', 4: '☁️', 5: '☁️', 6: '☁️', 
+        7: '🌦️', 8: '🌩️', 9: '🌧️', 10: '🌧️', 11: '⛈️', 
+        12: '🌧️', 13: '🌨️', 14: '❄️', 15: '❄️', 16: '❄️', 17: '❄️'
+    };
 
-            const searchLocation = async (query) => {
-                if (query.length < 3) {
-                    setSearchResults([]);
-                    return;
-                }
-                setIsSearching(true);
-                try {
-                    const url = `https://www.meteoblue.com/en/server/search/query3?query=${encodeURIComponent(query)}&apikey=${API_KEY}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (data.results) setSearchResults(data.results.slice(0, 10));
-                } catch (err) {
-                    setSearchResults([]);
-                } finally {
-                    setIsSearching(false);
-                }
-            };
+    async function initDashboard() {
+        const tbody = document.getElementById('forecast-body');
+        const headerRow = document.getElementById('header-row');
 
-            useEffect(() => {
-                const timer = setTimeout(() => {
-                    if (searchQuery) searchLocation(searchQuery);
-                }, 500);
-                return () => clearTimeout(timer);
-            }, [searchQuery]);
-
-            if (!isOpen) return null;
-
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">🏔️ Ajouter un Secteur</div>
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Rechercher une commune (ex: Guzet, Tignes...)"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            autoFocus
-                        />
-                        <div className="search-results">
-                            {isSearching && <div className="loading-search">🔍 Recherche...</div>}
-                            {searchResults.map((result, index) => (
-                                <div key={index} className="search-result-item" onClick={() => {
-                                    onAdd({ name: result.name, lat: result.lat, lon: result.lon, altitude: result.asl || 1000 });
-                                    setSearchQuery('');
-                                    onClose();
-                                }}>
-                                    <div className="result-name">{result.name}</div>
-                                    <div className="result-info">📍 {result.country} • Alt: {result.asl}m</div>
-                                </div>
-                            ))}
-                        </div>
-                        <button className="modal-btn modal-btn-cancel" onClick={onClose}>Annuler</button>
-                    </div>
-                </div>
-            );
-        }
-
-        function MountainWeatherApp() {
-            const [resorts, setResorts] = useState(() => {
-                const saved = localStorage.getItem('skiResorts');
-                // CORRECTION : Si le tableau est vide [], on recharge les défauts
-                const parsed = saved ? JSON.parse(saved) : [];
-                return parsed.length > 0 ? parsed : DEFAULT_RESORTS;
-            });
-            const [weatherData, setWeatherData] = useState([]);
-            const [snowData, setSnowData] = useState([]);
-            const [loading, setLoading] = useState(false);
-            const [error, setError] = useState(null);
-            const [isModalOpen, setIsModalOpen] = useState(false);
-
-            const fetchWeatherForResort = async (resort) => {
-                const url = `https://my.meteoblue.com/packages/basic-day_clouds-day_snowice-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    return { ...resort, data };
-                } catch (err) {
-                    return { ...resort, data: null };
-                }
-            };
-
-            const fetchAllWeatherData = async () => {
-                if (resorts.length === 0) return;
-                setLoading(true);
-                const results = await Promise.all(resorts.map(r => fetchWeatherForResort(r)));
+        for (const resort of DEFAULT_RESORTS) {
+            try {
+                const url = `https://my.meteoblue.com/packages/basic-day?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&key=${API_KEY}&format=json`;
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                const weather = results.map(r => {
-                    if (!r.data) return null;
-                    const days = {};
-                    for (let i = 0; i < 7; i++) {
-                        const code = r.data.data_day.pictocode[i];
-                        days[i-3] = {
-                            icon: weatherCodeToIcon[code]?.icon || '❓',
-                            temp_max: r.data.data_day.temperature_max[i]
-                        };
-                    }
-                    return { name: r.name, days };
-                }).filter(Boolean);
+                const days = data.data_day;
 
-                const snow = results.map(r => {
-                    if (!r.data) return null;
-                    const snowByDay = r.data.data_day.precipitation.map((p, idx) => 
-                        Math.round((r.data.data_day.snowfraction[idx] * p) / 10)
-                    );
-                    return { name: r.name, snowByDay };
-                }).filter(Boolean);
+                // Créer les en-têtes de colonnes (dates) une seule fois
+                if (headerRow.cells.length === 1) {
+                    days.time.forEach(dateStr => {
+                        const date = new Date(dateStr);
+                        const th = document.createElement('th');
+                        th.innerText = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '02' });
+                        headerRow.appendChild(th);
+                    });
+                }
 
-                setWeatherData(weather);
-                setSnowData(snow);
-                setLoading(false);
-            };
+                // Créer la ligne pour la station
+                let rowHtml = `<td class="resort-name">${resort.name} <span class="altitude">(${resort.altitude}m)</span></td>`;
+                
+                for (let i = 0; i < days.time.length; i++) {
+                    const icon = weatherCodeToIcon[days.pictocode[i]] || '🌡️';
+                    const temp = days.temp_max[i].toFixed(1);
+                    const wind = Math.round(days.windspeed_max[i]);
 
-            useEffect(() => {
-                fetchAllWeatherData();
-            }, [resorts.length]); // Relance si on ajoute/supprime
+                    rowHtml += `
+                        <td>
+                            <div class="day-cell">
+                                <span class="icon">${icon}</span>
+                                <span class="temp">${temp}°C</span>
+                                <span class="wind">💨 ${wind} km/h</span>
+                            </div>
+                        </td>`;
+                }
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
 
-            useEffect(() => {
-                localStorage.setItem('skiResorts', JSON.stringify(resorts));
-            }, [resorts]);
-
-            const getDayLabel = (offset) => {
-                const date = new Date();
-                date.setDate(date.getDate() + offset);
-                return offset === 0 ? "Auj." : date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-            };
-
-            return (
-                <div className="container">
-                    <header>
-                        <h1>⛷️ Météo Montagne</h1>
-                        <div className="header-controls">
-                            <button className="refresh-btn" onClick={() => setIsModalOpen(true)}>➕ Ajouter un secteur</button>
-                            <button className="refresh-btn" style={{background: 'var(--storm-gray)'}} onClick={fetchAllWeatherData} disabled={loading}>🔄 Actualiser</button>
-                        </div>
-                    </header>
-
-                    <div className="main-content">
-                        <div className="resort-list">
-                            {resorts.map((r, i) => (
-                                <div key={i} className="resort-tag">
-                                    {r.name} <button className="remove-resort" onClick={() => {
-                                        const next = resorts.filter((_, idx) => idx !== i);
-                                        setResorts(next);
-                                    }}>×</button>
-                                </div>
-                            ))}
-                        </div>
-
-                        {loading ? (
-                            <div className="loading">Chargement des sommets...</div>
-                        ) : (
-                            <>
-                                <div className="section">
-                                    <h2><span className="icon">⛅</span> Prévisions Températures</h2>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Secteur</th>
-                                                {[-2, -1, 0, 1, 2, 3, 4].map(off => <th key={off}>{getDayLabel(off)}</th>)}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {weatherData.length > 0 ? weatherData.map((res, i) => (
-                                                <tr key={i}>
-                                                    <td>{res.name}</td>
-                                                    {[-2, -1, 0, 1, 2, 3, 4].map(off => (
-                                                        <td key={off} className={off === 0 ? "today" : ""}>
-                                                            {res.days[off]?.icon} {res.days[off]?.temp_max}°
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            )) : (
-                                                <tr>
-                                                    <td colSpan="8" style={{textAlign: 'center', padding: '40px'}}>
-                                                        <button className="add-resort-btn" onClick={() => setIsModalOpen(true)}>
-                                                            + Ajouter votre première station
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="section">
-                                    <h2><span className="icon">❄️</span> Chutes de Neige (cm)</h2>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Secteur</th>
-                                                {[-2, -1, 0, 1, 2, 3, 4].map(off => <th key={off}>{getDayLabel(off)}</th>)}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {snowData.map((res, i) => (
-                                                <tr key={i}>
-                                                    <td>{res.name}</td>
-                                                    {res.snowByDay.map((s, idx) => (
-                                                        <td key={idx} className={s > 0 ? "snow-value" : ""}>{s > 0 ? `❄️ ${s}` : '-'}</td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                    <AddResortModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={(r) => setResorts([...resorts, r])} />
-                </div>
-            );
+            } catch (error) {
+                console.error("Erreur pour " + resort.name, error);
+            }
         }
+        document.getElementById('last-update').innerText = new Date().toLocaleString();
+    }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<MountainWeatherApp />);
-    </script>
+    initDashboard();
+</script>
+
 </body>
 </html>
