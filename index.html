@@ -68,23 +68,21 @@
 
         for (const resort of DEFAULT_RESORTS) {
             try {
-                // On utilise bien 'apikey' qui a résolu l'erreur 400
-                const url = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&apikey=${API_KEY}&format=json`;
+                // 1. Retour au package 'basic-day' (plus fiable pour la semaine)
+                // 2. Utilisation de 'apikey' (obligatoire pour éviter l'erreur 400)
+                const url = `https://my.meteoblue.com/packages/basic-day?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&apikey=${API_KEY}&format=json`;
                 
                 const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Erreur API: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
                 
-                // Si c'est le premier passage, on crée les colonnes de dates
+                const dayData = data.data_day;
+
+                // Création des colonnes de dates (1 seule fois)
                 if (firstLoad) {
-                    data.data_day.time.forEach(dateStr => {
+                    dayData.time.forEach(dateStr => {
                         const d = new Date(dateStr);
                         const th = document.createElement('th');
-                        // CORRECTION ICI : '2-digit' au lieu de '02'
                         th.innerText = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                         headerRow.appendChild(th);
                     });
@@ -95,11 +93,18 @@
                 const tr = document.createElement('tr');
                 let html = `<td class="resort-name">${resort.name} <span class="altitude">(${resort.altitude}m)</span></td>`;
 
-                for (let i = 0; i < data.data_day.time.length; i++) {
-                    const pCode = data.data_day.pictocode[i];
-                    const icon = weatherCodeToIcon[pCode] || '🌡️';
-                    const tempMax = data.data_day.temp_max[i].toFixed(1);
-                    const wind = Math.round(data.data_day.windspeed_max[i]);
+                for (let i = 0; i < dayData.time.length; i++) {
+                    // SÉCURITÉ : On vérifie si les tableaux existent avant de lire l'index [i]
+                    // Si pictocode est absent, on met 1 (soleil) par défaut pour ne pas crasher
+                    const code = (dayData.pictocode && dayData.pictocode[i]) ? dayData.pictocode[i] : 1;
+                    const icon = weatherCodeToIcon[code] || '🌡️';
+
+                    // Si temp_max ou windspeed_max manquent, on affiche "--" ou 0
+                    const tVal = (dayData.temp_max && dayData.temp_max[i] !== undefined) ? dayData.temp_max[i] : 0;
+                    const wVal = (dayData.windspeed_max && dayData.windspeed_max[i] !== undefined) ? dayData.windspeed_max[i] : 0;
+
+                    const tempMax = Number(tVal).toFixed(1);
+                    const wind = Math.round(Number(wVal));
 
                     html += `
                         <td>
@@ -114,9 +119,9 @@
                 tbody.appendChild(tr);
 
             } catch (error) {
-                console.error("Problème avec " + resort.name, error);
+                console.error("Erreur pour " + resort.name, error);
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="resort-name">${resort.name}</td><td colspan="7" style="color:red;">Erreur: ${error.message}</td>`;
+                tr.innerHTML = `<td class="resort-name">${resort.name}</td><td colspan="7" style="color:red; font-size:0.8em;">${error.message}</td>`;
                 tbody.appendChild(tr);
             }
         }
