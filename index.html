@@ -604,7 +604,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Configuration des secteurs de ski avec coordonnées
+        // Configuration initiale
         const DEFAULT_RESORTS = [
             { name: "Pic de Midi de Bigorre", lat: 42.9369, lon: 0.1428, altitude: 2877 },
             { name: "Col du Pourtalet", lat: 42.8650, lon: -0.4167, altitude: 1794 }
@@ -612,7 +612,6 @@
 
         const API_KEY = '76O0zHESUwlL5kA1';
 
-        // Mapping des codes météo Meteoblue vers icônes et descriptions
         const weatherCodeToIcon = {
             1: { icon: '☀️', desc: 'Ensoleillé' },
             2: { icon: '⛅', desc: 'Peu nuageux' },
@@ -625,6 +624,7 @@
             9: { icon: '⛈️', desc: 'Orage' }
         };
 
+        // --- COMPOSANT MODALE ---
         function AddResortModal({ isOpen, onClose, onAdd }) {
             const [searchQuery, setSearchQuery] = useState('');
             const [searchResults, setSearchResults] = useState([]);
@@ -635,19 +635,14 @@
                     setSearchResults([]);
                     return;
                 }
-
                 setIsSearching(true);
                 try {
                     const url = `https://www.meteoblue.com/en/server/search/query3?query=${encodeURIComponent(query)}&apikey=${API_KEY}`;
                     const response = await fetch(url);
                     const data = await response.json();
-                    
-                    if (data.results) {
-                        setSearchResults(data.results.slice(0, 10));
-                    }
+                    if (data.results) setSearchResults(data.results.slice(0, 10));
                 } catch (err) {
                     console.error('Erreur recherche:', err);
-                    setSearchResults([]);
                 } finally {
                     setIsSearching(false);
                 }
@@ -655,444 +650,158 @@
 
             useEffect(() => {
                 const timer = setTimeout(() => {
-                    if (searchQuery) {
-                        searchLocation(searchQuery);
-                    }
+                    if (searchQuery) searchLocation(searchQuery);
                 }, 500);
-
                 return () => clearTimeout(timer);
             }, [searchQuery]);
-
-            const handleSelect = (location) => {
-                onAdd({
-                    name: location.name,
-                    lat: location.lat,
-                    lon: location.lon,
-                    altitude: location.asl || 1000
-                });
-                setSearchQuery('');
-                setSearchResults([]);
-                onClose();
-            };
 
             if (!isOpen) return null;
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            🏔️ Ajouter un Secteur
-                        </div>
-                        
+                        <div className="modal-header">🏔️ Ajouter un Secteur</div>
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Rechercher une commune (min. 3 caractères - ex: Guzet, Saint-Lary...)"
+                            placeholder="Rechercher une commune (ex: Guzet, Saint-Lary...)"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             autoFocus
                         />
-
                         <div className="search-results">
-                            {isSearching && (
-                                <div className="loading-search">
-                                    🔍 Recherche en cours...
-                                </div>
-                            )}
-
-                            {!isSearching && searchResults.length === 0 && searchQuery.length >= 3 && (
-                                <div className="no-results">
-                                    Aucun résultat trouvé. Essayez une autre recherche.
-                                </div>
-                            )}
-
-                            {!isSearching && searchQuery.length > 0 && searchQuery.length < 3 && (
-                                <div className="no-results">
-                                    Tapez au moins 3 caractères pour lancer la recherche.
-                                </div>
-                            )}
-
-                            {!isSearching && searchResults.map((result, index) => (
-                                <div
-                                    key={index}
-                                    className="search-result-item"
-                                    onClick={() => handleSelect(result)}
-                                >
+                            {isSearching && <div className="loading-search">🔍 Recherche...</div>}
+                            {searchResults.map((result, index) => (
+                                <div key={index} className="search-result-item" onClick={() => {
+                                    onAdd({ name: result.name, lat: result.lat, lon: result.lon, altitude: result.asl || 1000 });
+                                    setSearchQuery('');
+                                    onClose();
+                                }}>
                                     <div className="result-name">{result.name}</div>
-                                    <div className="result-info">
-                                        📍 {result.country || ''} {result.admin1 ? `• ${result.admin1}` : ''} {result.asl ? `• Alt: ${result.asl}m` : ''}
-                                    </div>
+                                    <div className="result-info">📍 {result.country} • Alt: {result.asl}m</div>
                                 </div>
                             ))}
                         </div>
-
-                        <div className="modal-buttons">
-                            <button className="modal-btn modal-btn-cancel" onClick={onClose}>
-                                Annuler
-                            </button>
-                        </div>
+                        <button className="modal-btn modal-btn-cancel" onClick={onClose}>Annuler</button>
                     </div>
                 </div>
             );
         }
 
+        // --- COMPOSANT PRINCIPAL ---
         function MountainWeatherApp() {
             const [resorts, setResorts] = useState(() => {
                 const saved = localStorage.getItem('skiResorts');
                 return saved ? JSON.parse(saved) : DEFAULT_RESORTS;
             });
             const [weatherData, setWeatherData] = useState([]);
-            const [snowData, setSnowData] = useState([]);
             const [loading, setLoading] = useState(false);
-            const [error, setError] = useState(null);
-            const [currentDate, setCurrentDate] = useState('');
             const [isModalOpen, setIsModalOpen] = useState(false);
 
             useEffect(() => {
-                setCurrentDate(new Date().toLocaleDateString('fr-FR', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }));
-                fetchAllWeatherData();
+                if (resorts.length > 0) fetchAllWeatherData();
             }, []);
 
             useEffect(() => {
                 localStorage.setItem('skiResorts', JSON.stringify(resorts));
             }, [resorts]);
 
-            const addResort = async (newResort) => {
-                // Ajouter le secteur à la liste
-                const updatedResorts = [...resorts, newResort];
-                setResorts(updatedResorts);
-                
-                // Charger uniquement les données pour ce nouveau secteur
-                setLoading(true);
-                try {
-                    const result = await fetchWeatherForResort(newResort);
-                    
-                    // Ajouter les données météo du nouveau secteur
-                    if (result.data) {
-                        const newWeatherData = processWeatherDataForResort(result);
-                        const newSnowData = processSnowDataForResort(result);
-                        
-                        if (newWeatherData) {
-                            setWeatherData(prev => [...prev, newWeatherData]);
-                        }
-                        if (newSnowData) {
-                            setSnowData(prev => [...prev, newSnowData]);
-                        }
-                    }
-                } catch (err) {
-                    console.error('Erreur lors de l\'ajout du secteur:', err);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            const removeResort = (index) => {
-                // Retirer le secteur et ses données
-                const newResorts = resorts.filter((_, i) => i !== index);
-                setResorts(newResorts);
-                setWeatherData(prev => prev.filter((_, i) => i !== index));
-                setSnowData(prev => prev.filter((_, i) => i !== index));
-            };
-
             const fetchWeatherForResort = async (resort) => {
                 const url = `https://my.meteoblue.com/packages/basic-day_clouds-day_snowice-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
-                
                 try {
                     const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`Erreur API pour ${resort.name}: ${response.status}`);
-                    }
                     const data = await response.json();
-                    return { ...resort, data };
+                    return { name: resort.name, data };
                 } catch (err) {
-                    console.error(`Erreur pour ${resort.name}:`, err);
-                    return { ...resort, data: null, error: err.message };
+                    return null;
                 }
             };
 
             const fetchAllWeatherData = async () => {
+                if (resorts.length === 0) return;
                 setLoading(true);
-                setError(null);
-                
-                try {
-                    const promises = resorts.map(resort => fetchWeatherForResort(resort));
-                    const results = await Promise.all(promises);
-                    
-                    processWeatherData(results);
-                    processSnowData(results);
-                } catch (err) {
-                    setError(`Erreur lors de la récupération des données: ${err.message}`);
-                } finally {
-                    setLoading(false);
-                }
+                const results = await Promise.all(resorts.map(r => fetchWeatherForResort(r)));
+                setWeatherData(results.filter(Boolean));
+                setLoading(false);
+            };
+
+            const addResort = async (newResort) => {
+                setResorts([...resorts, newResort]);
+                setLoading(true);
+                const result = await fetchWeatherForResort(newResort);
+                if (result) setWeatherData(prev => [...prev, result]);
+                setLoading(false);
+            };
+
+            const removeResort = (index) => {
+                setResorts(resorts.filter((_, i) => i !== index));
+                setWeatherData(weatherData.filter((_, i) => i !== index));
             };
 
             const getDayLabel = (offset) => {
                 const date = new Date();
                 date.setDate(date.getDate() + offset);
-                
-                if (offset === 0) return 'Today';
-                if (offset === 1) return 'Tomorrow';
-                if (offset === 2) return 'After tomorrow';
-                
-                const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
-                const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-                return `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${dateStr}`;
+                return offset === 0 ? "Auj." : date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
             };
-
-            const processWeatherDataForResort = (resort) => {
-                if (!resort.data || !resort.data.data_day) {
-                    return null;
-                }
-
-                const dayData = resort.data.data_day;
-                const days = {};
-                
-                // On récupère 7 jours : de -3 à +3 (aujourd'hui = 0)
-                // Meteoblue renvoie les données à partir d'aujourd'hui
-                // Donc on doit mapper : index 0 = aujourd'hui, 1 = demain, etc.
-                for (let offset = -3; offset <= 3; offset++) {
-                    const dataIndex = offset + 3; // -3 devient 0, 0 devient 3, +3 devient 6
-                    
-                    if (dataIndex >= 0 && dataIndex < dayData.time.length) {
-                        const weatherCode = dayData.pictocode?.[dataIndex] || 1;
-                        const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
-                        
-                        days[offset] = {
-                            offset,
-                            date: dayData.time?.[dataIndex] || '',
-                            condition: weatherInfo.desc,
-                            icon: weatherInfo.icon,
-                            temp_max: dayData.temperature_max?.[dataIndex] || 0,
-                            temp_min: dayData.temperature_min?.[dataIndex] || 0,
-                            wind: dayData.windspeed_max?.[dataIndex] || 0,
-                            precipitation: dayData.precipitation?.[dataIndex] || 0
-                        };
-                    }
-                }
-
-                return {
-                    name: resort.name,
-                    days
-                };
-            };
-
-            const processSnowDataForResort = (resort) => {
-                if (!resort.data || !resort.data.data_day) {
-                    return null;
-                }
-
-                const dayData = resort.data.data_day;
-                const snowByDay = [];
-                
-                // Calculer les chutes de neige pour 7 jours (de -3 à +3)
-                for (let offset = -3; offset <= 3; offset++) {
-                    const dataIndex = offset + 3;
-                    
-                    if (dataIndex >= 0 && dataIndex < dayData.time.length) {
-                        const snowFraction = dayData.snowfraction?.[dataIndex] || 0;
-                        const precipitation = dayData.precipitation?.[dataIndex] || 0;
-                        const snowCm = Math.round(snowFraction * precipitation / 10);
-                        snowByDay.push(snowCm);
-                    } else {
-                        snowByDay.push(0);
-                    }
-                }
-
-                return {
-                    name: resort.name,
-                    snowByDay
-                };
-            };
-
-            const processWeatherData = (results) => {
-                const processed = results.map(resort => processWeatherDataForResort(resort)).filter(Boolean);
-                setWeatherData(processed);
-            };
-
-            const processSnowData = (results) => {
-                const processed = results.map(resort => processSnowDataForResort(resort)).filter(Boolean);
-                setSnowData(processed);
-            };
-
-            if (loading) {
-                return (
-                    <div className="container">
-                        <header>
-                            <h1>⛷️ Météo Montagne</h1>
-                            <div className="subtitle">Dashboard Ski • Powered by Meteoblue</div>
-                        </header>
-                        <div className="main-content">
-                            <div className="loading">
-                                🔄 Chargement des données météo depuis Meteoblue...
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
 
             return (
                 <div className="container">
                     <header>
                         <h1>⛷️ Météo Montagne</h1>
-                        <div className="subtitle">Dashboard Ski • Powered by Meteoblue</div>
                         <div className="header-controls">
-                            <div className="date-display">
-                                📅 Dernière mise à jour : {currentDate}
-                            </div>
-                            <button className="refresh-btn" onClick={fetchAllWeatherData} disabled={loading}>
-                                🔄 Actualiser
-                            </button>
+                            <button className="refresh-btn" onClick={() => setIsModalOpen(true)}>➕ Ajouter</button>
+                            <button className="refresh-btn" onClick={fetchAllWeatherData} disabled={loading || resorts.length === 0}>🔄 Actualiser</button>
                         </div>
                     </header>
 
                     <div className="main-content">
-                        {error && (
-                            <div className="error">
-                                ⚠️ {error}
-                            </div>
-                        )}
-
-                        <div style={{marginBottom: '30px'}}>
-                            <h3 style={{
-                                fontFamily: 'Barlow Condensed, sans-serif',
-                                fontSize: '1.3rem',
-                                color: 'var(--deep-blue)',
-                                marginBottom: '15px'
-                            }}>
-                                📍 Mes Secteurs
-                            </h3>
-                            <div className="resort-list">
-                                {resorts.map((resort, index) => (
-                                    <div key={index} className="resort-tag">
-                                        {resort.name}
-                                        <button
-                                            className="remove-resort"
-                                            onClick={() => removeResort(index)}
-                                            title="Retirer ce secteur"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className="resort-list">
+                            {resorts.map((r, i) => (
+                                <div key={i} className="resort-tag">
+                                    {r.name} <button className="remove-resort" onClick={() => removeResort(i)}>×</button>
+                                </div>
+                            ))}
                         </div>
 
-                        {snowData.length > 0 && (
-                            <section className="section">
-                                <h2>
-                                    <span className="icon">❄️</span>
-                                    Chutes de Neige (7 jours)
-                                </h2>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Secteur</th>
-                                            {[-3, -2, -1, 0, 1, 2, 3].map((offset, i) => (
-                                                <th key={offset} className={offset === 0 ? 'today' : ''}>
-                                                    {getDayLabel(offset)}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {snowData.map((resort, index) => (
-                                            <tr key={index}>
-                                                <td>{resort.name}</td>
-                                                {resort.snowByDay.map((snow, dayIndex) => {
-                                                    const offset = dayIndex - 3; // convertir index 0-6 en offset -3 à +3
-                                                    return (
-                                                        <td key={dayIndex} className={offset === 0 ? 'today' : ''}>
-                                                            <span className={`snow-value ${snow > 15 ? 'heavy-snow' : ''}`}>
-                                                                {snow} cm
-                                                            </span>
-                                                        </td>
-                                                    );
+                        <div className="section">
+                            <h2><span className="icon">⛅</span> Prévisions</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Secteur</th>
+                                        {[-3, -2, -1, 0, 1, 2, 3].map(off => <th key={off}>{getDayLabel(off)}</th>)}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {resorts.length > 0 ? (
+                                        weatherData.map((res, i) => (
+                                            <tr key={i}>
+                                                <td>{res.name}</td>
+                                                {[-3, -2, -1, 0, 1, 2, 3].map(off => {
+                                                    const d = res.data.data_day;
+                                                    const idx = off + 3;
+                                                    return <td key={off}>{d.pictocode ? weatherCodeToIcon[d.pictocode[idx]]?.icon : '?'} {d.temperature_max[idx]}°</td>
                                                 })}
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                <div className="legend">
-                                    <span className="legend-item">💡 <strong>Note :</strong></span>
-                                    <span className="legend-item">Les quantités de neige sont des estimations basées sur les précipitations et la fraction neige/pluie</span>
-                                    <span className="legend-item">⚠️ Valeurs en orange = chute importante (&gt;15cm)</span>
-                                </div>
-                                <button className="add-resort-btn" onClick={() => setIsModalOpen(true)}>
-                                    ➕ Ajouter un Secteur
-                                </button>
-                            </section>
-                        )}
-
-                        {weatherData.length > 0 && (
-                            <section className="section">
-                                <h2>
-                                    <span className="icon">🌤️</span>
-                                    Météo Glissante (7 jours)
-                                </h2>
-                                <table>
-                                    <thead>
+                                        ))
+                                    ) : (
                                         <tr>
-                                            <th>Secteur</th>
-                                            {[-3, -2, -1, 0, 1, 2, 3].map((offset) => (
-                                                <th key={offset} className={offset === 0 ? 'today' : ''}>
-                                                    {getDayLabel(offset)}
-                                                </th>
-                                            ))}
+                                            <td colSpan="8" style={{textAlign: 'center', padding: '40px'}}>
+                                                Aucun secteur. Cliquez sur <b>Ajouter</b>.
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {weatherData.map((resort, index) => (
-                                            <tr key={index}>
-                                                <td>{resort.name}</td>
-                                                {[-3, -2, -1, 0, 1, 2, 3].map((offset) => {
-                                                    const w = resort.days[offset];
-                                                    if (!w) return <td key={offset}>-</td>;
-                                                    
-                                                    const avgTemp = Math.round((w.temp_max + w.temp_min) / 2);
-                                                    
-                                                    return (
-                                                        <td key={offset} className={offset === 0 ? 'today' : ''}>
-                                                            <div className="conditions">
-                                                                <span className="weather-icon">{w.icon}</span>
-                                                                <span className={`temp ${avgTemp < 0 ? 'temp-cold' : avgTemp > 5 ? 'temp-warm' : ''}`}>
-                                                                    {w.temp_min}° / {w.temp_max}°
-                                                                </span>
-                                                            </div>
-                                                            <div className="wind-info">💨 {Math.round(w.wind)} km/h</div>
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                <div className="legend">
-                                    <span className="legend-item">💡 <strong>Légende :</strong></span>
-                                    <span className="legend-item">Températures affichées : min / max</span>
-                                    <span className="legend-item">🔵 Températures négatives = conditions froides</span>
-                                    <span className="legend-item">🟠 Températures &gt;5°C = conditions douces</span>
-                                    <span className="legend-item">🔷 Today = Aujourd'hui</span>
-                                </div>
-                            </section>
-                        )}
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-
-                    <AddResortModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onAdd={addResort}
-                    />
+                    <AddResortModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={addResort} />
                 </div>
             );
         }
 
-        ReactDOM.render(<MountainWeatherApp />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MountainWeatherApp />);
     </script>
 </body>
 </html>
