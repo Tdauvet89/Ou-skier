@@ -787,14 +787,14 @@
                                         <thead>
                                             <tr>
                                                 <th>Secteur</th>
-                                                {[-3, -2, -1, 0, 1, 2, 3].map(off => <th key={off}>{getDayLabel(off)}</th>)}
+                                                {[-2, -1, 0, 1, 2, 3, 4].map(off => <th key={off}>{getDayLabel(off)}</th>)}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {weatherData.length > 0 ? weatherData.map((res, i) => (
                                                 <tr key={i}>
                                                     <td>{res.name}</td>
-                                                    {[-3, -2, -1, 0, 1, 2, 3].map(off => (
+                                                    {[-2, -1, 0, 1, 2, 3, 4].map(off => (
                                                         <td key={off} className={off === 0 ? "today" : ""}>
                                                             {res.days[off]?.icon} {res.days[off]?.temp_max}°
                                                         </td>
@@ -819,7 +819,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Secteur</th>
-                                                {[-3, -2, -1, 0, 1, 2, 3].map(off => <th key={off}>{getDayLabel(off)}</th>)}
+                                                {[-2, -1, 0, 1, 2, 3, 4].map(off => <th key={off}>{getDayLabel(off)}</th>)}
                                             </tr>
                                         </thead>
                                         <tbody>
