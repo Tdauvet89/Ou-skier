@@ -2,51 +2,71 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Météo Montagne - Dashboard</title>
+    <title>Ski Dashboard Pro</title>
     <style>
-        /* Thème Blanc / Clair */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 20px; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; text-transform: uppercase; border-bottom: 2px solid #5bc0de; padding-bottom: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; color: #333; margin: 20px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #2c3e50; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Table Styles */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: #2c3e50; color: white; padding: 12px; border: 1px solid #ddd; }
-        td { padding: 10px; border: 1px solid #ddd; text-align: center; vertical-align: middle; background-color: #fff; }
+        .controls { background: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 5px; transition: 0.3s; }
+        .btn-add { background: #27ae60; color: white; }
+        .btn-refresh { background: #3498db; color: white; }
+        .btn-delete { background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.8em; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th { background-color: #34495e; color: white; padding: 12px; font-size: 0.9em; }
+        td { border: 1px solid #eee; padding: 10px; text-align: center; }
         
-        /* Styles spécifiques aux cellules */
-        .resort-name { text-align: left; font-weight: bold; min-width: 150px; background-color: #f9f9f9; }
+        .resort-cell { text-align: left; font-weight: bold; background: #fdfdfd; min-width: 180px; }
         .altitude { font-weight: normal; color: #7f8c8d; font-size: 0.85em; }
         
-        /* Conteneur météo dans chaque case */
-        .weather-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .temp { font-weight: bold; color: #d9534f; font-size: 1.1em; } /* Rouge pour la temp */
-        .wind { color: #3498db; font-size: 0.85em; font-style: italic; } /* Bleu pour le vent */
-        .icon { font-size: 1.6em; margin-bottom: 2px; }
+        .weather-box { display: flex; flex-direction: column; align-items: center; }
+        .temp { font-weight: bold; color: #d35400; font-size: 1.1em; }
+        .snow { color: #2980b9; font-weight: bold; margin-top: 3px; font-size: 0.9em; }
+        .wind { color: #7f8c8d; font-size: 0.75em; }
+        .icon { font-size: 1.5em; }
+        
+        h2 { border-left: 5px solid #3498db; padding-left: 10px; color: #2c3e50; font-size: 1.2em; margin-top: 30px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏔️ Dashboard Ski</h1>
-    <p style="text-align: center; color: #666;">Mise à jour : <span id="last-update">--</span></p>
+    <h1>🏔️ Dashboard Météo Ski</h1>
 
-    <table id="weather-table">
-        <thead>
-            <tr id="header-row">
-                <th>SECTEUR</th>
-                </tr>
-        </thead>
-        <tbody id="forecast-body">
-            <tr><td colspan="8">Chargement des prévisions...</td></tr>
-        </tbody>
-    </table>
+    <div class="controls">
+        <input type="text" id="nameInput" placeholder="Nom (ex: Cauterets)">
+        <input type="number" id="latInput" placeholder="Latitude" step="0.0001">
+        <input type="number" id="lonInput" placeholder="Longitude" step="0.0001">
+        <input type="number" id="altInput" placeholder="Altitude (m)">
+        <button class="btn-add" onclick="addNewResort()">+ Ajouter un secteur</button>
+        <button class="btn-refresh" onclick="location.reload()">🔄 Actualiser</button>
+    </div>
+
+    <h2>❄️ Prévisions & Chutes de Neige</h2>
+    <div style="overflow-x: auto;">
+        <table id="weather-table">
+            <thead>
+                <tr id="header-row">
+                    <th>SECTEUR</th>
+                    </tr>
+            </thead>
+            <tbody id="forecast-body"></tbody>
+        </table>
+    </div>
+    
+    <p style="text-align: center; font-size: 0.8em; color: gray; margin-top: 20px;">
+        Dernière mise à jour : <span id="last-update">--</span>
+    </p>
 </div>
 
 <script>
     const API_KEY = '76O0zHESUwlL5kA1';
-
-    const DEFAULT_RESORTS = [
+    
+    // Chargement des secteurs depuis le localStorage ou secteurs par défaut
+    let resorts = JSON.parse(localStorage.getItem('myResorts')) || [
         { name: "Pic de Midi de Bigorre", lat: 42.9369, lon: 0.1428, altitude: 2877 },
         { name: "Col du Pourtalet", lat: 42.8650, lon: -0.4167, altitude: 1794 },
         { name: "Pic de Lurtet", lat: 42.8500, lon: 0.1000, altitude: 2506 },
@@ -54,63 +74,56 @@
     ];
 
     const weatherCodeToIcon = {
-        1: '☀️', 2: '🌤️', 3: '⛅', 4: '☁️', 5: '☁️', 6: '☁️', 
-        7: '🌦️', 8: '🌩️', 9: '🌧️', 10: '🌧️', 11: '⛈️', 
-        12: '🌧️', 13: '🌨️', 14: '❄️', 15: '❄️', 16: '❄️', 17: '❄️'
+        1: '☀️', 2: '🌤️', 3: '⛅', 4: '☁️', 5: '☁️', 6: '☁️', 7: '🌦️', 8: '🌩️', 9: '🌧️', 
+        10: '🌧️', 11: '⛈️', 12: '🌧️', 13: '🌨️', 14: '❄️', 15: '❄️', 16: '❄️', 17: '❄️'
     };
 
     async function initDashboard() {
         const tbody = document.getElementById('forecast-body');
         const headerRow = document.getElementById('header-row');
-        
+        tbody.innerHTML = "";
         let firstLoad = true;
-        tbody.innerHTML = ""; // On vide le message de chargement
 
-        for (const resort of DEFAULT_RESORTS) {
+        for (let index = 0; index < resorts.length; index++) {
+            const resort = resorts[index];
             try {
-                // 1. Retour au package 'basic-day' (plus fiable pour la semaine)
-                // 2. Utilisation de 'apikey' (obligatoire pour éviter l'erreur 400)
+                // Utilisation du package 'basic-day' qui contient 'precipitation'
                 const url = `https://my.meteoblue.com/packages/basic-day?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&apikey=${API_KEY}&format=json`;
-                
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
-                
-                const dayData = data.data_day;
+                const d = data.data_day;
 
-                // Création des colonnes de dates (1 seule fois)
                 if (firstLoad) {
-                    dayData.time.forEach(dateStr => {
-                        const d = new Date(dateStr);
+                    d.time.forEach(dateStr => {
+                        const dateObj = new Date(dateStr);
                         const th = document.createElement('th');
-                        th.innerText = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                        th.innerText = dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                         headerRow.appendChild(th);
                     });
                     firstLoad = false;
                 }
 
-                // Construction de la ligne
                 const tr = document.createElement('tr');
-                let html = `<td class="resort-name">${resort.name} <span class="altitude">(${resort.altitude}m)</span></td>`;
+                let html = `
+                    <td class="resort-cell">
+                        <button class="btn-delete" onclick="deleteResort(${index})">✕</button>
+                        ${resort.name} <br><span class="altitude">${resort.altitude}m</span>
+                    </td>`;
 
-                for (let i = 0; i < dayData.time.length; i++) {
-                    // SÉCURITÉ : On vérifie si les tableaux existent avant de lire l'index [i]
-                    // Si pictocode est absent, on met 1 (soleil) par défaut pour ne pas crasher
-                    const code = (dayData.pictocode && dayData.pictocode[i]) ? dayData.pictocode[i] : 1;
-                    const icon = weatherCodeToIcon[code] || '🌡️';
-
-                    // Si temp_max ou windspeed_max manquent, on affiche "--" ou 0
-                    const tVal = (dayData.temp_max && dayData.temp_max[i] !== undefined) ? dayData.temp_max[i] : 0;
-                    const wVal = (dayData.windspeed_max && dayData.windspeed_max[i] !== undefined) ? dayData.windspeed_max[i] : 0;
-
-                    const tempMax = Number(tVal).toFixed(1);
-                    const wind = Math.round(Number(wVal));
+                for (let i = 0; i < d.time.length; i++) {
+                    const icon = weatherCodeToIcon[d.pictocode[i]] || '🌡️';
+                    const temp = d.temp_max[i].toFixed(1);
+                    const wind = Math.round(d.windspeed_max[i]);
+                    // Meteoblue basic-day renvoie souvent les chutes de neige dans 'precipitation' si pictocode = neige
+                    const snow = (d.pictocode[i] >= 13) ? Math.round(d.precipitation[i]) : 0;
+                    const snowDisplay = snow > 0 ? `<span class="snow">❄️ ${snow} cm</span>` : '<span style="color:#eee">-</span>';
 
                     html += `
                         <td>
                             <div class="weather-box">
                                 <span class="icon">${icon}</span>
-                                <span class="temp">${tempMax}°C</span>
+                                <span class="temp">${temp}°C</span>
+                                ${snowDisplay}
                                 <span class="wind">💨 ${wind} km/h</span>
                             </div>
                         </td>`;
@@ -118,18 +131,37 @@
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
 
-            } catch (error) {
-                console.error("Erreur pour " + resort.name, error);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="resort-name">${resort.name}</td><td colspan="7" style="color:red; font-size:0.8em;">${error.message}</td>`;
-                tbody.appendChild(tr);
+            } catch (e) {
+                console.error(e);
             }
         }
         document.getElementById('last-update').innerText = new Date().toLocaleString();
     }
 
+    function addNewResort() {
+        const name = document.getElementById('nameInput').value;
+        const lat = document.getElementById('latInput').value;
+        const lon = document.getElementById('lonInput').value;
+        const alt = document.getElementById('altInput').value;
+
+        if (name && lat && lon && alt) {
+            resorts.push({ name, lat: parseFloat(lat), lon: parseFloat(lon), altitude: parseInt(alt) });
+            localStorage.setItem('myResorts', JSON.stringify(resorts));
+            location.reload();
+        } else {
+            alert("Veuillez remplir tous les champs.");
+        }
+    }
+
+    function deleteResort(index) {
+        if (confirm("Supprimer ce secteur ?")) {
+            resorts.splice(index, 1);
+            localStorage.setItem('myResorts', JSON.stringify(resorts));
+            location.reload();
+        }
+    }
+
     initDashboard();
 </script>
-
 </body>
 </html>
