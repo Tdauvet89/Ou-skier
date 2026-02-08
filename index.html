@@ -68,7 +68,7 @@
 
         for (const resort of DEFAULT_RESORTS) {
             try {
-                // CORRECTION ICI : utilisation de 'apikey=' au lieu de 'key='
+                // On utilise bien 'apikey' qui a résolu l'erreur 400
                 const url = `https://my.meteoblue.com/packages/basic-1h_basic-day?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&apikey=${API_KEY}&format=json`;
                 
                 const response = await fetch(url);
@@ -84,8 +84,8 @@
                     data.data_day.time.forEach(dateStr => {
                         const d = new Date(dateStr);
                         const th = document.createElement('th');
-                        // Format date : 08/02
-                        th.innerText = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '02' });
+                        // CORRECTION ICI : '2-digit' au lieu de '02'
+                        th.innerText = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                         headerRow.appendChild(th);
                     });
                     firstLoad = false;
@@ -115,9 +115,8 @@
 
             } catch (error) {
                 console.error("Problème avec " + resort.name, error);
-                // On ajoute une ligne d'erreur visuelle si ça plante
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="resort-name">${resort.name}</td><td colspan="7" style="color:red;">Erreur chargement</td>`;
+                tr.innerHTML = `<td class="resort-name">${resort.name}</td><td colspan="7" style="color:red;">Erreur: ${error.message}</td>`;
                 tbody.appendChild(tr);
             }
         }
