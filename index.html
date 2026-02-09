@@ -319,6 +319,164 @@
             margin-bottom: 5px;
         }
 
+        /* Tableau horaire détaillé */
+        .hourly-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .hourly-table thead,
+        .hourly-table tbody {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .resort-header-sticky {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            color: var(--deep-blue);
+            border-bottom: 2px solid var(--glacier);
+            min-width: 200px;
+            max-width: 200px;
+        }
+
+        .day-column {
+            text-align: center;
+            vertical-align: top;
+            border-right: 2px solid var(--glacier);
+            padding: 0;
+            min-width: 180px;
+            max-width: 180px;
+        }
+
+        .day-column:last-child {
+            border-right: none;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%);
+            color: white;
+            padding: 10px 6px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .day-header.today-header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .hourly-slots {
+            display: flex;
+            flex-direction: row;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .hour-slot {
+            flex: 1;
+            padding: 6px 3px;
+            border-right: 1px solid #f0f0f0;
+            min-width: 60px;
+        }
+
+        .hour-slot:last-child {
+            border-right: none;
+        }
+
+        .hour-time {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--deep-blue);
+            margin-bottom: 4px;
+        }
+
+        .hour-icon {
+            font-size: 1.3rem;
+            margin: 3px 0;
+        }
+
+        .hour-temp {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--storm-gray);
+            margin: 3px 0;
+        }
+
+        .temp-trend {
+            font-size: 0.6rem;
+            color: #95a5a6;
+        }
+
+        .hour-wind {
+            font-size: 0.65rem;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+
+        .wind-trend {
+            font-size: 0.6rem;
+            color: #95a5a6;
+        }
+
+        .trend-up {
+            color: #e74c3c;
+        }
+
+        .trend-down {
+            color: #3498db;
+        }
+
+        .trend-stable {
+            color: #95a5a6;
+        }
+
+        .weather-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .weather-table-container {
+            display: flex;
+            min-width: fit-content;
+        }
+
+        .resort-name-column {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%);
+            color: white;
+            padding: 15px 20px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            min-width: 200px;
+            max-width: 200px;
+            box-shadow: 3px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .days-container {
+            display: flex;
+            flex: 1;
+        }
+
         .past-day {
             opacity: 0.7;
             background: #f8f9fa !important;
@@ -902,7 +1060,8 @@
             };
 
             const fetchWeatherForResort = async (resort) => {
-                const url = `https://my.meteoblue.com/packages/basic-day_clouds-day_snowice-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
+                // Utiliser le package qui inclut les données horaires
+                const url = `https://my.meteoblue.com/packages/basic-1h_basic-day_clouds-1h_clouds-day_snowice-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
                 
                 try {
                     const response = await fetch(url);
@@ -912,6 +1071,7 @@
                     }
                     const data = await response.json();
                     logApiCall(resort.name, true);
+                    console.log('Données reçues pour', resort.name, ':', data); // Debug
                     return { ...resort, data };
                 } catch (err) {
                     console.error(`Erreur pour ${resort.name}:`, err);
@@ -967,21 +1127,33 @@
 
             const processWeatherDataForResort = (resort) => {
                 if (!resort.data || !resort.data.data_day) {
+                    console.log('Pas de données journalières pour', resort.name);
                     return null;
                 }
 
                 const dayData = resort.data.data_day;
+                const hourData = resort.data.data_1h; // Données horaires
                 const days = {};
                 
+                console.log('Traitement des données pour', resort.name);
+                console.log('- Données journalières (data_day):', dayData ? 'OK' : 'Manquant');
+                console.log('- Données horaires (data_1h):', hourData ? 'OK' : 'Manquant');
+                
                 // On récupère 7 jours : de -2 à +4 (aujourd'hui = 0)
-                // Meteoblue renvoie les données à partir d'aujourd'hui
-                // Donc on doit mapper : index 0 = aujourd'hui, 1 = demain, etc.
                 for (let offset = -2; offset <= 4; offset++) {
-                    const dataIndex = offset + 2; // -2 devient 0, 0 devient 2, +4 devient 6
+                    const dataIndex = offset + 2;
                     
                     if (dataIndex >= 0 && dataIndex < dayData.time.length) {
                         const weatherCode = dayData.pictocode?.[dataIndex] || 1;
                         const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
+                        
+                        // Extraire les données horaires pour ce jour (10h, 12h, 15h)
+                        let hourlyData = null;
+                        if (hourData && hourData.time) {
+                            const targetDate = dayData.time[dataIndex];
+                            console.log(`Extraction données horaires pour ${targetDate}`);
+                            hourlyData = extractHourlyData(hourData, targetDate);
+                        }
                         
                         days[offset] = {
                             offset,
@@ -991,7 +1163,8 @@
                             temp_max: dayData.temperature_max?.[dataIndex] || 0,
                             temp_min: dayData.temperature_min?.[dataIndex] || 0,
                             wind: dayData.windspeed_max?.[dataIndex] || 0,
-                            precipitation: dayData.precipitation?.[dataIndex] || 0
+                            precipitation: dayData.precipitation?.[dataIndex] || 0,
+                            hourly: hourlyData
                         };
                     }
                 }
@@ -1000,6 +1173,80 @@
                     name: resort.name,
                     days
                 };
+            };
+
+            const extractHourlyData = (hourData, targetDate) => {
+                if (!hourData || !hourData.time) {
+                    console.log('Pas de données horaires disponibles');
+                    return null;
+                }
+                
+                // Trouver les index pour 10h, 12h, 15h du jour ciblé
+                const hours = [10, 12, 15];
+                const result = {};
+                
+                console.log('Recherche des données pour la date:', targetDate);
+                console.log('Premier timestamp disponible:', hourData.time[0]);
+                console.log('Dernier timestamp disponible:', hourData.time[hourData.time.length - 1]);
+                
+                for (let i = 0; i < hourData.time.length; i++) {
+                    const timeStr = hourData.time[i];
+                    
+                    // Format attendu : "2026-02-09T10:00:00Z" ou "2026-02-09 10:00:00"
+                    // Vérifier si c'est le bon jour
+                    if (timeStr.startsWith(targetDate)) {
+                        // Extraire l'heure de différents formats possibles
+                        let hour;
+                        if (timeStr.includes('T')) {
+                            // Format ISO: "2026-02-09T10:00:00Z"
+                            const timePart = timeStr.split('T')[1];
+                            hour = parseInt(timePart.substring(0, 2));
+                        } else if (timeStr.includes(' ')) {
+                            // Format avec espace: "2026-02-09 10:00:00"
+                            const timePart = timeStr.split(' ')[1];
+                            hour = parseInt(timePart.substring(0, 2));
+                        } else {
+                            continue;
+                        }
+                        
+                        if (hours.includes(hour)) {
+                            const weatherCode = hourData.pictocode?.[i] || 1;
+                            const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
+                            
+                            result[hour] = {
+                                temp: Math.round(hourData.temperature?.[i] || 0),
+                                wind: Math.round(hourData.windspeed?.[i] || 0),
+                                icon: weatherInfo.icon,
+                                condition: weatherInfo.desc,
+                                timestamp: timeStr
+                            };
+                            
+                            console.log(`  ✓ ${hour}h trouvé: temp=${result[hour].temp}°, vent=${result[hour].wind}km/h, ${timeStr}`);
+                        }
+                    }
+                }
+                
+                if (Object.keys(result).length === 0) {
+                    console.log('⚠️ Aucune donnée horaire trouvée pour', targetDate);
+                    console.log('   Vérifier que le package API inclut bien data_1h');
+                    return null;
+                }
+                
+                return result;
+            };
+
+            const getTempTrend = (temp1, temp2) => {
+                const diff = temp2 - temp1;
+                if (Math.abs(diff) < 1) return { symbol: '→', class: 'trend-stable' };
+                if (diff > 0) return { symbol: '↗', class: 'trend-up' };
+                return { symbol: '↘', class: 'trend-down' };
+            };
+
+            const getWindTrend = (wind1, wind2) => {
+                const diff = wind2 - wind1;
+                if (Math.abs(diff) < 3) return { symbol: '→', class: 'trend-stable' };
+                if (diff > 0) return { symbol: '↗', class: 'trend-up' };
+                return { symbol: '↘', class: 'trend-down' };
             };
 
             const processSnowDataForResort = (resort) => {
@@ -1214,51 +1461,95 @@
                             <section className="section">
                                 <h2>
                                     <span className="icon">🌤️</span>
-                                    Météo Glissante (7 jours)
+                                    Météo Détaillée par Horaires (7 jours)
                                 </h2>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Secteur</th>
-                                            {[-2, -1, 0, 1, 2, 3, 4].map((offset) => (
-                                                <th key={offset} className={offset === 0 ? 'today' : ''}>
-                                                    {getDayLabel(offset)}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {weatherData.map((resort, index) => (
-                                            <tr key={index}>
-                                                <td>{resort.name} ({resorts[index]?.altitude}m)</td>
-                                                {[-2, -1, 0, 1, 2, 3, 4].map((offset) => {
-                                                    const w = resort.days[offset];
-                                                    if (!w) return <td key={offset}>-</td>;
-                                                    
-                                                    const avgTemp = Math.round((w.temp_max + w.temp_min) / 2);
-                                                    
-                                                    return (
-                                                        <td key={offset} className={offset === 0 ? 'today' : ''}>
-                                                            <div className="conditions">
-                                                                <span className="weather-icon">{w.icon}</span>
-                                                                <span className={`temp ${avgTemp < 0 ? 'temp-cold' : avgTemp > 5 ? 'temp-warm' : ''}`}>
-                                                                    {w.temp_min}° / {w.temp_max}°
-                                                                </span>
+                                {weatherData.map((resort, resortIndex) => {
+                                    const resortInfo = resorts.find(r => r.name === resort.name);
+                                    return (
+                                        <div key={resortIndex} className="weather-table-wrapper">
+                                            <div className="weather-table-container">
+                                                {/* Colonne fixe avec le nom du secteur */}
+                                                <div className="resort-name-column">
+                                                    <div>
+                                                        {resort.name}
+                                                        <div style={{fontSize: '0.9rem', opacity: 0.9, marginTop: '4px'}}>
+                                                            ({resortInfo?.altitude || '?'}m)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Colonnes des jours qui scrollent */}
+                                                <div className="days-container">
+                                                    {[-2, -1, 0, 1, 2, 3, 4].map((offset) => {
+                                                        const dayWeather = resort.days[offset];
+                                                        if (!dayWeather) return null;
+                                                        
+                                                        const hourly = dayWeather.hourly;
+                                                        
+                                                        return (
+                                                            <div key={offset} className="day-column">
+                                                                <div className={`day-header ${offset === 0 ? 'today-header' : ''}`}>
+                                                                    {getDayLabel(offset)}
+                                                                </div>
+                                                                {hourly ? (
+                                                                    <div className="hourly-slots">
+                                                                        {[10, 12, 15].map((hour, idx) => {
+                                                                            const data = hourly[hour];
+                                                                            if (!data) return (
+                                                                                <div key={hour} className="hour-slot" style={{opacity: 0.3, fontSize: '0.65rem'}}>
+                                                                                    {hour}h<br/>-
+                                                                                </div>
+                                                                            );
+                                                                            
+                                                                            const prevHour = [10, 12, 15][idx - 1];
+                                                                            const prevData = prevHour ? hourly[prevHour] : null;
+                                                                            
+                                                                            const tempTrend = prevData ? getTempTrend(prevData.temp, data.temp) : null;
+                                                                            const windTrend = prevData ? getWindTrend(prevData.wind, data.wind) : null;
+                                                                            
+                                                                            return (
+                                                                                <div key={hour} className="hour-slot">
+                                                                                    <div className="hour-time">{hour}h</div>
+                                                                                    <div className="hour-icon">{data.icon}</div>
+                                                                                    <div className="hour-temp">
+                                                                                        {Math.round(data.temp)}°
+                                                                                        {tempTrend && (
+                                                                                            <span className={`temp-trend ${tempTrend.class}`}>
+                                                                                                {tempTrend.symbol}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="hour-wind">
+                                                                                        💨{Math.round(data.wind)}
+                                                                                        {windTrend && (
+                                                                                            <span className={`wind-trend ${windTrend.class}`}>
+                                                                                                {windTrend.symbol}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div style={{padding: '15px 5px', fontSize: '0.65rem', color: '#95a5a6'}}>
+                                                                        Données non dispo
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                            <div className="wind-info">💨 {Math.round(w.wind)} km/h</div>
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                                 <div className="legend">
                                     <span className="legend-item">💡 <strong>Légende :</strong></span>
-                                    <span className="legend-item">Températures affichées : min / max</span>
-                                    <span className="legend-item">🔵 Températures négatives = conditions froides</span>
-                                    <span className="legend-item">🟠 Températures &gt;5°C = conditions douces</span>
-                                    <span className="legend-item">🔷 Aujourd'hui mis en évidence</span>
+                                    <span className="legend-item">Horaires : 10h, 12h, 15h</span>
+                                    <span className="legend-item">↗ = Hausse | ↘ = Baisse | → = Stable</span>
+                                    <span className="legend-item">🔴 Rouge = hausse | 🔵 Bleu = baisse</span>
+                                    <span className="legend-item">🟢 Fond vert = Aujourd'hui</span>
                                 </div>
                             </section>
                         )}
