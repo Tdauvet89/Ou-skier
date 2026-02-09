@@ -12,15 +12,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ice-blue: #d4e9f7;
-            --glacier: #a8d5e2;
+            /* === DESIGN SYSTEM - VARIABLES === */
+            /* Couleurs Principales */
             --deep-blue: #1a5276;
+            --glacier: #5dade2;
+            --powder: #d4e9f7;
+            --storm-gray: #5d6d7e;
+            --fresh-green: #27ae60;
+            --shadow-blue: rgba(0,0,0,0.1);
+            --ice-blue: #d4e9f7;
             --snow-white: #fafbfc;
-            --powder: #e8f4f8;
-            --storm-gray: #34495e;
-            --warning-orange: #e67e22;
             --fresh-snow: #ecf0f1;
-            --shadow-blue: rgba(26, 82, 118, 0.15);
+            
+            /* Couleurs Météo */
+            --temp-cold: #3498db;
+            --temp-warm: #e67e22;
+            --warning-orange: #e67e22;
+            --heavy-snow: #e74c3c;
+            
+            /* Espacements */
+            --padding-xs: 4px;
+            --padding-sm: 8px;
+            --padding-md: 15px;
+            --padding-lg: 20px;
+            --padding-xl: 40px;
+            
+            --margin-xs: 4px;
+            --margin-sm: 8px;
+            --margin-md: 15px;
+            --margin-lg: 25px;
+            --margin-xl: 40px;
+            
+            --space-between-sections: 40px;
+            --space-between-elements: 15px;
         }
 
         * {
@@ -378,16 +402,57 @@
         }
 
         .sticky-first-col {
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            background: rgba(212, 233, 247, 0.95);
+            position: -webkit-sticky !important;
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 10 !important;
+            background: rgba(212, 233, 247, 0.98) !important;
             font-weight: 600;
             color: var(--deep-blue);
             font-size: 0.85rem;
             min-width: 160px;
             max-width: 160px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        /* Section Separator - Design System */
+        .section-separator {
+            height: 2px;
+            background: linear-gradient(90deg, var(--glacier) 0%, transparent 100%);
+            margin: var(--space-between-sections) 0;
+            border: none;
+        }
+
+        /* Unified Table avec scroll horizontal */
+        .unified-table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+            border-radius: 12px;
+            margin-bottom: 0;
+            position: relative;
+            /* Force le scroll container */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .unified-weather-table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        /* Header sticky aussi */
+        .unified-weather-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .unified-weather-table thead th.sticky-first-col {
+            z-index: 15 !important;
         }
 
         .day-col-header {
@@ -1321,13 +1386,40 @@
                     }
                 }
                 
+                // ✅ CORRECTION FINALE : Trouver dynamiquement l'index qui correspond à aujourd'hui
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0]; // "2026-02-09"
+                
+                let todayIndex = -1;
+                for (let i = 0; i < dayData.time.length; i++) {
+                    if (dayData.time[i] === todayStr) {
+                        todayIndex = i;
+                        break;
+                    }
+                }
+                
+                if (isPicLurtet) {
+                    console.log('🎯 Recherche de la date d\'aujourd\'hui:', todayStr);
+                    console.log('📌 Index trouvé pour aujourd\'hui:', todayIndex);
+                }
+                
+                // Si on ne trouve pas aujourd'hui, utiliser le premier jour disponible
+                if (todayIndex === -1) {
+                    if (isPicLurtet) {
+                        console.log('⚠️ Aujourd\'hui non trouvé dans les données');
+                        console.log('   Les données commencent à:', dayData.time[0]);
+                    }
+                    todayIndex = 0;
+                }
+                
                 console.log('Traitement des données pour', resort.name);
                 console.log('- Données journalières (data_day):', dayData ? 'OK' : 'Manquant');
                 console.log('- Données horaires (data_1h):', hourData ? 'OK' : 'Manquant');
+                console.log('- Index aujourd\'hui:', todayIndex, '→', dayData.time[todayIndex]);
                 
                 // On récupère 7 jours : de -2 à +4 (aujourd'hui = 0)
                 for (let offset = -2; offset <= 4; offset++) {
-                    const dataIndex = offset + 2;
+                    const dataIndex = todayIndex + offset; // ✅ Calculé depuis todayIndex
                     
                     if (dataIndex >= 0 && dataIndex < dayData.time.length) {
                         const weatherCode = dayData.pictocode?.[dataIndex] || 1;
@@ -1459,9 +1551,26 @@
                 const dayData = resort.data.data_day;
                 const snowByDay = [];
                 
+                // ✅ CORRECTION : Trouver dynamiquement l'index qui correspond à aujourd'hui
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+                
+                let todayIndex = -1;
+                for (let i = 0; i < dayData.time.length; i++) {
+                    if (dayData.time[i] === todayStr) {
+                        todayIndex = i;
+                        break;
+                    }
+                }
+                
+                // Si on ne trouve pas aujourd'hui, utiliser le premier jour disponible
+                if (todayIndex === -1) {
+                    todayIndex = 0;
+                }
+                
                 // Calculer les chutes de neige pour 7 jours (de -2 à +4)
                 for (let offset = -2; offset <= 4; offset++) {
-                    const dataIndex = offset + 2;
+                    const dataIndex = todayIndex + offset; // ✅ Calculé depuis todayIndex
                     
                     if (dataIndex >= 0 && dataIndex < dayData.time.length) {
                         const snowFraction = dayData.snowfraction?.[dataIndex] || 0;
@@ -1653,6 +1762,9 @@
                                 </table>
                             </section>
                         )}
+
+                        {/* Séparateur entre sections - Design System */}
+                        <hr className="section-separator" />
 
                         {weatherData.length > 0 && (
                             <section className="section">
