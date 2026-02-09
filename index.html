@@ -1212,6 +1212,17 @@
                 // Utiliser le package qui inclut les données horaires
                 const url = `https://my.meteoblue.com/packages/basic-1h_basic-day_clouds-1h_clouds-day_snowice-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
                 
+                // DEBUG pour Pic de Lurtet
+                const isPicLurtet = resort.name.toLowerCase().includes('lurtet');
+                if (isPicLurtet) {
+                    console.log('🌐 ========== APPEL API PIC DE LURTET ==========');
+                    console.log('📍 Coordonnées utilisées:');
+                    console.log('   Latitude:', resort.lat);
+                    console.log('   Longitude:', resort.lon);
+                    console.log('   Altitude:', resort.altitude);
+                    console.log('🔗 URL API (sans clé):', url.replace(API_KEY, 'XXX'));
+                }
+                
                 try {
                     const response = await fetch(url);
                     if (!response.ok) {
@@ -1220,7 +1231,12 @@
                     }
                     const data = await response.json();
                     logApiCall(resort.name, true);
-                    console.log('Données reçues pour', resort.name, ':', data); // Debug
+                    
+                    if (isPicLurtet) {
+                        console.log('✅ Réponse API reçue pour Pic de Lurtet');
+                        console.log('🌐 ========== FIN APPEL API ==========');
+                    }
+                    
                     return { ...resort, data };
                 } catch (err) {
                     console.error(`Erreur pour ${resort.name}:`, err);
@@ -1284,6 +1300,27 @@
                 const hourData = resort.data.data_1h; // Données horaires
                 const days = {};
                 
+                // DEBUG APPROFONDI pour Pic de Lurtet
+                const isPicLurtet = resort.name.toLowerCase().includes('lurtet');
+                if (isPicLurtet) {
+                    console.log('🔍 ========== DEBUG PIC DE LURTET ==========');
+                    console.log('📍 Coordonnées:', {
+                        lat: resort.lat,
+                        lon: resort.lon,
+                        altitude: resort.altitude
+                    });
+                    console.log('📅 Date actuelle:', new Date().toISOString());
+                    console.log('📊 Données journalières (data_day.time):', dayData.time);
+                    console.log('🌡️ Températures min:', dayData.temperature_min);
+                    console.log('🌡️ Températures max:', dayData.temperature_max);
+                    
+                    if (hourData && hourData.time) {
+                        console.log('⏰ Premier timestamp horaire:', hourData.time[0]);
+                        console.log('⏰ Dernier timestamp horaire:', hourData.time[hourData.time.length - 1]);
+                        console.log('📊 Nombre total d\'heures:', hourData.time.length);
+                    }
+                }
+                
                 console.log('Traitement des données pour', resort.name);
                 console.log('- Données journalières (data_day):', dayData ? 'OK' : 'Manquant');
                 console.log('- Données horaires (data_1h):', hourData ? 'OK' : 'Manquant');
@@ -1296,12 +1333,21 @@
                         const weatherCode = dayData.pictocode?.[dataIndex] || 1;
                         const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
                         
-                        // Extraire les données horaires pour ce jour (10h, 12h, 15h)
+                        // DEBUG pour Pic de Lurtet
+                        if (isPicLurtet) {
+                            console.log(`📆 Offset ${offset} (${offset === 0 ? 'AUJOURD\'HUI' : offset > 0 ? 'J+'+offset : 'J'+offset}):`);
+                            console.log(`   Date: ${dayData.time[dataIndex]}`);
+                            console.log(`   Temp min/max: ${dayData.temperature_min[dataIndex]}° / ${dayData.temperature_max[dataIndex]}°`);
+                        }
+                        
+                        // Extraire les données horaires pour ce jour
                         let hourlyData = null;
                         if (hourData && hourData.time) {
                             const targetDate = dayData.time[dataIndex];
-                            console.log(`Extraction données horaires pour ${targetDate}`);
-                            hourlyData = extractHourlyData(hourData, targetDate);
+                            if (isPicLurtet) {
+                                console.log(`   🔍 Extraction horaire pour: ${targetDate}`);
+                            }
+                            hourlyData = extractHourlyData(hourData, targetDate, isPicLurtet);
                         }
                         
                         days[offset] = {
@@ -1317,6 +1363,10 @@
                         };
                     }
                 }
+                
+                if (isPicLurtet) {
+                    console.log('🔍 ========== FIN DEBUG PIC DE LURTET ==========');
+                }
 
                 return {
                     name: resort.name,
@@ -1324,19 +1374,19 @@
                 };
             };
 
-            const extractHourlyData = (hourData, targetDate) => {
+            const extractHourlyData = (hourData, targetDate, debugMode = false) => {
                 if (!hourData || !hourData.time) {
-                    console.log('Pas de données horaires disponibles');
+                    if (debugMode) console.log('   ⚠️ Pas de données horaires disponibles');
                     return null;
                 }
                 
-                // Trouver les index pour 10h, 12h, 15h du jour ciblé
-                const hours = [10, 12, 15];
+                // Trouver les index pour 8h, 10h, 12h, 14h, 16h du jour ciblé
+                const hours = [8, 10, 12, 14, 16];
                 const result = {};
                 
-                console.log('Recherche des données pour la date:', targetDate);
-                console.log('Premier timestamp disponible:', hourData.time[0]);
-                console.log('Dernier timestamp disponible:', hourData.time[hourData.time.length - 1]);
+                if (debugMode) {
+                    console.log('   🔎 Recherche horaires pour:', targetDate);
+                }
                 
                 for (let i = 0; i < hourData.time.length; i++) {
                     const timeStr = hourData.time[i];
@@ -1370,14 +1420,17 @@
                                 timestamp: timeStr
                             };
                             
-                            console.log(`  ✓ ${hour}h trouvé: temp=${result[hour].temp}°, vent=${result[hour].wind}km/h, ${timeStr}`);
+                            if (debugMode) {
+                                console.log(`   ✓ ${hour}h: temp=${result[hour].temp}°, vent=${result[hour].wind}km/h [${timeStr}]`);
+                            }
                         }
                     }
                 }
                 
                 if (Object.keys(result).length === 0) {
-                    console.log('⚠️ Aucune donnée horaire trouvée pour', targetDate);
-                    console.log('   Vérifier que le package API inclut bien data_1h');
+                    if (debugMode) {
+                        console.log('   ⚠️ Aucune donnée horaire trouvée pour', targetDate);
+                    }
                     return null;
                 }
                 
@@ -1598,25 +1651,16 @@
                                         ))}
                                     </tbody>
                                 </table>
-                                <div className="legend">
-                                    <span className="legend-item">💡 <strong>Note :</strong></span>
-                                    <span className="legend-item">Les quantités de neige sont des estimations basées sur les précipitations et la fraction neige/pluie</span>
-                                    <span className="legend-item">⚠️ Valeurs en orange = chute importante (&gt;15cm)</span>
-                                </div>
                             </section>
                         )}
 
                         {weatherData.length > 0 && (
                             <section className="section">
-                                <h2>
-                                    <span className="icon">🌤️</span>
-                                    Météo Comparative (7 jours)
-                                </h2>
-                                
-                                <div className="view-toggle-container">
-                                    <div style={{fontSize: '0.9rem', color: 'var(--storm-gray)'}}>
-                                        💡 Comparez tous vos secteurs en un coup d'œil
-                                    </div>
+                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+                                    <h2 style={{margin: 0}}>
+                                        <span className="icon">🌤️</span>
+                                        Météo Comparative (7 jours)
+                                    </h2>
                                     <div className="view-toggle">
                                         <button 
                                             className={`view-toggle-btn ${viewMode === 'day' ? 'active' : ''}`}
@@ -1628,7 +1672,7 @@
                                             className={`view-toggle-btn ${viewMode === 'hourly' ? 'active' : ''}`}
                                             onClick={() => setViewMode('hourly')}
                                         >
-                                            🕐 Vue 3h
+                                            🕐 Vue 5h
                                         </button>
                                     </div>
                                 </div>
@@ -1649,9 +1693,9 @@
                                                         </th>
                                                     ))
                                                 ) : (
-                                                    // Vue par heure (3 colonnes par jour)
+                                                    // Vue par heure (5 colonnes par jour)
                                                     [-2, -1, 0, 1, 2, 3, 4].map((offset) => (
-                                                        <th key={offset} colSpan={3} className={`day-col-header ${offset === 0 ? 'today-col' : ''}`}
+                                                        <th key={offset} colSpan={5} className={`day-col-header ${offset === 0 ? 'today-col' : ''}`}
                                                             style={{background: offset === 0 ? '' : 'linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)', color: 'white', padding: '8px 4px'}}>
                                                             {getDayLabel(offset)}
                                                         </th>
@@ -1665,9 +1709,11 @@
                                                     </th>
                                                     {[-2, -1, 0, 1, 2, 3, 4].map((offset) => (
                                                         <React.Fragment key={offset}>
+                                                            <th className="hourly-col-header">8h</th>
                                                             <th className="hourly-col-header">10h</th>
                                                             <th className="hourly-col-header">12h</th>
-                                                            <th className="hourly-col-header">15h</th>
+                                                            <th className="hourly-col-header">14h</th>
+                                                            <th className="hourly-col-header">16h</th>
                                                         </React.Fragment>
                                                     ))}
                                                 </tr>
@@ -1706,12 +1752,14 @@
                                                                 );
                                                             })
                                                         ) : (
-                                                            // Vue par heure
+                                                            // Vue par heure (5h)
                                                             [-2, -1, 0, 1, 2, 3, 4].map((offset) => {
                                                                 const dayWeather = resort.days[offset];
                                                                 if (!dayWeather || !dayWeather.hourly) {
                                                                     return (
                                                                         <React.Fragment key={offset}>
+                                                                            <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
+                                                                            <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
                                                                             <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
                                                                             <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
                                                                             <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
@@ -1721,7 +1769,7 @@
                                                                 
                                                                 return (
                                                                     <React.Fragment key={offset}>
-                                                                        {[10, 12, 15].map((hour) => {
+                                                                        {[8, 10, 12, 14, 16].map((hour) => {
                                                                             const hourData = dayWeather.hourly[hour];
                                                                             if (!hourData) {
                                                                                 return <td key={hour} className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>;
@@ -1744,22 +1792,6 @@
                                             })}
                                         </tbody>
                                     </table>
-                                </div>
-
-                                <div className="legend">
-                                    <span className="legend-item">💡 <strong>Légende :</strong></span>
-                                    {viewMode === 'day' ? (
-                                        <>
-                                            <span className="legend-item">Températures : min / max du jour</span>
-                                            <span className="legend-item">Vent : rafale maximale</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="legend-item">Horaires : 10h, 12h, 15h</span>
-                                            <span className="legend-item">Température et vent à l'heure précise</span>
-                                        </>
-                                    )}
-                                    <span className="legend-item">🟢 Fond vert = Aujourd'hui</span>
                                 </div>
                             </section>
                         )}
