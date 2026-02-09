@@ -319,6 +319,154 @@
             margin-bottom: 5px;
         }
 
+        /* Toggle View Switch */
+        .view-toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: var(--powder);
+            border-radius: 8px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .view-toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            color: var(--storm-gray);
+        }
+
+        .view-toggle-btn.active {
+            background: linear-gradient(135deg, var(--deep-blue), #2874a6);
+            color: white;
+            box-shadow: 0 2px 6px rgba(26, 82, 118, 0.3);
+        }
+
+        .view-toggle-btn:hover:not(.active) {
+            background: var(--powder);
+        }
+
+        /* Unified Table */
+        .unified-weather-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .unified-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        .sticky-first-col {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: rgba(212, 233, 247, 0.95);
+            font-weight: 600;
+            color: var(--deep-blue);
+            font-size: 0.85rem;
+            min-width: 160px;
+            max-width: 160px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+
+        .day-col-header {
+            text-align: center;
+            padding: 12px 8px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.3;
+            min-width: 140px;
+        }
+
+        .day-col-header.today-col {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .hourly-col-header {
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--deep-blue);
+            min-width: 90px;
+            border-left: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .hourly-col-header:first-of-type {
+            border-left: none;
+        }
+
+        .day-cell {
+            text-align: center;
+            padding: 10px 6px;
+            border-right: 2px solid var(--glacier);
+            min-width: 140px;
+            vertical-align: middle;
+        }
+
+        .day-cell.today-cell {
+            background: rgba(39, 174, 96, 0.08);
+        }
+
+        .hourly-cell {
+            text-align: center;
+            padding: 8px 4px;
+            border-left: 1px solid #f0f0f0;
+            min-width: 90px;
+            vertical-align: middle;
+        }
+
+        .hourly-cell.today-cell {
+            background: rgba(39, 174, 96, 0.08);
+        }
+
+        .cell-icon {
+            font-size: 1.4rem;
+            margin: 2px 0;
+        }
+
+        .cell-temp {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--storm-gray);
+            margin: 3px 0;
+        }
+
+        .cell-wind {
+            font-size: 0.65rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .cell-temp-range {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--storm-gray);
+        }
+
         /* Tableau horaire détaillé */
         .hourly-table {
             width: 100%;
@@ -911,6 +1059,7 @@
                 const saved = localStorage.getItem('apiCallsLog');
                 return saved ? JSON.parse(saved) : [];
             });
+            const [viewMode, setViewMode] = useState('day'); // 'day' ou 'hourly'
 
             // Logger un appel API
             const logApiCall = (resortName, success = true, errorMsg = null) => {
@@ -1461,94 +1610,155 @@
                             <section className="section">
                                 <h2>
                                     <span className="icon">🌤️</span>
-                                    Météo Détaillée par Horaires (7 jours)
+                                    Météo Comparative (7 jours)
                                 </h2>
-                                {weatherData.map((resort, resortIndex) => {
-                                    const resortInfo = resorts.find(r => r.name === resort.name);
-                                    return (
-                                        <div key={resortIndex} className="weather-table-wrapper">
-                                            <div className="weather-table-container">
-                                                {/* Colonne fixe avec le nom du secteur */}
-                                                <div className="resort-name-column">
-                                                    <div>
-                                                        {resort.name}
-                                                        <div style={{fontSize: '0.9rem', opacity: 0.9, marginTop: '4px'}}>
-                                                            ({resortInfo?.altitude || '?'}m)
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                {/* Colonnes des jours qui scrollent */}
-                                                <div className="days-container">
-                                                    {[-2, -1, 0, 1, 2, 3, 4].map((offset) => {
-                                                        const dayWeather = resort.days[offset];
-                                                        if (!dayWeather) return null;
+                                
+                                <div className="view-toggle-container">
+                                    <div style={{fontSize: '0.9rem', color: 'var(--storm-gray)'}}>
+                                        💡 Comparez tous vos secteurs en un coup d'œil
+                                    </div>
+                                    <div className="view-toggle">
+                                        <button 
+                                            className={`view-toggle-btn ${viewMode === 'day' ? 'active' : ''}`}
+                                            onClick={() => setViewMode('day')}
+                                        >
+                                            📅 Vue Jour
+                                        </button>
+                                        <button 
+                                            className={`view-toggle-btn ${viewMode === 'hourly' ? 'active' : ''}`}
+                                            onClick={() => setViewMode('hourly')}
+                                        >
+                                            🕐 Vue 3h
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="unified-table-wrapper">
+                                    <table className="unified-weather-table">
+                                        <thead>
+                                            <tr>
+                                                <th className="sticky-first-col" style={{background: 'linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)', color: 'white'}}>
+                                                    Secteur
+                                                </th>
+                                                {viewMode === 'day' ? (
+                                                    // Vue par jour
+                                                    [-2, -1, 0, 1, 2, 3, 4].map((offset) => (
+                                                        <th key={offset} className={`day-col-header ${offset === 0 ? 'today-col' : ''}`}
+                                                            style={{background: offset === 0 ? '' : 'linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)', color: 'white'}}>
+                                                            {getDayLabel(offset)}
+                                                        </th>
+                                                    ))
+                                                ) : (
+                                                    // Vue par heure (3 colonnes par jour)
+                                                    [-2, -1, 0, 1, 2, 3, 4].map((offset) => (
+                                                        <th key={offset} colSpan={3} className={`day-col-header ${offset === 0 ? 'today-col' : ''}`}
+                                                            style={{background: offset === 0 ? '' : 'linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)', color: 'white', padding: '8px 4px'}}>
+                                                            {getDayLabel(offset)}
+                                                        </th>
+                                                    ))
+                                                )}
+                                            </tr>
+                                            {viewMode === 'hourly' && (
+                                                <tr style={{background: 'linear-gradient(135deg, #5dade2 0%, #85c1e9 100%)', color: 'white'}}>
+                                                    <th className="sticky-first-col" style={{background: 'linear-gradient(135deg, #5dade2 0%, #85c1e9 100%)', fontSize: '0.7rem'}}>
                                                         
-                                                        const hourly = dayWeather.hourly;
+                                                    </th>
+                                                    {[-2, -1, 0, 1, 2, 3, 4].map((offset) => (
+                                                        <React.Fragment key={offset}>
+                                                            <th className="hourly-col-header">10h</th>
+                                                            <th className="hourly-col-header">12h</th>
+                                                            <th className="hourly-col-header">15h</th>
+                                                        </React.Fragment>
+                                                    ))}
+                                                </tr>
+                                            )}
+                                        </thead>
+                                        <tbody>
+                                            {weatherData.map((resort, resortIndex) => {
+                                                const resortInfo = resorts.find(r => r.name === resort.name);
+                                                return (
+                                                    <tr key={resortIndex}>
+                                                        <td className="sticky-first-col">
+                                                            {resort.name}
+                                                            <div style={{fontSize: '0.7rem', opacity: 0.8, marginTop: '2px'}}>
+                                                                ({resortInfo?.altitude || '?'}m)
+                                                            </div>
+                                                        </td>
                                                         
-                                                        return (
-                                                            <div key={offset} className="day-column">
-                                                                <div className={`day-header ${offset === 0 ? 'today-header' : ''}`}>
-                                                                    {getDayLabel(offset)}
-                                                                </div>
-                                                                {hourly ? (
-                                                                    <div className="hourly-slots">
-                                                                        {[10, 12, 15].map((hour, idx) => {
-                                                                            const data = hourly[hour];
-                                                                            if (!data) return (
-                                                                                <div key={hour} className="hour-slot" style={{opacity: 0.3, fontSize: '0.65rem'}}>
-                                                                                    {hour}h<br/>-
-                                                                                </div>
-                                                                            );
-                                                                            
-                                                                            const prevHour = [10, 12, 15][idx - 1];
-                                                                            const prevData = prevHour ? hourly[prevHour] : null;
-                                                                            
-                                                                            const tempTrend = prevData ? getTempTrend(prevData.temp, data.temp) : null;
-                                                                            const windTrend = prevData ? getWindTrend(prevData.wind, data.wind) : null;
+                                                        {viewMode === 'day' ? (
+                                                            // Vue par jour
+                                                            [-2, -1, 0, 1, 2, 3, 4].map((offset) => {
+                                                                const dayWeather = resort.days[offset];
+                                                                if (!dayWeather) return <td key={offset}>-</td>;
+                                                                
+                                                                const avgTemp = Math.round((dayWeather.temp_max + dayWeather.temp_min) / 2);
+                                                                
+                                                                return (
+                                                                    <td key={offset} className={`day-cell ${offset === 0 ? 'today-cell' : ''}`}>
+                                                                        <div className="cell-icon">{dayWeather.icon}</div>
+                                                                        <div className="cell-temp-range">
+                                                                            {Math.round(dayWeather.temp_min)}° / {Math.round(dayWeather.temp_max)}°
+                                                                        </div>
+                                                                        <div className="cell-wind">
+                                                                            💨 {Math.round(dayWeather.wind)} km/h
+                                                                        </div>
+                                                                    </td>
+                                                                );
+                                                            })
+                                                        ) : (
+                                                            // Vue par heure
+                                                            [-2, -1, 0, 1, 2, 3, 4].map((offset) => {
+                                                                const dayWeather = resort.days[offset];
+                                                                if (!dayWeather || !dayWeather.hourly) {
+                                                                    return (
+                                                                        <React.Fragment key={offset}>
+                                                                            <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
+                                                                            <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
+                                                                            <td className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>
+                                                                        </React.Fragment>
+                                                                    );
+                                                                }
+                                                                
+                                                                return (
+                                                                    <React.Fragment key={offset}>
+                                                                        {[10, 12, 15].map((hour) => {
+                                                                            const hourData = dayWeather.hourly[hour];
+                                                                            if (!hourData) {
+                                                                                return <td key={hour} className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`} style={{fontSize: '0.65rem', color: '#95a5a6'}}>-</td>;
+                                                                            }
                                                                             
                                                                             return (
-                                                                                <div key={hour} className="hour-slot">
-                                                                                    <div className="hour-time">{hour}h</div>
-                                                                                    <div className="hour-icon">{data.icon}</div>
-                                                                                    <div className="hour-temp">
-                                                                                        {Math.round(data.temp)}°
-                                                                                        {tempTrend && (
-                                                                                            <span className={`temp-trend ${tempTrend.class}`}>
-                                                                                                {tempTrend.symbol}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="hour-wind">
-                                                                                        💨{Math.round(data.wind)}
-                                                                                        {windTrend && (
-                                                                                            <span className={`wind-trend ${windTrend.class}`}>
-                                                                                                {windTrend.symbol}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </div>
+                                                                                <td key={hour} className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`}>
+                                                                                    <div className="cell-icon" style={{fontSize: '1.2rem'}}>{hourData.icon}</div>
+                                                                                    <div className="cell-temp">{hourData.temp}°</div>
+                                                                                    <div className="cell-wind">💨{hourData.wind}</div>
+                                                                                </td>
                                                                             );
                                                                         })}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div style={{padding: '15px 5px', fontSize: '0.65rem', color: '#95a5a6'}}>
-                                                                        Données non dispo
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                                                    </React.Fragment>
+                                                                );
+                                                            })
+                                                        )}
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <div className="legend">
                                     <span className="legend-item">💡 <strong>Légende :</strong></span>
-                                    <span className="legend-item">Horaires : 10h, 12h, 15h</span>
-                                    <span className="legend-item">↗ = Hausse | ↘ = Baisse | → = Stable</span>
-                                    <span className="legend-item">🔴 Rouge = hausse | 🔵 Bleu = baisse</span>
+                                    {viewMode === 'day' ? (
+                                        <>
+                                            <span className="legend-item">Températures : min / max du jour</span>
+                                            <span className="legend-item">Vent : rafale maximale</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="legend-item">Horaires : 10h, 12h, 15h</span>
+                                            <span className="legend-item">Température et vent à l'heure précise</span>
+                                        </>
+                                    )}
                                     <span className="legend-item">🟢 Fond vert = Aujourd'hui</span>
                                 </div>
                             </section>
