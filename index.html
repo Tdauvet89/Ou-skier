@@ -1473,48 +1473,63 @@
                 }
                 
                 // Trouver les index pour 8h, 10h, 12h, 14h, 16h du jour ciblé
+                // IMPORTANT : Meteoblue renvoie les heures en heure LOCALE (pas UTC)
                 const hours = [8, 10, 12, 14, 16];
                 const result = {};
                 
                 if (debugMode) {
                     console.log('   🔎 Recherche horaires pour:', targetDate);
+                    console.log('   📊 Exemples de timestamps:', hourData.time.slice(0, 5));
                 }
                 
                 for (let i = 0; i < hourData.time.length; i++) {
                     const timeStr = hourData.time[i];
                     
-                    // Format attendu : "2026-02-09T10:00:00Z" ou "2026-02-09 10:00:00"
-                    // Vérifier si c'est le bon jour
-                    if (timeStr.startsWith(targetDate)) {
-                        // Extraire l'heure de différents formats possibles
-                        let hour;
-                        if (timeStr.includes('T')) {
-                            // Format ISO: "2026-02-09T10:00:00Z"
-                            const timePart = timeStr.split('T')[1];
-                            hour = parseInt(timePart.substring(0, 2));
-                        } else if (timeStr.includes(' ')) {
-                            // Format avec espace: "2026-02-09 10:00:00"
-                            const timePart = timeStr.split(' ')[1];
-                            hour = parseInt(timePart.substring(0, 2));
-                        } else {
-                            continue;
-                        }
+                    // Format possible : 
+                    // - "2026-02-09T10:00:00Z" (ISO avec Z)
+                    // - "2026-02-09 10:00" (format simple)
+                    // - "2026-02-09T09:00:00" (ISO sans Z, heure locale)
+                    
+                    if (!timeStr.startsWith(targetDate)) continue;
+                    
+                    // Extraire l'heure de différents formats
+                    let hour;
+                    if (timeStr.includes('T')) {
+                        // Format ISO: "2026-02-09T10:00:00Z" ou "2026-02-09T10:00:00"
+                        const timePart = timeStr.split('T')[1];
+                        hour = parseInt(timePart.substring(0, 2));
                         
-                        if (hours.includes(hour)) {
-                            const weatherCode = hourData.pictocode?.[i] || 1;
-                            const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
-                            
-                            result[hour] = {
-                                temp: Math.round(hourData.temperature?.[i] || 0),
-                                wind: Math.round(hourData.windspeed?.[i] || 0),
-                                icon: weatherInfo.icon,
-                                condition: weatherInfo.desc,
-                                timestamp: timeStr
-                            };
-                            
-                            if (debugMode) {
-                                console.log(`   ✓ ${hour}h: temp=${result[hour].temp}°, vent=${result[hour].wind}km/h [${timeStr}]`);
-                            }
+                        // Si le timestamp contient 'Z', c'est en UTC
+                        // Il faut ajouter +1h pour avoir l'heure française (UTC+1)
+                        if (timeStr.includes('Z') && debugMode) {
+                            console.log(`   ⚠️ Timestamp en UTC détecté: ${timeStr}`);
+                            console.log(`      Heure UTC: ${hour}h → Heure locale: ${hour + 1}h`);
+                        }
+                    } else if (timeStr.includes(' ')) {
+                        // Format avec espace: "2026-02-09 10:00:00" ou "2026-02-09 10:00"
+                        const timePart = timeStr.split(' ')[1];
+                        hour = parseInt(timePart.substring(0, 2));
+                    } else {
+                        continue;
+                    }
+                    
+                    if (hours.includes(hour)) {
+                        const weatherCode = hourData.pictocode?.[i] || 1;
+                        const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
+                        const temp = Math.round(hourData.temperature?.[i] || 0);
+                        const wind = Math.round(hourData.windspeed?.[i] || 0);
+                        
+                        result[hour] = {
+                            temp,
+                            wind,
+                            icon: weatherInfo.icon,
+                            condition: weatherInfo.desc,
+                            timestamp: timeStr,
+                            weatherCode // Pour debug
+                        };
+                        
+                        if (debugMode) {
+                            console.log(`   ✓ ${hour}h: temp=${temp}°, vent=${wind}km/h, code=${weatherCode}, icône=${weatherInfo.icon} [${timeStr}]`);
                         }
                     }
                 }
@@ -1522,6 +1537,7 @@
                 if (Object.keys(result).length === 0) {
                     if (debugMode) {
                         console.log('   ⚠️ Aucune donnée horaire trouvée pour', targetDate);
+                        console.log('   💡 Suggestion: Vérifier le format des timestamps dans data_1h.time');
                     }
                     return null;
                 }
@@ -1768,7 +1784,7 @@
 
                         {weatherData.length > 0 && (
                             <section className="section">
-                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
                                     <h2 style={{margin: 0}}>
                                         <span className="icon">🌤️</span>
                                         Météo Comparative (7 jours)
@@ -1788,6 +1804,7 @@
                                         </button>
                                     </div>
                                 </div>
+                                <div className="section-separator"></div>
 
                                 <div className="unified-table-wrapper">
                                     <table className="unified-weather-table">
