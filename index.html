@@ -256,10 +256,7 @@
 
         tbody tr:hover {
             background: var(--powder);
-            transform: scale(1.005);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            z-index: 1; /* Helps row highlight appear above other elements */
-            position: relative; 
+            /* Animation supprimée pour meilleure lisibilité */
         }
 
         td {
@@ -460,12 +457,18 @@
 
         .hourly-col-header {
             text-align: center;
-            padding: 8px 4px;
-            font-size: 0.7rem;
+            padding: 4px 2px;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: white;
+            min-width: 35px;
+            max-width: 35px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Une heure sur deux en bold pour faciliter la lecture */
+        .hourly-col-header:nth-child(2n+2) {
             font-weight: 700;
-            color: var(--deep-blue);
-            min-width: 90px;
-            border-left: 1px solid rgba(255,255,255,0.3);
         }
 
         .hourly-col-header:first-of-type {
@@ -486,10 +489,12 @@
 
         .hourly-cell {
             text-align: center;
-            padding: 8px 4px;
-            border-left: 1px solid #f0f0f0;
-            min-width: 90px;
+            padding: 6px 2px;
+            min-width: 35px;
+            max-width: 35px;
+            border-right: 1px solid #f0f0f0;
             vertical-align: middle;
+            font-size: 0.7rem;
         }
 
         .hourly-cell.today-cell {
@@ -497,21 +502,38 @@
         }
 
         .cell-icon {
-            font-size: 1.4rem;
-            margin: 2px 0;
+            font-size: 1.1rem;
+            margin: 1px 0;
         }
 
         .cell-temp {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--storm-gray);
-            margin: 3px 0;
+            margin: 2px 0;
         }
 
         .cell-wind {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #7f8c8d;
             margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex-wrap: nowrap;
+        }
+        
+        .wind-arrow {
+            font-size: 0.8rem;
+            color: #3498db;
+            line-height: 1;
+        }
+        
+        .wind-cardinal {
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #555;
         }
 
         .cell-temp-range {
@@ -975,6 +997,35 @@
         // Weather codes importés depuis weatherCodes.js
         // Fonctions disponibles: getWeatherInfo(code, hour), adjustWeatherCodeForDaylight(code, hour)
 
+        /**
+         * Convertit une direction en degrés en flèche et point cardinal
+         * @param {number} degrees - Direction en degrés (0-360)
+         * @returns {object} { arrow: string, cardinal: string }
+         */
+        function getWindDirectionDisplay(degrees) {
+            if (degrees === null || degrees === undefined) {
+                return { arrow: '', cardinal: '' };
+            }
+            
+            // Normaliser entre 0-360
+            const normalized = ((degrees % 360) + 360) % 360;
+            
+            // Points cardinaux (8 directions)
+            const directions = [
+                { name: 'N', arrow: '↓' },   // 0° = Nord = vent vient du nord (flèche vers bas)
+                { name: 'NE', arrow: '↙' },  // 45°
+                { name: 'E', arrow: '←' },   // 90°
+                { name: 'SE', arrow: '↖' },  // 135°
+                { name: 'S', arrow: '↑' },   // 180°
+                { name: 'SW', arrow: '↗' },  // 225°
+                { name: 'W', arrow: '→' },   // 270°
+                { name: 'NW', arrow: '↘' }   // 315°
+            ];
+            
+            const index = Math.round(normalized / 45) % 8;
+            return directions[index];
+        }
+
         function AddResortModal({ isOpen, onClose, onAdd }) {
             const [searchQuery, setSearchQuery] = useState('');
             const [searchResults, setSearchResults] = useState([]);
@@ -1428,6 +1479,7 @@
                             temp_max: dayData.temperature_max?.[dataIndex] || 0,
                             temp_min: dayData.temperature_min?.[dataIndex] || 0,
                             wind: dayData.windspeed_max?.[dataIndex] || 0,
+                            windDirection: dayData.winddirection?.[dataIndex] || null,
                             precipitation: dayData.precipitation?.[dataIndex] || 0,
                             hourly: hourlyData
                         };
@@ -1897,7 +1949,16 @@
                                                                             {Math.round(dayWeather.temp_min)}° / {Math.round(dayWeather.temp_max)}°
                                                                         </div>
                                                                         <div className="cell-wind">
-                                                                            💨 {Math.round(dayWeather.wind)} km/h
+                                                                            <span>{Math.round(dayWeather.wind)}</span>
+                                                                            {dayWeather.windDirection !== null && (() => {
+                                                                                const windDir = getWindDirectionDisplay(dayWeather.windDirection);
+                                                                                return (
+                                                                                    <>
+                                                                                        <span className="wind-arrow">{windDir.arrow}</span>
+                                                                                        <span className="wind-cardinal">{windDir.cardinal}</span>
+                                                                                    </>
+                                                                                );
+                                                                            })()}
                                                                         </div>
                                                                     </td>
                                                                 );
@@ -1926,11 +1987,19 @@
                                                                             
                                                                             return (
                                                                                 <td key={hour} className={`hourly-cell ${offset === 0 ? 'today-cell' : ''}`}>
-                                                                                    <div className="cell-icon" style={{fontSize: '1.2rem'}}>{hourData.icon}</div>
+                                                                                    <div className="cell-icon">{hourData.icon}</div>
                                                                                     <div className="cell-temp">{hourData.temp}°</div>
                                                                                     <div className="cell-wind">
-                                                                                        💨{hourData.wind}
-                                                                                        {hourData.windDirectionCardinal && <span style={{fontSize: '0.6rem', marginLeft: '2px'}}>{hourData.windDirectionCardinal}</span>}
+                                                                                        <span>{hourData.wind}</span>
+                                                                                        {hourData.windDirection !== null && (() => {
+                                                                                            const windDir = getWindDirectionDisplay(hourData.windDirection);
+                                                                                            return (
+                                                                                                <>
+                                                                                                    <span className="wind-arrow">{windDir.arrow}</span>
+                                                                                                    <span className="wind-cardinal">{windDir.cardinal}</span>
+                                                                                                </>
+                                                                                            );
+                                                                                        })()}
                                                                                     </div>
                                                                                 </td>
                                                                             );

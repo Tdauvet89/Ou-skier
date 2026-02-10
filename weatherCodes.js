@@ -93,9 +93,15 @@ function getWeatherInfo(code, hour = 12) {
 
 // Export pour utilisation dans l'application
 if (typeof module !== 'undefined' && module.exports) {
+    // Node.js
     module.exports = {
         weatherCodeToIcon,
         adjustWeatherCodeForDaylight,
         getWeatherInfo
     };
+} else {
+    // Navigateur - rendre disponible globalement
+    window.weatherCodeToIcon = weatherCodeToIcon;
+    window.adjustWeatherCodeForDaylight = adjustWeatherCodeForDaylight;
+    window.getWeatherInfo = getWeatherInfo;
 }
