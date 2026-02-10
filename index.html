@@ -1026,7 +1026,29 @@
             return directions[index];
         }
 
-        function AddResortModal({ isOpen, onClose, onAdd }) {
+        /**
+         * Génère l'URL Meteoblue pour un secteur
+         * @param {string} name - Nom du secteur
+         * @param {number} lat - Latitude
+         * @param {number} lon - Longitude
+         * @returns {string} URL Meteoblue
+         */
+        function getMeteoblueUrl(name, lat, lon) {
+            // Convertir le nom en slug (format Meteoblue)
+            const slug = name
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Supprimer accents
+                .replace(/[^a-z0-9]+/g, '-') // Remplacer espaces et caractères spéciaux par -
+                .replace(/^-+|-+$/g, ''); // Supprimer - au début et fin
+            
+            // Format: https://www.meteoblue.com/fr/meteo/semaine/[slug]_france_[id]
+            // On utilise les coordonnées pour générer un ID unique approximatif
+            const coordId = Math.abs(Math.round(lat * 100000 + lon * 100000));
+            
+            return `https://www.meteoblue.com/fr/meteo/semaine/${slug}_france_${coordId}?coords=${lat},${lon}`;
+        }
+
+        function AddResortModal({ isOpen, onClose, onAdd}) {
             const [searchQuery, setSearchQuery] = useState('');
             const [searchResults, setSearchResults] = useState([]);
             const [isSearching, setIsSearching] = useState(false);
@@ -1377,8 +1399,8 @@
                 
                 if (offset === 0) return "Aujourd'hui";
                 if (offset === 1) return 'Demain';
-                if (offset === 2) return 'Après-demain';
                 
+                // Pour J+2 et plus : afficher le jour de la semaine + date
                 const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
                 const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                 return `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${dateStr}`;
@@ -1839,9 +1861,18 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {snowData.map((resort, index) => (
+                                        {snowData.map((resort, index) => {
+                                            const resortInfo = resorts[index];
+                                            const meteoblueUrl = resortInfo ? getMeteoblueUrl(resort.name, resortInfo.lat, resortInfo.lon) : '#';
+                                            return (
                                             <tr key={index}>
-                                                <td>{resort.name} ({resorts[index]?.altitude}m)</td>
+                                                <td>
+                                                    <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" 
+                                                       style={{color: 'var(--deep-blue)', textDecoration: 'none', fontWeight: '600'}}>
+                                                        {resort.name}
+                                                    </a>
+                                                    {' '}({resortInfo?.altitude}m)
+                                                </td>
                                                 {resort.snowByDay.map((snow, dayIndex) => {
                                                     const offset = dayIndex - 2; // convertir index 0-6 en offset -2 à +4
                                                     return (
@@ -1853,7 +1884,7 @@
                                                     );
                                                 })}
                                             </tr>
-                                        ))}
+                                        )})}
                                     </tbody>
                                 </table>
                             </section>
@@ -1925,10 +1956,14 @@
                                         <tbody>
                                             {weatherData.map((resort, resortIndex) => {
                                                 const resortInfo = resorts.find(r => r.name === resort.name);
+                                                const meteoblueUrl = resortInfo ? getMeteoblueUrl(resort.name, resortInfo.lat, resortInfo.lon) : '#';
                                                 return (
                                                     <tr key={resortIndex}>
                                                         <td className="sticky-first-col">
-                                                            {resort.name}
+                                                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" 
+                                                               style={{color: 'var(--deep-blue)', textDecoration: 'none', fontWeight: '700', display: 'block'}}>
+                                                                {resort.name}
+                                                            </a>
                                                             <div style={{fontSize: '0.7rem', opacity: 0.8, marginTop: '2px'}}>
                                                                 ({resortInfo?.altitude || '?'}m)
                                                             </div>
