@@ -212,7 +212,7 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            overflow: hidden;
+            /* overflow: hidden;  <-- REMOVED to fix sticky */
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
@@ -257,6 +257,8 @@
             background: var(--powder);
             transform: scale(1.005);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            z-index: 1; /* Helps row highlight appear above other elements */
+            position: relative; 
         }
 
         td {
@@ -386,63 +388,59 @@
             background: var(--powder);
         }
 
-        /* --- MODIFICATIONS POUR COLONNE STICKY --- */
-        
-        /* Unified Table Wrapper - Gère le scroll et les coins arrondis */
+        /* Unified Table */
+        .unified-weather-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            /* overflow: hidden; REMOVED! - This was breaking sticky */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .unified-weather-table thead th {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 30; /* High z-index for headers */
+        }
+
+        /* Unified Table avec scroll horizontal - sticky column fix */
         .unified-table-wrapper {
             width: 100%;
             overflow-x: auto;
             margin-bottom: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            position: relative;
-            /* Le border-radius est ici, pas sur la table, pour éviter de couper le sticky */
-        }
-
-        /* Unified Table - On retire overflow:hidden qui casse le sticky */
-        .unified-weather-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            /* overflow: hidden;  <-- SUPPRIMÉ POUR LE STICKY */
-            /* border-radius: 12px; <-- DÉPLACÉ SUR LE WRAPPER */
-        }
-
-        /* En-têtes sticky standard (pour le haut) */
-        .unified-weather-table thead th {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            position: relative; /* Ensure wrapper context */
         }
 
         /* Sticky first column - TOUJOURS visible au scroll */
         .unified-weather-table .sticky-first-col {
             position: sticky;
             left: 0;
-            z-index: 20; /* Z-index élevé pour passer au-dessus du reste */
+            z-index: 20; /* Increased to stay above scrolling content */
             background: white;
             font-weight: 600;
             padding: 12px 16px;
             min-width: 180px;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1); /* Ombre pour l'effet de superposition */
-            border-right: 2px solid #e0e0e0; /* Bordure plus marquée */
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            border-right: 2px solid var(--glacier); /* Added clear border */
         }
 
-        /* Header sticky column - Coin haut gauche */
+        /* Header sticky column - Intersection top/left */
         .unified-weather-table thead .sticky-first-col {
             background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%);
             color: white;
-            z-index: 30; /* Le coin doit être au-dessus de tout (Ligne Headers + Colonne Secteurs) */
+            z-index: 40; /* Highest z-index (header + sticky col) */
         }
 
-        /* Body sticky column - Colonne de gauche corps du tableau */
+        /* Body sticky column */
         .unified-weather-table tbody .sticky-first-col {
-            background: rgba(212, 233, 247, 0.95); /* Background opaque nécessaire */
+            background: #eaf6fc; /* Solid color, not transparent */
             color: var(--deep-blue);
         }
-
-        /* --- FIN DES MODIFICATIONS --- */
 
         .day-col-header {
             text-align: center;
