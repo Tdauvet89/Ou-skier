@@ -386,70 +386,63 @@
             background: var(--powder);
         }
 
-        /* Unified Table */
+        /* --- MODIFICATIONS POUR COLONNE STICKY --- */
+        
+        /* Unified Table Wrapper - Gère le scroll et les coins arrondis */
+        .unified-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            /* Le border-radius est ici, pas sur la table, pour éviter de couper le sticky */
+        }
+
+        /* Unified Table - On retire overflow:hidden qui casse le sticky */
         .unified-weather-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            position: relative;
+            /* overflow: hidden;  <-- SUPPRIMÉ POUR LE STICKY */
+            /* border-radius: 12px; <-- DÉPLACÉ SUR LE WRAPPER */
         }
 
+        /* En-têtes sticky standard (pour le haut) */
         .unified-weather-table thead th {
             position: -webkit-sticky;
             position: sticky;
             top: 0;
-            z-index: 3;
-        }
-
-        /* Unified Table avec scroll horizontal - sticky column fix */
-        .unified-table-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
-            border-radius: 12px;
-            margin-bottom: 40px;
-            position: relative;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .unified-weather-table {
-            width: max-content;
-            min-width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            position: relative;
+            z-index: 10;
         }
 
         /* Sticky first column - TOUJOURS visible au scroll */
-        .sticky-first-col {
-            position: -webkit-sticky !important;
-            position: sticky !important;
-            left: 0 !important;
-            z-index: 100 !important;
+        .unified-weather-table .sticky-first-col {
+            position: sticky;
+            left: 0;
+            z-index: 20; /* Z-index élevé pour passer au-dessus du reste */
+            background: white;
             font-weight: 600;
+            padding: 12px 16px;
+            min-width: 180px;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1); /* Ombre pour l'effet de superposition */
+            border-right: 2px solid #e0e0e0; /* Bordure plus marquée */
+        }
+
+        /* Header sticky column - Coin haut gauche */
+        .unified-weather-table thead .sticky-first-col {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%);
+            color: white;
+            z-index: 30; /* Le coin doit être au-dessus de tout (Ligne Headers + Colonne Secteurs) */
+        }
+
+        /* Body sticky column - Colonne de gauche corps du tableau */
+        .unified-weather-table tbody .sticky-first-col {
+            background: rgba(212, 233, 247, 0.95); /* Background opaque nécessaire */
             color: var(--deep-blue);
-            font-size: 0.85rem;
-            min-width: 160px;
-            max-width: 160px;
-            box-shadow: 3px 0 8px rgba(0,0,0,0.2);
         }
 
-        /* Header sticky column - fond bleu */
-        .unified-weather-table thead th.sticky-first-col {
-            background: linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%) !important;
-            color: white !important;
-            z-index: 101 !important;
-        }
-
-        /* Body sticky column - fond clair */
-        .unified-weather-table tbody td.sticky-first-col {
-            background: rgba(212, 233, 247, 0.98) !important;
-            color: var(--deep-blue) !important;
-        }
+        /* --- FIN DES MODIFICATIONS --- */
 
         .day-col-header {
             text-align: center;
