@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="weatherCodes.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -971,44 +972,8 @@
 
         const API_KEY = '76O0zHESUwlL5kA1';
 
-        // Mapping des codes météo Meteoblue vers icônes et descriptions
-        const weatherCodeToIcon = {
-            1: { icon: '☀️', desc: 'Ensoleillé' },
-            2: { icon: '🌤️', desc: 'Peu nuageux' },
-            3: { icon: '⛅', desc: 'Partiellement nuageux' },
-            4: { icon: '☁️', desc: 'Nuageux' },
-            5: { icon: '🌧️', desc: 'Pluie légère' },
-            6: { icon: '🌧️', desc: 'Pluie modérée' },
-            7: { icon: '🌧️', desc: 'Pluie forte' },
-            8: { icon: '❄️', desc: 'Neige légère' },
-            9: { icon: '❄️', desc: 'Neige modérée' },
-            10: { icon: '❄️', desc: 'Neige forte' },
-            11: { icon: '🌫️', desc: 'Brouillard' },
-            12: { icon: '🌧️', desc: 'Averses légères' },
-            13: { icon: '🌧️', desc: 'Averses' },
-            14: { icon: '⛈️', desc: 'Orages' },
-            15: { icon: '🌨️', desc: 'Averses de neige légères' },
-            16: { icon: '🌨️', desc: 'Averses de neige' },
-            17: { icon: '🌧️', desc: 'Pluie et neige mêlées' },
-            18: { icon: '🌧️', desc: 'Pluie verglaçante' },
-            19: { icon: '❄️', desc: 'Grêle' },
-            20: { icon: '⛈️', desc: 'Orages avec pluie légère' },
-            21: { icon: '☀️', desc: 'Ensoleillé clair' },
-            22: { icon: '☀️', desc: 'Partiellement ensoleillé' },
-            23: { icon: '⛅', desc: 'Peu nuageux (jour)' },
-            24: { icon: '☁️', desc: 'Nuageux (jour)' },
-            25: { icon: '🌧️', desc: 'Pluie (jour)' },
-            26: { icon: '🌧️', desc: 'Averses (jour)' },
-            27: { icon: '❄️', desc: 'Neige (jour)' },
-            28: { icon: '🌨️', desc: 'Averses de neige (jour)' },
-            29: { icon: '⛈️', desc: 'Orage (jour)' },
-            30: { icon: '🌫️', desc: 'Brouillard (jour)' },
-            31: { icon: '🌙', desc: 'Nuit claire' },
-            32: { icon: '🌙', desc: 'Nuit peu nuageuse' },
-            33: { icon: '☁️', desc: 'Nuit nuageuse' },
-            34: { icon: '☀️', desc: 'Ensoleillé avec nuages épars' },
-            35: { icon: '🌧️', desc: 'Pluie et neige' }
-        };
+        // Weather codes importés depuis weatherCodes.js
+        // Fonctions disponibles: getWeatherInfo(code, hour), adjustWeatherCodeForDaylight(code, hour)
 
         function AddResortModal({ isOpen, onClose, onAdd }) {
             const [searchQuery, setSearchQuery] = useState('');
@@ -1434,9 +1399,25 @@
                 for (let offset = -2; offset <= 4; offset++) {
                     const dataIndex = todayIndex + offset; // ✅ Calculé depuis todayIndex
                     
+                    // Si index négatif (J-1, J-2 non disponibles), créer entrée vide
+                    if (dataIndex < 0) {
+                        days[offset] = {
+                            offset,
+                            date: '',
+                            condition: 'Données passées non disponibles',
+                            icon: '📅',
+                            temp_max: null,
+                            temp_min: null,
+                            wind: null,
+                            precipitation: null,
+                            hourly: null
+                        };
+                        continue;
+                    }
+                    
                     if (dataIndex >= 0 && dataIndex < dayData.time.length) {
                         const weatherCode = dayData.pictocode?.[dataIndex] || 1;
-                        const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
+                        const weatherInfo = getWeatherInfo(weatherCode);
                         
                         // DEBUG pour Pic de Lurtet
                         if (isPicLurtet) {
@@ -1485,9 +1466,12 @@
                     return null;
                 }
                 
+                // DEBUG : Afficher toutes les clés disponibles dans hourData
+                if (debugMode) {
+                    console.log('   📋 Variables disponibles dans data_1h:', Object.keys(hourData).join(', '));
+                }
+                
                 // CORRECTION : Les heures demandées sont en heure LOCALE française (UTC+1)
-                // Mais l'API peut renvoyer en UTC, il faut donc chercher heure-1
-                // Exemple : Pour afficher 10h locale, chercher 09h dans les timestamps UTC
                 const requestedHours = [8, 10, 12, 14, 16];
                 const result = {};
                 
@@ -1496,7 +1480,7 @@
                     console.log('   📊 Exemples de timestamps:', hourData.time.slice(0, 5));
                 }
                 
-                // Vérifier si les timestamps sont en UTC (contiennent Z ou :00)
+                // Vérifier si les timestamps sont en UTC
                 const firstTimestamp = hourData.time[0] || '';
                 const isUTC = firstTimestamp.includes('Z') || !firstTimestamp.includes(' ');
                 
@@ -1521,9 +1505,7 @@
                         continue;
                     }
                     
-                    // CORRECTION : Si UTC, l'heure dans le timestamp est en UTC
-                    // Pour afficher 10h locale (UTC+1), il faut lire 09h UTC
-                    // Donc on ajoute +1 à l'heure lue pour obtenir l'heure locale
+                    // Conversion UTC → Local si nécessaire
                     let localHour = hour;
                     if (isUTC) {
                         localHour = hour + 1;
@@ -1532,9 +1514,28 @@
                     
                     if (requestedHours.includes(localHour)) {
                         const weatherCode = hourData.pictocode?.[i] || 1;
-                        const weatherInfo = weatherCodeToIcon[weatherCode] || weatherCodeToIcon[1];
+                        
+                        // CORRECTION : Remplacer les codes NUIT par codes JOUR si l'heure est en journée
+                        let adjustedCode = weatherCode;
+                        if (localHour >= 6 && localHour <= 20) {
+                            // C'est le jour, convertir les codes nuit en codes jour
+                            if (weatherCode === 31) adjustedCode = 1;  // Nuit claire → Ensoleillé
+                            if (weatherCode === 32) adjustedCode = 2;  // Nuit peu nuageuse → Peu nuageux
+                            if (weatherCode === 33) adjustedCode = 4;  // Nuit nuageuse → Nuageux
+                        }
+                        
+                        const weatherInfo = getWeatherInfo(adjustedCode, localHour);
                         const temp = Math.round(hourData.temperature?.[i] || 0);
-                        const wind = Math.round(hourData.windspeed?.[i] || 0);
+                        
+                        // CORRECTION VENT : Tester plusieurs variables possibles
+                        let wind = 0;
+                        if (hourData.windspeed_mean) {
+                            wind = Math.round(hourData.windspeed_mean[i] || 0);
+                        } else if (hourData.windspeed) {
+                            wind = Math.round(hourData.windspeed[i] || 0);
+                        } else if (hourData.windspeed_max) {
+                            wind = Math.round(hourData.windspeed_max[i] || 0);
+                        }
                         
                         result[localHour] = {
                             temp,
@@ -1542,11 +1543,17 @@
                             icon: weatherInfo.icon,
                             condition: weatherInfo.desc,
                             timestamp: timeStr,
-                            weatherCode
+                            weatherCode: adjustedCode,
+                            originalCode: weatherCode
                         };
                         
                         if (debugMode) {
-                            console.log(`   ✓ ${localHour}h (${isUTC ? hour + 'h UTC' : 'locale'}): temp=${temp}°, vent=${wind}km/h, code=${weatherCode}, icône=${weatherInfo.icon} [${timeStr}]`);
+                            console.log(`   ✓ ${localHour}h (${isUTC ? hour + 'h UTC' : 'locale'}): temp=${temp}°, vent=${wind}km/h, code=${weatherCode}${weatherCode !== adjustedCode ? '→'+adjustedCode : ''}, icône=${weatherInfo.icon} [${timeStr}]`);
+                            // Afficher toutes les valeurs de vent disponibles
+                            if (hourData.windspeed_mean) console.log(`      windspeed_mean: ${Math.round(hourData.windspeed_mean[i])}km/h`);
+                            if (hourData.windspeed) console.log(`      windspeed: ${Math.round(hourData.windspeed[i])}km/h`);
+                            if (hourData.windspeed_max) console.log(`      windspeed_max: ${Math.round(hourData.windspeed_max[i])}km/h`);
+                            if (hourData.windgust) console.log(`      windgust: ${Math.round(hourData.windgust[i])}km/h`);
                         }
                     }
                 }
@@ -1554,7 +1561,6 @@
                 if (Object.keys(result).length === 0) {
                     if (debugMode) {
                         console.log('   ⚠️ Aucune donnée horaire trouvée pour', targetDate);
-                        console.log('   💡 Vérifier le format des timestamps et le fuseau horaire');
                     }
                     return null;
                 }
