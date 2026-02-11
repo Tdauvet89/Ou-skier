@@ -1132,53 +1132,68 @@
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-                    // Extraire les risques par écheance
-                    const echeances = xmlDoc.getElementsByTagName("ECHEANCE");
+                    // Extraire le risque depuis CARTOUCHERISQUE > RISQUE
+                    const risqueEl = xmlDoc.querySelector(
+                        "CARTOUCHERISQUE RISQUE",
+                    );
+                    if (!risqueEl) {
+                        console.warn(
+                            `BRA: pas de balise RISQUE pour massif ${massifId}`,
+                        );
+                        return null;
+                    }
+
+                    const dateBulletin =
+                        xmlDoc.documentElement.getAttribute("DATEBULLETIN");
+                    const dateEcheance =
+                        xmlDoc.documentElement.getAttribute("DATEECHEANCE");
+
+                    // Risque J1 : RISQUE1 est le risque principal, EVOLURISQUE1 l'évolution
+                    const risque1 =
+                        parseInt(risqueEl.getAttribute("RISQUE1")) || 0;
+                    const evoluRisque1 =
+                        parseInt(risqueEl.getAttribute("EVOLURISQUE1")) || 0;
+                    const risqueMaxi =
+                        parseInt(risqueEl.getAttribute("RISQUEMAXI")) ||
+                        risque1;
+
+                    // Risque J2
+                    const risqueMaxiJ2 =
+                        parseInt(risqueEl.getAttribute("RISQUEMAXIJ2")) || 0;
+
+                    // LOC1/LOC2 pour risques différenciés par altitude (ex: "<2400" / ">2400")
+                    const loc1 = risqueEl.getAttribute("LOC1") || "";
+                    const loc2 = risqueEl.getAttribute("LOC2") || "";
+                    const risque2 =
+                        parseInt(risqueEl.getAttribute("RISQUE2")) || 0;
+
                     const braData = {};
 
-                    for (let i = 0; i < Math.min(echeances.length, 3); i++) {
-                        const echeance = echeances[i];
-                        const date = echeance.getAttribute("DATE");
+                    // Aujourd'hui (J1) — risque maxi, ou différencié bas/haut si LOC1/LOC2 renseignés
+                    if (loc1 && loc2 && risque2) {
+                        braData["aujourd'hui"] = {
+                            bas: risque1,
+                            haut: risque2,
+                            evolution: evoluRisque1,
+                            date: dateEcheance,
+                        };
+                    } else {
+                        braData["aujourd'hui"] = {
+                            bas: risqueMaxi,
+                            haut: risqueMaxi,
+                            evolution: evoluRisque1,
+                            date: dateEcheance,
+                        };
+                    }
 
-                        // Extraire les risques par altitude
-                        const risques = echeance.getElementsByTagName("RISQUE");
-
-                        let risqueBas = null;
-                        let risqueHaut = null;
-
-                        for (let j = 0; j < risques.length; j++) {
-                            const risque = risques[j];
-                            const altitude =
-                                risque.getAttribute("ALTITUDE") ||
-                                risque.getAttribute("LOC_ALT");
-                            const valeur = parseInt(
-                                risque.getAttribute("VALEUR") ||
-                                    risque.textContent,
-                            );
-
-                            if (altitude && altitude.includes("BAS")) {
-                                risqueBas = valeur;
-                            } else if (altitude && altitude.includes("HAUT")) {
-                                risqueHaut = valeur;
-                            }
-
-                            // Si pas d'attribut altitude, c'est peut-être un risque unique
-                            if (!altitude && !risqueBas && !risqueHaut) {
-                                risqueBas = risqueHaut = valeur;
-                            }
-                        }
-
-                        // Mapper l'écheance (0=aujourd'hui, 1=demain, 2=après-demain)
-                        const key =
-                            i === 0
-                                ? "aujourd'hui"
-                                : i === 1
-                                  ? "demain"
-                                  : "apresdemain";
-                        braData[key] = {
-                            bas: risqueBas || 0,
-                            haut: risqueHaut || 0,
-                            date: date,
+                    // Demain (J2)
+                    if (risqueMaxiJ2) {
+                        const dateJ2 =
+                            risqueEl.getAttribute("DATE_RISQUE_J2") || "";
+                        braData["demain"] = {
+                            bas: risqueMaxiJ2,
+                            haut: risqueMaxiJ2,
+                            date: dateJ2,
                         };
                     }
 
