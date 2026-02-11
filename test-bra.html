@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Météo France BRA</title>
+    <script src="massifMapping.js"></script>
+</head>
+<body>
+    <h1>Test API Bulletins Avalanche</h1>
+    
+    <h2>1. Test Mapping Massifs</h2>
+    <div id="mapping-results"></div>
+    
+    <h2>2. Test Images BRA</h2>
+    <div id="images-container"></div>
+    
+    <script>
+        const TOKEN = "eyJ4NXQiOiJOelU0WTJJME9XRXhZVGt6WkdJM1kySTFaakZqWVRJeE4yUTNNalEyTkRRM09HRmtZalkzTURkbE9UZ3paakUxTURRNFltSTVPR1kyTURjMVkyWTBNdyIsImtpZCI6Ik56VTRZMkkwT1dFeFlUa3paR0kzWTJJMVpqRmpZVEl4TjJRM01qUTJORFEzT0dGa1lqWTNNRGRsT1RnelpqRTFNRFE0WW1JNU9HWTJNRGMxWTJZME13X1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI1YmQyODUwMi0zYmI2LTRkNWYtYTFmZC0wZTJhNjhjZTFlNzQiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJuYmYiOjE3NzA3OTc2MTMsImF6cCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvcG9ydGFpbC1hcGkubWV0ZW9mcmFuY2UuZnJcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE3NzA4MDEyMTMsImlhdCI6MTc3MDc5NzYxMywianRpIjoiNTU0NmIwNjEtYTdiOC00NTQ1LWE0NGYtOTM2OWNlYmZhMDE0IiwiY2xpZW50X2lkIjoiT193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYSJ9.yc64LOhjHit54cAohq-YX1MUqr2hu-son0lTTtkKSl7u9lZmwcBAqP61ilhBr-pD9umkjDEMYxKVqixR09R46pHWD1o7bdA4ywlNfm5eLOGkc3kpoTTdRtTbrl2kTA8_l0iugOuvNQveZ2Cu7TpOVhOQGKvqKMRTVK5epL-vnNp-GIPPas29pXuMGRBNThG5BrZIONRQkuPHfLSegFUqPVxoi2F3Ogw0-b20Vx1uKs_0kxuURd-6fsaZ-ZEASm_7Asr30siZj9lH1dDmHgZGemdwwPIeBu4yxs9zu9yqVCszdN8-ireiPBzLtDo_XgjVA2SSC4IGBkyf1aFb0Jsgww";
+        
+        // Test 1: Mapping
+        const mappingDiv = document.getElementById('mapping-results');
+        let html = '<table border="1"><tr><th>Secteur</th><th>Coords</th><th>Massif</th><th>ID</th></tr>';
+        
+        for (const [name, data] of Object.entries(EXEMPLES_SECTEURS)) {
+            const massif = data.massif;
+            html += `<tr>
+                <td>${name}</td>
+                <td>${data.coords.lat.toFixed(4)}, ${data.coords.lon.toFixed(4)}</td>
+                <td>${massif ? massif.name : 'Non trouvé'}</td>
+                <td>${massif ? massif.id : '-'}</td>
+            </tr>`;
+        }
+        html += '</table>';
+        mappingDiv.innerHTML = html;
+        
+        // Test 2: Récupérer images pour Haute-Bigorre (ID 65)
+        const testMassifId = 65;
+        const imagesDiv = document.getElementById('images-container');
+        
+        async function testImages() {
+            imagesDiv.innerHTML = '<p>Chargement des images...</p>';
+            
+            const endpoints = [
+                {
+                    name: 'Indice de risque',
+                    url: `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/image/montagne-risques?id-massif=${testMassifId}`
+                },
+                {
+                    name: 'Rose des pentes',
+                    url: `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/image/rose-pentes?id-massif=${testMassifId}`
+                }
+            ];
+            
+            let imagesHtml = '<h3>Massif: Haute-Bigorre (ID: 65)</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint.url, {
+                        headers: {
+                            'Authorization': `Bearer ${TOKEN}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const imageUrl = URL.createObjectURL(blob);
+                        imagesHtml += `
+                            <div style="margin: 20px;">
+                                <h4>${endpoint.name}</h4>
+                                <img src="${imageUrl}" style="max-width: 400px; border: 1px solid #ccc;" />
+                            </div>
+                        `;
+                    } else {
+                        imagesHtml += `<p>❌ ${endpoint.name}: Erreur ${response.status}</p>`;
+                    }
+                } catch (error) {
+                    imagesHtml += `<p>❌ ${endpoint.name}: ${error.message}</p>`;
+                }
+            }
+            
+            imagesDiv.innerHTML = imagesHtml;
+        }
+        
+        testImages();
+    </script>
+</body>
+</html>

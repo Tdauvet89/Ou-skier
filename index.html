@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="weatherCodes.js"></script>
+    <script src="massifMapping.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -993,6 +994,54 @@
         ];
 
         const API_KEY = '76O0zHESUwlL5kA1';
+        
+        // Token Météo France BRA (expire après 1h - à renouveler)
+        const METEO_FRANCE_TOKEN = "eyJ4NXQiOiJOelU0WTJJME9XRXhZVGt6WkdJM1kySTFaakZqWVRJeE4yUTNNalEyTkRRM09HRmtZalkzTURkbE9UZ3paakUxTURRNFltSTVPR1kyTURjMVkyWTBNdyIsImtpZCI6Ik56VTRZMkkwT1dFeFlUa3paR0kzWTJJMVpqRmpZVEl4TjJRM01qUTJORFEzT0dGa1lqWTNNRGRsT1RnelpqRTFNRFE0WW1JNU9HWTJNRGMxWTJZME13X1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI1YmQyODUwMi0zYmI2LTRkNWYtYTFmZC0wZTJhNjhjZTFlNzQiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJuYmYiOjE3NzA3OTc2MTMsImF6cCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvcG9ydGFpbC1hcGkubWV0ZW9mcmFuY2UuZnJcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE3NzA4MDEyMTMsImlhdCI6MTc3MDc5NzYxMywianRpIjoiNTU0NmIwNjEtYTdiOC00NTQ1LWE0NGYtOTM2OWNlYmZhMDE0IiwiY2xpZW50X2lkIjoiT193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYSJ9.yc64LOhjHit54cAohq-YX1MUqr2hu-son0lTTtkKSl7u9lZmwcBAqP61ilhBr-pD9umkjDEMYxKVqixR09R46pHWD1o7bdA4ywlNfm5eLOGkc3kpoTTdRtTbrl2kTA8_l0iugOuvNQveZ2Cu7TpOVhOQGKvqKMRTVK5epL-vnNp-GIPPas29pXuMGRBNThG5BrZIONRQkuPHfLSegFUqPVxoi2F3Ogw0-b20Vx1uKs_0kxuURd-6fsaZ-ZEASm_7Asr30siZj9lH1dDmHgZGemdwwPIeBu4yxs9zu9yqVCszdN8-ireiPBzLtDo_XgjVA2SSC4IGBkyf1aFb0Jsgww";
+
+        /**
+         * Récupère les images BRA (Bulletin Risque Avalanche) pour un massif
+         * @param {number} massifId - ID du massif Météo France
+         * @returns {Promise<object>} URLs des images { risque, rosePentes }
+         */
+        async function fetchBRAImages(massifId) {
+            if (!massifId) return null;
+            
+            const baseUrl = 'https://public-api.meteofrance.fr/public/DPBRA/v1';
+            const headers = {
+                'Authorization': `Bearer ${METEO_FRANCE_TOKEN}`
+            };
+            
+            try {
+                // Récupérer l'image de risque
+                const risqueResponse = await fetch(
+                    `${baseUrl}/massif/image/montagne-risques?id-massif=${massifId}`,
+                    { headers }
+                );
+                
+                // Récupérer l'image rose des pentes
+                const roseResponse = await fetch(
+                    `${baseUrl}/massif/image/rose-pentes?id-massif=${massifId}`,
+                    { headers }
+                );
+                
+                const result = {};
+                
+                if (risqueResponse.ok) {
+                    const blob = await risqueResponse.blob();
+                    result.risque = URL.createObjectURL(blob);
+                }
+                
+                if (roseResponse.ok) {
+                    const blob = await roseResponse.blob();
+                    result.rosePentes = URL.createObjectURL(blob);
+                }
+                
+                return Object.keys(result).length > 0 ? result : null;
+            } catch (error) {
+                console.error(`Erreur BRA pour massif ${massifId}:`, error);
+                return null;
+            }
+        }
 
         // Weather codes importés depuis weatherCodes.js
         // Fonctions disponibles: getWeatherInfo(code, hour), adjustWeatherCodeForDaylight(code, hour)
@@ -1176,6 +1225,7 @@
                 return saved ? JSON.parse(saved) : [];
             });
             const [viewMode, setViewMode] = useState('day'); // 'day' ou 'hourly'
+            const [braImages, setBraImages] = useState({}); // { resortName: { risque: url, rosePentes: url } }
 
             // Logger un appel API
             const logApiCall = (resortName, success = true, errorMsg = null) => {
@@ -1265,6 +1315,26 @@
                     processWeatherData(results);
                     processSnowData(results);
                     
+                    // Charger les images BRA pour tous les secteurs
+                    const braPromises = resorts.map(async (resort) => {
+                        const massif = getMassifFromCoords(resort.lat, resort.lon);
+                        if (massif) {
+                            console.log(`🏔️ Massif détecté pour ${resort.name}: ${massif.name} (ID ${massif.id})`);
+                            const images = await fetchBRAImages(massif.id);
+                            return images ? { name: resort.name, images } : null;
+                        }
+                        return null;
+                    });
+                    
+                    const braResults = await Promise.all(braPromises);
+                    const braImagesObj = {};
+                    braResults.forEach(result => {
+                        if (result) {
+                            braImagesObj[result.name] = result.images;
+                        }
+                    });
+                    setBraImages(braImagesObj);
+                    
                     // Enregistrer l'heure de mise à jour
                     const now = new Date();
                     setLastUpdate(now.toISOString());
@@ -1309,6 +1379,19 @@
                         }
                         if (newSnowData) {
                             setSnowData(prev => [...prev, newSnowData]);
+                        }
+                        
+                        // Récupérer les images BRA pour ce secteur
+                        const massif = getMassifFromCoords(newResort.lat, newResort.lon);
+                        if (massif) {
+                            console.log(`🏔️ Massif détecté pour ${newResort.name}: ${massif.name} (ID ${massif.id})`);
+                            const images = await fetchBRAImages(massif.id);
+                            if (images) {
+                                setBraImages(prev => ({
+                                    ...prev,
+                                    [newResort.name]: images
+                                }));
+                            }
                         }
                     }
                 } catch (err) {
@@ -1976,6 +2059,7 @@
                                                                 if (!dayWeather) return <td key={offset}>-</td>;
                                                                 
                                                                 const avgTemp = Math.round((dayWeather.temp_max + dayWeather.temp_min) / 2);
+                                                                const braImagesForResort = braImages[resort.name];
                                                                 
                                                                 return (
                                                                     <td key={offset} className={`day-cell ${offset === 0 ? 'today-cell' : ''}`}>
@@ -1995,6 +2079,30 @@
                                                                                 );
                                                                             })()}
                                                                         </div>
+                                                                        
+                                                                        {/* Images BRA uniquement pour AUJOURD'HUI */}
+                                                                        {offset === 0 && braImagesForResort && (
+                                                                            <div style={{marginTop: '8px', display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                                                                                {braImagesForResort.risque && (
+                                                                                    <img 
+                                                                                        src={braImagesForResort.risque} 
+                                                                                        alt="Risque avalanche"
+                                                                                        title="Indice de risque d'avalanche"
+                                                                                        style={{width: '60px', height: 'auto', borderRadius: '4px', cursor: 'pointer'}}
+                                                                                        onClick={() => window.open(braImagesForResort.risque, '_blank')}
+                                                                                    />
+                                                                                )}
+                                                                                {braImagesForResort.rosePentes && (
+                                                                                    <img 
+                                                                                        src={braImagesForResort.rosePentes} 
+                                                                                        alt="Rose des pentes"
+                                                                                        title="Rose des pentes"
+                                                                                        style={{width: '60px', height: 'auto', borderRadius: '4px', cursor: 'pointer'}}
+                                                                                        onClick={() => window.open(braImagesForResort.rosePentes, '_blank')}
+                                                                                    />
+                                                                                )}
+                                                                            </div>
+                                                                        )}
                                                                     </td>
                                                                 );
                                                             })
