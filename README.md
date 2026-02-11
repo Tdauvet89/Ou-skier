@@ -1,55 +1,49 @@
-# 📁 Structure de l'Application - Mountain Weather App
+# Structure de l'Application - Mountain Weather App
 
-## 📂 Organisation des Fichiers
+## Organisation des Fichiers
 
 ```
 mountain-weather-app/
-├── index.html              # ⭐ Application principale (React + Alpine.js)
-├── weatherCodes.js         # ⭐ Correspondances codes météo Meteoblue
-├── design-system/          # Documentation du design system
-│   ├── DESIGN_SYSTEM.md    # Composants et règles de design
-│   └── API_ANALYSIS.md     # Analyse des problèmes API
+├── index.html              # Application principale (React)
+├── weatherCodes.js         # Correspondances codes meteo Meteoblue
+├── massifMapping.js        # Mapping GPS -> massifs Meteo France (BRA)
 ├── CHANGELOG.md            # Historique des versions
-├── API-LOGGING.md          # Documentation du système de logs API
-├── DIAGNOSTIC.md           # Guide de diagnostic des problèmes
-├── CORRECTION_FINALE.md    # Correction du décalage de dates
-├── CORRECTION_WEATHERCODE.md  # Correction des codes météo
-└── README.md              # Ce fichier
+├── API-LOGGING.md          # Documentation du systeme de logs API
+├── README.md               # Ce fichier
 ```
 
-⭐ = Fichiers obligatoires pour le fonctionnement
+Fichiers obligatoires pour le fonctionnement : `index.html`, `weatherCodes.js`, `massifMapping.js`
 
-## 📄 Description des Fichiers
+## Description des Fichiers
 
-### Fichiers Principaux
+### `index.html`
+- Application principale React (JSX via Babel standalone)
+- Interface, gestion states, appels API Meteoblue, tableaux meteo
+- Cache localStorage des donnees meteo (TTL 2h)
 
-#### `index.html`
-- **Rôle** : Application principale React
-- **Contenu** : Interface, gestion states, appels API, tableaux
-- **Taille** : ~1960 lignes
+### `weatherCodes.js`
+- Module de correspondance des codes meteo Meteoblue -> icones/descriptions
+- Export : `getWeatherInfo(code, hour)`, `adjustWeatherCodeForDaylight()`
 
-#### `weatherCodes.js`
-- **Rôle** : Module de correspondance des codes météo
-- **Export** : `getWeatherInfo(code, hour)`, `adjustWeatherCodeForDaylight()`
-- **Taille** : ~120 lignes
+### `massifMapping.js`
+- Mapping coordonnees GPS -> massifs Pyrenees Meteo France
+- Utilise pour recuperer les bulletins d'avalanche (BRA)
+- Export : `getMassifFromCoords(lat, lon)`, `MASSIFS_PYRENEES`
 
-## 🚀 Déploiement
+## API
 
-### Fichiers Obligatoires
-```bash
-index.html          # App principale
-weatherCodes.js     # Codes météo
-```
+### Meteoblue
+- **Packages utilises** : `basic-1h`, `basic-day`, `snowice-day`, `wind-1h`, `wind-day`
+- **Cache** : Les donnees sont cachees dans localStorage pendant 2h pour reduire la consommation
+- Le bouton "Actualiser" force un appel API frais (bypass cache)
+- L'ajout/suppression d'une station invalide le cache
 
-### Commandes
-```bash
-git add index.html weatherCodes.js README.md
-git commit -m "V3.9 - App structurée"
-git push
-```
+### Meteo France (BRA)
+- Bulletins Risque Avalanche par massif (XML)
+- Token JWT a renouveler manuellement (expire apres 1h)
 
-## 📈 Version Actuelle
+## Version Actuelle
 
-**V3.9** - App structurée avec fichiers séparés
+**V6.0** - Cache API + optimisation consommation Meteoblue
 
 Voir `CHANGELOG.md` pour l'historique complet.

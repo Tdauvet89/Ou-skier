@@ -2,6 +2,23 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.0.0] - 2026-02-11
+
+### Ajouté
+- **Cache localStorage des données météo** (TTL 2h) : les données API sont mises en cache et réutilisées pendant 2h, évitant les appels API redondants à chaque rechargement de page
+- Badge vert "CACHE" dans le header quand les données proviennent du cache
+- Invalidation automatique du cache à l'ajout/suppression d'une station
+- Le bouton "Actualiser" force toujours un appel API frais (bypass cache)
+- Sauvegarde des données BRA dans le cache (en plus des données Meteoblue)
+
+### Supprimé
+- **Packages API `clouds-1h` et `clouds-day`** retirés de l'URL Meteoblue (non utilisés, consommaient des crédits inutilement)
+
+### Impact
+- Réduction estimée de 70-90% des appels API en usage normal
+- Packages API passés de 7 à 5 par appel (économie de crédits)
+- Aucun impact sur l'expérience utilisateur
+
 ## [2.3.0] - 2026-02-08
 
 ### Ajouté

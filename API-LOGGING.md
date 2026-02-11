@@ -71,16 +71,34 @@ Vérifiez votre plan sur https://my.meteoblue.com :
 2. **Actualisez intelligemment** : Pas besoin de rafraîchir toutes les 5 minutes
 3. **Utilisez le cache** : Les données restent valables plusieurs heures
 
+## Cache des données météo
+
+Depuis la v6.0, les données API sont mises en cache dans le localStorage (clé `weatherCache`) :
+
+- **TTL** : 2 heures — les données sont réutilisées pendant 2h sans appel API
+- **Invalidation** : le cache est automatiquement invalidé quand on ajoute ou supprime une station
+- **Bypass** : le bouton "Actualiser" force toujours un appel API frais
+- **Contenu** : données Meteoblue brutes + données BRA
+- **Indicateur** : un badge vert "CACHE" apparait dans le header quand les données viennent du cache
+
+### Packages API utilisés
+
+`basic-1h`, `basic-day`, `snowice-day`, `wind-1h`, `wind-day` (5 packages)
+
+Les packages `clouds-1h` et `clouds-day` ont été retirés (non utilisés).
+
 ## Stockage
 
-Les logs sont sauvegardés dans le **localStorage** du navigateur :
-- Clé : `apiCallsLog`
+Les logs et le cache sont sauvegardés dans le **localStorage** du navigateur :
+- `apiCallsLog` : historique des appels API
+- `weatherCache` : cache des données météo (TTL 2h)
+- `skiResorts` : liste des stations sauvegardées
 - Persistant entre les sessions
 - Lié au domaine (différent en local vs GitHub Pages)
 
 ### Effacer les données
 
-Pour un reset complet (secteurs + logs) :
+Pour un reset complet (secteurs + logs + cache) :
 1. Ouvrez la console (F12)
 2. Tapez : `localStorage.clear()`
 3. Rechargez la page
