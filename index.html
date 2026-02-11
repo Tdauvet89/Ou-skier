@@ -1094,9 +1094,49 @@
                 );
             }
 
-            // Token Météo France BRA (expire après 1h - à renouveler)
-            const METEO_FRANCE_TOKEN =
-                "eyJ4NXQiOiJOelU0WTJJME9XRXhZVGt6WkdJM1kySTFaakZqWVRJeE4yUTNNalEyTkRRM09HRmtZalkzTURkbE9UZ3paakUxTURRNFltSTVPR1kyTURjMVkyWTBNdyIsImtpZCI6Ik56VTRZMkkwT1dFeFlUa3paR0kzWTJJMVpqRmpZVEl4TjJRM01qUTJORFEzT0dGa1lqWTNNRGRsT1RnelpqRTFNRFE0WW1JNU9HWTJNRGMxWTJZME13X1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI1YmQyODUwMi0zYmI2LTRkNWYtYTFmZC0wZTJhNjhjZTFlNzQiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJuYmYiOjE3NzA4Mzg2OTcsImF6cCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvcG9ydGFpbC1hcGkubWV0ZW9mcmFuY2UuZnJcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE3NzA4NDIyOTcsImlhdCI6MTc3MDgzODY5NywianRpIjoiYjViNTc4YmMtOWU5Mi00YzNhLWI0MDMtNzVhYTlhZmJlNzlkIiwiY2xpZW50X2lkIjoiT193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYSJ9.Ytg9_vIZPnFH24aZr5_MNprdyFB7DPWzy8HItDZBdm67JySu8rzMp7H77wTf_hiAFjiQF7KFSrnAs4-aIUvDqPjoP33_ni5t5iH1r0VBgA8SshwbKl_t2spv_jp6YzPyDAQvajNoiPOt39KrYzV7PEPq_DYPrBGL8zf7aur66nYn52dQ2oOrzUoAZ43BETVFwvZ6YtDjhm-zsHEDf_bCsr1ITcdJgzQfZfHaJT4kRjCs85Vmdklgy6xfuVWZvvB8eTkWptotPvjO5JEFsvJFMj-KFR01UIGpJtmyjUXL1tfV9BaMmETcRgK6iTXjTYIpFMzgE18FcQjdkO8M3slpFA";
+            // === Météo France BRA — Token auto-renouvelé ===
+            const MF_APPLICATION_ID =
+                "T193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYTpDTHFPcUY5NkNJVTZaRW92QUliODR1YzdPQWNh";
+            let _mfToken = null;
+            let _mfTokenExp = 0;
+
+            async function getMeteoFranceToken() {
+                // Réutiliser le token s'il est encore valide (marge de 5 min)
+                if (_mfToken && Date.now() < _mfTokenExp - 300000) {
+                    return _mfToken;
+                }
+                try {
+                    const resp = await fetch(
+                        "https://portail-api.meteofrance.fr/token",
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: "Basic " + MF_APPLICATION_ID,
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                            },
+                            body: "grant_type=client_credentials",
+                        },
+                    );
+                    if (!resp.ok)
+                        throw new Error(`Token MF: HTTP ${resp.status}`);
+                    const data = await resp.json();
+                    _mfToken = data.access_token;
+                    _mfTokenExp = Date.now() + (data.expires_in || 3600) * 1000;
+                    console.log(
+                        "🔑 Token Météo France renouvelé (expire dans " +
+                            Math.round((data.expires_in || 3600) / 60) +
+                            " min)",
+                    );
+                    return _mfToken;
+                } catch (err) {
+                    console.error(
+                        "Erreur renouvellement token Météo France:",
+                        err,
+                    );
+                    return _mfToken; // Retourner l'ancien token en fallback
+                }
+            }
 
             /**
              * Récupère les données BRA (Bulletin Risque Avalanche) pour un massif
@@ -1107,10 +1147,16 @@
             async function fetchBRAData(massifId) {
                 if (!massifId) return null;
 
+                const token = await getMeteoFranceToken();
+                if (!token) {
+                    console.warn("Pas de token Météo France disponible");
+                    return null;
+                }
+
                 const baseUrl =
                     "https://public-api.meteofrance.fr/public/DPBRA/v1";
                 const headers = {
-                    Authorization: `Bearer ${METEO_FRANCE_TOKEN}`,
+                    Authorization: `Bearer ${token}`,
                 };
 
                 try {
