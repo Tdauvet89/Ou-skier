@@ -1037,7 +1037,7 @@
                 },
             ];
 
-            const API_KEY = "76O0zHESUwlL5kA1";
+            const API_KEY = "LuUd7q9wHpiG1aWh";
 
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
@@ -1050,6 +1050,13 @@
                     const cache = JSON.parse(raw);
                     const age = Date.now() - cache.timestamp;
                     if (age > CACHE_TTL_MS) {
+                        localStorage.removeItem(CACHE_KEY);
+                        return null;
+                    }
+                    // Invalider le cache si aucun résultat ne contient de données
+                    const hasData =
+                        cache.results && cache.results.some((r) => r.data);
+                    if (!hasData) {
                         localStorage.removeItem(CACHE_KEY);
                         return null;
                     }
