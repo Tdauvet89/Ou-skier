@@ -999,11 +999,12 @@
         const METEO_FRANCE_TOKEN = "eyJ4NXQiOiJOelU0WTJJME9XRXhZVGt6WkdJM1kySTFaakZqWVRJeE4yUTNNalEyTkRRM09HRmtZalkzTURkbE9UZ3paakUxTURRNFltSTVPR1kyTURjMVkyWTBNdyIsImtpZCI6Ik56VTRZMkkwT1dFeFlUa3paR0kzWTJJMVpqRmpZVEl4TjJRM01qUTJORFEzT0dGa1lqWTNNRGRsT1RnelpqRTFNRFE0WW1JNU9HWTJNRGMxWTJZME13X1JTMjU2IiwidHlwIjoiYXQrand0IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI1YmQyODUwMi0zYmI2LTRkNWYtYTFmZC0wZTJhNjhjZTFlNzQiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJuYmYiOjE3NzA3OTc2MTMsImF6cCI6Ik9fdzFoekh1a0lacFZMZFNQZnBoYTZhUV9Ga2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvcG9ydGFpbC1hcGkubWV0ZW9mcmFuY2UuZnJcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE3NzA4MDEyMTMsImlhdCI6MTc3MDc5NzYxMywianRpIjoiNTU0NmIwNjEtYTdiOC00NTQ1LWE0NGYtOTM2OWNlYmZhMDE0IiwiY2xpZW50X2lkIjoiT193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYSJ9.yc64LOhjHit54cAohq-YX1MUqr2hu-son0lTTtkKSl7u9lZmwcBAqP61ilhBr-pD9umkjDEMYxKVqixR09R46pHWD1o7bdA4ywlNfm5eLOGkc3kpoTTdRtTbrl2kTA8_l0iugOuvNQveZ2Cu7TpOVhOQGKvqKMRTVK5epL-vnNp-GIPPas29pXuMGRBNThG5BrZIONRQkuPHfLSegFUqPVxoi2F3Ogw0-b20Vx1uKs_0kxuURd-6fsaZ-ZEASm_7Asr30siZj9lH1dDmHgZGemdwwPIeBu4yxs9zu9yqVCszdN8-ireiPBzLtDo_XgjVA2SSC4IGBkyf1aFb0Jsgww";
 
         /**
-         * Récupère les images BRA (Bulletin Risque Avalanche) pour un massif
+         * Récupère les données BRA (Bulletin Risque Avalanche) pour un massif
+         * Extrait les niveaux de risque par altitude et par jour du XML
          * @param {number} massifId - ID du massif Météo France
-         * @returns {Promise<object>} URLs des images { risque, rosePentes }
+         * @returns {Promise<object>} Données BRA { aujourd'hui: {bas, haut}, demain: {bas, haut}, apresdemain: {bas, haut} }
          */
-        async function fetchBRAImages(massifId) {
+        async function fetchBRAData(massifId) {
             if (!massifId) return null;
             
             const baseUrl = 'https://public-api.meteofrance.fr/public/DPBRA/v1';
@@ -1012,34 +1013,81 @@
             };
             
             try {
-                // Récupérer l'image de risque
-                const risqueResponse = await fetch(
-                    `${baseUrl}/massif/image/montagne-risques?id-massif=${massifId}`,
+                // Récupérer le XML du bulletin
+                const response = await fetch(
+                    `${baseUrl}/massif/BRA?id-massif=${massifId}&format=xml`,
                     { headers }
                 );
                 
-                // Récupérer l'image rose des pentes
-                const roseResponse = await fetch(
-                    `${baseUrl}/massif/image/rose-pentes?id-massif=${massifId}`,
-                    { headers }
-                );
-                
-                const result = {};
-                
-                if (risqueResponse.ok) {
-                    const blob = await risqueResponse.blob();
-                    result.risque = URL.createObjectURL(blob);
+                if (!response.ok) {
+                    console.warn(`BRA indisponible pour massif ${massifId}: ${response.status}`);
+                    return null;
                 }
                 
-                if (roseResponse.ok) {
-                    const blob = await roseResponse.blob();
-                    result.rosePentes = URL.createObjectURL(blob);
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                
+                // Extraire les risques par écheance
+                const echeances = xmlDoc.getElementsByTagName('ECHEANCE');
+                const braData = {};
+                
+                for (let i = 0; i < Math.min(echeances.length, 3); i++) {
+                    const echeance = echeances[i];
+                    const date = echeance.getAttribute('DATE');
+                    
+                    // Extraire les risques par altitude
+                    const risques = echeance.getElementsByTagName('RISQUE');
+                    
+                    let risqueBas = null;
+                    let risqueHaut = null;
+                    
+                    for (let j = 0; j < risques.length; j++) {
+                        const risque = risques[j];
+                        const altitude = risque.getAttribute('ALTITUDE') || risque.getAttribute('LOC_ALT');
+                        const valeur = parseInt(risque.getAttribute('VALEUR') || risque.textContent);
+                        
+                        if (altitude && altitude.includes('BAS')) {
+                            risqueBas = valeur;
+                        } else if (altitude && altitude.includes('HAUT')) {
+                            risqueHaut = valeur;
+                        }
+                        
+                        // Si pas d'attribut altitude, c'est peut-être un risque unique
+                        if (!altitude && !risqueBas && !risqueHaut) {
+                            risqueBas = risqueHaut = valeur;
+                        }
+                    }
+                    
+                    // Mapper l'écheance (0=aujourd'hui, 1=demain, 2=après-demain)
+                    const key = i === 0 ? 'aujourd\'hui' : i === 1 ? 'demain' : 'apresdemain';
+                    braData[key] = {
+                        bas: risqueBas || 0,
+                        haut: risqueHaut || 0,
+                        date: date
+                    };
                 }
                 
-                return Object.keys(result).length > 0 ? result : null;
+                return Object.keys(braData).length > 0 ? braData : null;
             } catch (error) {
                 console.error(`Erreur BRA pour massif ${massifId}:`, error);
                 return null;
+            }
+        }
+
+        /**
+         * Retourne la couleur selon le niveau de risque
+         * @param {number} niveau - Niveau de risque (1-5)
+         * @returns {string} Code couleur
+         */
+        function getBRAColor(niveau) {
+            switch(niveau) {
+                case 1: return '#27ae60'; // Vert
+                case 2: return '#f1c40f'; // Jaune
+                case 3: return '#e67e22'; // Orange
+                case 4:
+                case 5: return '#e74c3c'; // Rouge
+                default: return '#95a5a6'; // Gris
             }
         }
 
@@ -1225,7 +1273,7 @@
                 return saved ? JSON.parse(saved) : [];
             });
             const [viewMode, setViewMode] = useState('day'); // 'day' ou 'hourly'
-            const [braImages, setBraImages] = useState({}); // { resortName: { risque: url, rosePentes: url } }
+            const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, apresdemain: {bas, haut} } }
 
             // Logger un appel API
             const logApiCall = (resortName, success = true, errorMsg = null) => {
@@ -1315,25 +1363,25 @@
                     processWeatherData(results);
                     processSnowData(results);
                     
-                    // Charger les images BRA pour tous les secteurs
+                    // Charger les données BRA pour tous les secteurs
                     const braPromises = resorts.map(async (resort) => {
                         const massif = getMassifFromCoords(resort.lat, resort.lon);
                         if (massif) {
                             console.log(`🏔️ Massif détecté pour ${resort.name}: ${massif.name} (ID ${massif.id})`);
-                            const images = await fetchBRAImages(massif.id);
-                            return images ? { name: resort.name, images } : null;
+                            const data = await fetchBRAData(massif.id);
+                            return data ? { name: resort.name, data } : null;
                         }
                         return null;
                     });
                     
                     const braResults = await Promise.all(braPromises);
-                    const braImagesObj = {};
+                    const braDataObj = {};
                     braResults.forEach(result => {
                         if (result) {
-                            braImagesObj[result.name] = result.images;
+                            braDataObj[result.name] = result.data;
                         }
                     });
-                    setBraImages(braImagesObj);
+                    setBraData(braDataObj);
                     
                     // Enregistrer l'heure de mise à jour
                     const now = new Date();
@@ -1381,15 +1429,15 @@
                             setSnowData(prev => [...prev, newSnowData]);
                         }
                         
-                        // Récupérer les images BRA pour ce secteur
+                        // Récupérer les données BRA pour ce secteur
                         const massif = getMassifFromCoords(newResort.lat, newResort.lon);
                         if (massif) {
                             console.log(`🏔️ Massif détecté pour ${newResort.name}: ${massif.name} (ID ${massif.id})`);
-                            const images = await fetchBRAImages(massif.id);
-                            if (images) {
-                                setBraImages(prev => ({
+                            const data = await fetchBRAData(massif.id);
+                            if (data) {
+                                setBraData(prev => ({
                                     ...prev,
-                                    [newResort.name]: images
+                                    [newResort.name]: data
                                 }));
                             }
                         }
@@ -2059,7 +2107,17 @@
                                                                 if (!dayWeather) return <td key={offset}>-</td>;
                                                                 
                                                                 const avgTemp = Math.round((dayWeather.temp_max + dayWeather.temp_min) / 2);
-                                                                const braImagesForResort = braImages[resort.name];
+                                                                const braDataForResort = braData[resort.name];
+                                                                
+                                                                // Déterminer quelle échéance BRA afficher selon l'offset
+                                                                let braEcheance = null;
+                                                                if (offset === 0 && braDataForResort?.["aujourd'hui"]) {
+                                                                    braEcheance = braDataForResort["aujourd'hui"];
+                                                                } else if (offset === 1 && braDataForResort?.demain) {
+                                                                    braEcheance = braDataForResort.demain;
+                                                                } else if (offset === 2 && braDataForResort?.apresdemain) {
+                                                                    braEcheance = braDataForResort.apresdemain;
+                                                                }
                                                                 
                                                                 return (
                                                                     <td key={offset} className={`day-cell ${offset === 0 ? 'today-cell' : ''}`}>
@@ -2080,26 +2138,36 @@
                                                                             })()}
                                                                         </div>
                                                                         
-                                                                        {/* Images BRA uniquement pour AUJOURD'HUI */}
-                                                                        {offset === 0 && braImagesForResort && (
-                                                                            <div style={{marginTop: '8px', display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap'}}>
-                                                                                {braImagesForResort.risque && (
-                                                                                    <img 
-                                                                                        src={braImagesForResort.risque} 
-                                                                                        alt="Risque avalanche"
-                                                                                        title="Indice de risque d'avalanche"
-                                                                                        style={{width: '60px', height: 'auto', borderRadius: '4px', cursor: 'pointer'}}
-                                                                                        onClick={() => window.open(braImagesForResort.risque, '_blank')}
-                                                                                    />
+                                                                        {/* Tags BRA pour Aujourd'hui, Demain et Après-demain */}
+                                                                        {braEcheance && (
+                                                                            <div style={{marginTop: '6px', display: 'flex', gap: '4px', justifyContent: 'center', fontSize: '0.6rem'}}>
+                                                                                {braEcheance.haut > 0 && (
+                                                                                    <div style={{
+                                                                                        backgroundColor: getBRAColor(braEcheance.haut),
+                                                                                        color: 'white',
+                                                                                        padding: '3px 8px',
+                                                                                        borderRadius: '4px',
+                                                                                        fontWeight: '700',
+                                                                                        textAlign: 'center',
+                                                                                        whiteSpace: 'nowrap',
+                                                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                                                                    }}>
+                                                                                        🔺 {braEcheance.haut}/5
+                                                                                    </div>
                                                                                 )}
-                                                                                {braImagesForResort.rosePentes && (
-                                                                                    <img 
-                                                                                        src={braImagesForResort.rosePentes} 
-                                                                                        alt="Rose des pentes"
-                                                                                        title="Rose des pentes"
-                                                                                        style={{width: '60px', height: 'auto', borderRadius: '4px', cursor: 'pointer'}}
-                                                                                        onClick={() => window.open(braImagesForResort.rosePentes, '_blank')}
-                                                                                    />
+                                                                                {braEcheance.bas > 0 && braEcheance.bas !== braEcheance.haut && (
+                                                                                    <div style={{
+                                                                                        backgroundColor: getBRAColor(braEcheance.bas),
+                                                                                        color: 'white',
+                                                                                        padding: '3px 8px',
+                                                                                        borderRadius: '4px',
+                                                                                        fontWeight: '700',
+                                                                                        textAlign: 'center',
+                                                                                        whiteSpace: 'nowrap',
+                                                                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                                                                                    }}>
+                                                                                        🔻 {braEcheance.bas}/5
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
                                                                         )}
