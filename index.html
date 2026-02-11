@@ -1197,6 +1197,57 @@
                         };
                     }
 
+                    // Extraire les infos détaillées du BERA
+                    const massifName =
+                        xmlDoc.documentElement.getAttribute("MASSIF") || "";
+                    const commentaireRisque =
+                        risqueEl.getAttribute("COMMENTAIRE") || "";
+                    const resume =
+                        xmlDoc.querySelector("CARTOUCHERISQUE RESUME")
+                            ?.textContent || "";
+                    const stabilite =
+                        xmlDoc.querySelector("STABILITE TEXTESANSTITRE")
+                            ?.textContent || "";
+                    const qualiteNeige =
+                        xmlDoc.querySelector("QUALITE TEXTE")?.textContent ||
+                        "";
+
+                    // Enneigement
+                    const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");
+                    const enneigement = enneigementEl
+                        ? {
+                              limiteSud:
+                                  enneigementEl.getAttribute("LimiteSud"),
+                              limiteNord:
+                                  enneigementEl.getAttribute("LimiteNord"),
+                          }
+                        : null;
+
+                    // Pentes exposées
+                    const penteEl = xmlDoc.querySelector(
+                        "CARTOUCHERISQUE PENTE",
+                    );
+                    const pentes = penteEl
+                        ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"].filter(
+                              (d) => penteEl.getAttribute(d) === "true",
+                          )
+                        : [];
+
+                    braData._detail = {
+                        massifName,
+                        massifId,
+                        dateBulletin,
+                        commentaireRisque,
+                        resume,
+                        stabilite,
+                        qualiteNeige,
+                        enneigement,
+                        pentes,
+                        risqueMaxi,
+                        evoluRisque1,
+                        risqueMaxiJ2,
+                    };
+
                     return Object.keys(braData).length > 0 ? braData : null;
                 } catch (error) {
                     console.error(`Erreur BRA pour massif ${massifId}:`, error);
@@ -1431,7 +1482,8 @@
                     return saved ? JSON.parse(saved) : [];
                 });
                 const [viewMode, setViewMode] = useState("day"); // 'day' ou 'hourly'
-                const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, apresdemain: {bas, haut} } }
+                const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, _detail: {...} } }
+                const [beraModal, setBeraModal] = useState(null); // { resortName, detail } ou null
                 const [loadedFromCache, setLoadedFromCache] = useState(false);
 
                 // Logger un appel API
@@ -1577,50 +1629,27 @@
                         processSnowData(results);
 
                         // Charger les données BRA pour tous les secteurs
-                        console.log(
-                            "🔄 Début chargement BRA pour",
-                            resorts.length,
-                            "stations",
-                        );
                         const braPromises = resorts.map(async (resort) => {
                             const massif = getMassifFromCoords(
                                 resort.lat,
                                 resort.lon,
                             );
-                            console.log(
-                                `🏔️ getMassifFromCoords(${resort.lat}, ${resort.lon}) pour ${resort.name}:`,
-                                massif,
-                            );
                             if (massif) {
-                                try {
-                                    const data = await fetchBRAData(massif.id);
-                                    console.log(
-                                        `✅ BRA pour ${resort.name} (massif ${massif.id}):`,
-                                        data ? "OK" : "null",
-                                    );
-                                    return data
-                                        ? { name: resort.name, data }
-                                        : null;
-                                } catch (e) {
-                                    console.error(
-                                        `❌ Erreur BRA pour ${resort.name}:`,
-                                        e,
-                                    );
-                                    return null;
-                                }
+                                const data = await fetchBRAData(massif.id);
+                                return data
+                                    ? { name: resort.name, data }
+                                    : null;
                             }
                             return null;
                         });
 
                         const braResults = await Promise.all(braPromises);
-                        console.log("📊 braResults:", braResults);
                         const braDataObj = {};
                         braResults.forEach((result) => {
                             if (result) {
                                 braDataObj[result.name] = result.data;
                             }
                         });
-                        console.log("📊 braDataObj final:", braDataObj);
                         setBraData(braDataObj);
 
                         // Sauvegarder dans le cache
@@ -2865,6 +2894,50 @@
                                                                                     "?"}
                                                                                 m)
                                                                             </div>
+                                                                            {braData[
+                                                                                resort
+                                                                                    .name
+                                                                            ]
+                                                                                ?._detail && (
+                                                                                <div
+                                                                                    style={{
+                                                                                        fontSize:
+                                                                                            "0.65rem",
+                                                                                        marginTop:
+                                                                                            "4px",
+                                                                                    }}
+                                                                                >
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        onClick={(
+                                                                                            e,
+                                                                                        ) => {
+                                                                                            e.preventDefault();
+                                                                                            setBeraModal(
+                                                                                                {
+                                                                                                    resortName:
+                                                                                                        resort.name,
+                                                                                                    detail: braData[
+                                                                                                        resort
+                                                                                                            .name
+                                                                                                    ]
+                                                                                                        ._detail,
+                                                                                                },
+                                                                                            );
+                                                                                        }}
+                                                                                        style={{
+                                                                                            color: "var(--accent-blue)",
+                                                                                            textDecoration:
+                                                                                                "underline",
+                                                                                            cursor: "pointer",
+                                                                                        }}
+                                                                                    >
+                                                                                        Voir
+                                                                                        le
+                                                                                        BERA
+                                                                                    </a>
+                                                                                </div>
+                                                                            )}
                                                                         </td>
 
                                                                         {viewMode ===
@@ -3251,6 +3324,338 @@
                             onClose={() => setIsModalOpen(false)}
                             onAdd={addResort}
                         />
+
+                        {/* Modale BERA */}
+                        {beraModal && (
+                            <div
+                                style={{
+                                    position: "fixed",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: "rgba(0,0,0,0.6)",
+                                    zIndex: 9999,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: "20px",
+                                }}
+                                onClick={() => setBeraModal(null)}
+                            >
+                                <div
+                                    style={{
+                                        background: "white",
+                                        borderRadius: "16px",
+                                        maxWidth: "600px",
+                                        width: "100%",
+                                        maxHeight: "85vh",
+                                        overflow: "auto",
+                                        padding: "28px",
+                                        position: "relative",
+                                        boxShadow:
+                                            "0 20px 60px rgba(0,0,0,0.3)",
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {/* Bouton fermer */}
+                                    <button
+                                        onClick={() => setBeraModal(null)}
+                                        style={{
+                                            position: "absolute",
+                                            top: "12px",
+                                            right: "12px",
+                                            background: "#e0e0e0",
+                                            border: "none",
+                                            borderRadius: "50%",
+                                            width: "32px",
+                                            height: "32px",
+                                            fontSize: "1.1rem",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        X
+                                    </button>
+
+                                    {/* Titre */}
+                                    <h2
+                                        style={{
+                                            margin: "0 0 4px 0",
+                                            fontSize: "1.3rem",
+                                            color: "var(--deep-blue)",
+                                        }}
+                                    >
+                                        BERA — {beraModal.detail.massifName}
+                                    </h2>
+                                    <div
+                                        style={{
+                                            fontSize: "0.8rem",
+                                            color: "#666",
+                                            marginBottom: "16px",
+                                        }}
+                                    >
+                                        Bulletin du{" "}
+                                        {new Date(
+                                            beraModal.detail.dateBulletin,
+                                        ).toLocaleDateString("fr-FR", {
+                                            weekday: "long",
+                                            day: "numeric",
+                                            month: "long",
+                                            year: "numeric",
+                                        })}{" "}
+                                        — Station : {beraModal.resortName}
+                                    </div>
+
+                                    {/* Risque */}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "12px",
+                                            marginBottom: "16px",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                backgroundColor: getBRAColor(
+                                                    beraModal.detail.risqueMaxi,
+                                                ),
+                                                color: "white",
+                                                padding: "10px 16px",
+                                                borderRadius: "8px",
+                                                fontWeight: "700",
+                                                fontSize: "1rem",
+                                                boxShadow:
+                                                    "0 2px 6px rgba(0,0,0,0.2)",
+                                            }}
+                                        >
+                                            Risque J1 :{" "}
+                                            {beraModal.detail.risqueMaxi}/5
+                                            {beraModal.detail.evoluRisque1 >
+                                                0 &&
+                                                beraModal.detail
+                                                    .evoluRisque1 !==
+                                                    beraModal.detail
+                                                        .risqueMaxi && (
+                                                    <span
+                                                        style={{
+                                                            fontWeight: "400",
+                                                            fontSize: "0.85rem",
+                                                        }}
+                                                    >
+                                                        {" "}
+                                                        evol.{" "}
+                                                        {
+                                                            beraModal.detail
+                                                                .evoluRisque1
+                                                        }
+                                                        /5
+                                                    </span>
+                                                )}
+                                        </div>
+                                        {beraModal.detail.risqueMaxiJ2 > 0 && (
+                                            <div
+                                                style={{
+                                                    backgroundColor:
+                                                        getBRAColor(
+                                                            beraModal.detail
+                                                                .risqueMaxiJ2,
+                                                        ),
+                                                    color: "white",
+                                                    padding: "10px 16px",
+                                                    borderRadius: "8px",
+                                                    fontWeight: "700",
+                                                    fontSize: "1rem",
+                                                    boxShadow:
+                                                        "0 2px 6px rgba(0,0,0,0.2)",
+                                                }}
+                                            >
+                                                Risque J2 :{" "}
+                                                {beraModal.detail.risqueMaxiJ2}
+                                                /5
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Commentaire risque */}
+                                    {beraModal.detail.commentaireRisque && (
+                                        <div
+                                            style={{
+                                                background: "#f0f4ff",
+                                                borderRadius: "8px",
+                                                padding: "12px",
+                                                marginBottom: "12px",
+                                                fontSize: "0.85rem",
+                                                fontStyle: "italic",
+                                                color: "#333",
+                                            }}
+                                        >
+                                            {beraModal.detail.commentaireRisque}
+                                        </div>
+                                    )}
+
+                                    {/* Pentes exposées */}
+                                    {beraModal.detail.pentes.length > 0 && (
+                                        <div style={{ marginBottom: "12px" }}>
+                                            <strong
+                                                style={{ fontSize: "0.85rem" }}
+                                            >
+                                                Pentes les plus dangereuses :
+                                            </strong>
+                                            <span
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    marginLeft: "6px",
+                                                }}
+                                            >
+                                                {beraModal.detail.pentes.join(
+                                                    ", ",
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Résumé */}
+                                    {beraModal.detail.resume && (
+                                        <div style={{ marginBottom: "14px" }}>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    margin: "0 0 6px 0",
+                                                    color: "var(--deep-blue)",
+                                                }}
+                                            >
+                                                Avalanches
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    lineHeight: "1.5",
+                                                    margin: 0,
+                                                    whiteSpace: "pre-line",
+                                                    color: "#333",
+                                                }}
+                                            >
+                                                {beraModal.detail.resume}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Stabilité */}
+                                    {beraModal.detail.stabilite && (
+                                        <div style={{ marginBottom: "14px" }}>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    margin: "0 0 6px 0",
+                                                    color: "var(--deep-blue)",
+                                                }}
+                                            >
+                                                Stabilite du manteau neigeux
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    lineHeight: "1.5",
+                                                    margin: 0,
+                                                    whiteSpace: "pre-line",
+                                                    color: "#333",
+                                                }}
+                                            >
+                                                {beraModal.detail.stabilite}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Qualité neige */}
+                                    {beraModal.detail.qualiteNeige && (
+                                        <div style={{ marginBottom: "14px" }}>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    margin: "0 0 6px 0",
+                                                    color: "var(--deep-blue)",
+                                                }}
+                                            >
+                                                Qualite de la neige
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    lineHeight: "1.5",
+                                                    margin: 0,
+                                                    whiteSpace: "pre-line",
+                                                    color: "#333",
+                                                }}
+                                            >
+                                                {beraModal.detail.qualiteNeige}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Enneigement */}
+                                    {beraModal.detail.enneigement && (
+                                        <div style={{ marginBottom: "14px" }}>
+                                            <h3
+                                                style={{
+                                                    fontSize: "0.95rem",
+                                                    margin: "0 0 6px 0",
+                                                    color: "var(--deep-blue)",
+                                                }}
+                                            >
+                                                Enneigement
+                                            </h3>
+                                            <p
+                                                style={{
+                                                    fontSize: "0.85rem",
+                                                    margin: 0,
+                                                    color: "#333",
+                                                }}
+                                            >
+                                                Limite Nord :{" "}
+                                                {
+                                                    beraModal.detail.enneigement
+                                                        .limiteNord
+                                                }
+                                                m — Limite Sud :{" "}
+                                                {
+                                                    beraModal.detail.enneigement
+                                                        .limiteSud
+                                                }
+                                                m
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Bouton fermer en bas */}
+                                    <div
+                                        style={{
+                                            textAlign: "center",
+                                            marginTop: "20px",
+                                        }}
+                                    >
+                                        <button
+                                            onClick={() => setBeraModal(null)}
+                                            style={{
+                                                background: "var(--deep-blue)",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                padding: "10px 32px",
+                                                fontSize: "0.9rem",
+                                                fontWeight: "600",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             }
