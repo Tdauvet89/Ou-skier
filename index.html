@@ -497,11 +497,46 @@
             }
 
             .day-cell {
-                text-align: center;
-                padding: 10px 6px;
+                padding: 8px 6px;
                 border-right: 2px solid var(--glacier);
-                min-width: 140px;
+                min-width: 150px;
                 vertical-align: middle;
+            }
+
+            .day-cell-inner {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .day-cell-icon {
+                flex: 0 0 30%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+            }
+
+            .day-cell-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                align-items: flex-start;
+                font-size: 0.75rem;
+            }
+
+            .day-cell-info .info-row {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .day-cell-info .info-icon {
+                width: 14px;
+                text-align: center;
+                flex-shrink: 0;
+                font-size: 0.7rem;
             }
 
             .day-cell.today-cell {
@@ -2976,197 +3011,220 @@
                                                                                               }
                                                                                               className={`day-cell ${offset === 0 ? "today-cell" : ""}`}
                                                                                           >
-                                                                                              <div className="cell-icon">
-                                                                                                  {
-                                                                                                      dayWeather.icon
-                                                                                                  }
-                                                                                              </div>
-                                                                                              <div className="cell-temp-range">
-                                                                                                  {Math.round(
-                                                                                                      dayWeather.temp_min,
-                                                                                                  )}
+                                                                                              <div className="day-cell-inner">
+                                                                                                  {/* 30% gauche : icône météo */}
+                                                                                                  <div className="day-cell-icon">
+                                                                                                      {
+                                                                                                          dayWeather.icon
+                                                                                                      }
+                                                                                                  </div>
 
-                                                                                                  °
-                                                                                                  /{" "}
-                                                                                                  {Math.round(
-                                                                                                      dayWeather.temp_max,
-                                                                                                  )}
-
-                                                                                                  °
-                                                                                              </div>
-                                                                                              <div className="cell-wind">
-                                                                                                  <span>
-                                                                                                      {Math.round(
-                                                                                                          dayWeather.wind,
-                                                                                                      )}
-                                                                                                  </span>
-                                                                                                  {dayWeather.windDirection !==
-                                                                                                      null &&
-                                                                                                      (() => {
-                                                                                                          const windDir =
-                                                                                                              getWindDirectionDisplay(
-                                                                                                                  dayWeather.windDirection,
-                                                                                                              );
-                                                                                                          return (
-                                                                                                              <>
-                                                                                                                  <span className="wind-arrow">
-                                                                                                                      {
-                                                                                                                          windDir.arrow
-                                                                                                                      }
-                                                                                                                  </span>
-                                                                                                                  <span className="wind-cardinal">
-                                                                                                                      {
-                                                                                                                          windDir.cardinal
-                                                                                                                      }
-                                                                                                                  </span>
-                                                                                                              </>
-                                                                                                          );
-                                                                                                      })()}
-                                                                                              </div>
-
-                                                                                              {/* Tags BRA pour Aujourd'hui, Demain et Après-demain */}
-                                                                                              {braEcheance &&
-                                                                                                  braEcheance.haut >
-                                                                                                      0 && (
-                                                                                                      <div
-                                                                                                          style={{
-                                                                                                              marginTop:
-                                                                                                                  "6px",
-                                                                                                              display:
-                                                                                                                  "flex",
-                                                                                                              justifyContent:
-                                                                                                                  "center",
-                                                                                                              fontSize:
-                                                                                                                  "0.6rem",
-                                                                                                          }}
-                                                                                                      >
-                                                                                                          <div
+                                                                                                  {/* 70% droite : infos */}
+                                                                                                  <div className="day-cell-info">
+                                                                                                      {/* Température */}
+                                                                                                      <div className="info-row">
+                                                                                                          <span
+                                                                                                              className="info-icon"
+                                                                                                              title="Température"
+                                                                                                          >
+                                                                                                              🌡
+                                                                                                          </span>
+                                                                                                          <span
                                                                                                               style={{
-                                                                                                                  backgroundColor:
-                                                                                                                      getBRAColor(
-                                                                                                                          braEcheance.haut,
-                                                                                                                      ),
-                                                                                                                  color: "white",
-                                                                                                                  padding:
-                                                                                                                      "3px 8px",
-                                                                                                                  borderRadius:
-                                                                                                                      "4px",
-                                                                                                                  fontWeight:
-                                                                                                                      "700",
-                                                                                                                  textAlign:
-                                                                                                                      "center",
-                                                                                                                  whiteSpace:
-                                                                                                                      "nowrap",
-                                                                                                                  boxShadow:
-                                                                                                                      "0 1px 3px rgba(0,0,0,0.2)",
+                                                                                                                  fontWeight: 600,
                                                                                                               }}
                                                                                                           >
-                                                                                                              Risque
-                                                                                                              :{" "}
-                                                                                                              {
-                                                                                                                  braEcheance.haut
-                                                                                                              }
-                                                                                                              /5
-                                                                                                          </div>
+                                                                                                              {Math.round(
+                                                                                                                  dayWeather.temp_min,
+                                                                                                              )}
+                                                                                                              °
+                                                                                                              /{" "}
+                                                                                                              {Math.round(
+                                                                                                                  dayWeather.temp_max,
+                                                                                                              )}
+                                                                                                              °
+                                                                                                          </span>
                                                                                                       </div>
-                                                                                                  )}
 
-                                                                                              {/* Lien Voir le BERA — uniquement Jour J */}
-                                                                                              {offset ===
-                                                                                                  0 &&
-                                                                                                  braDataForResort?._detail && (
-                                                                                                      <div
-                                                                                                          style={{
-                                                                                                              marginTop:
-                                                                                                                  "4px",
-                                                                                                              fontSize:
-                                                                                                                  "0.6rem",
-                                                                                                          }}
-                                                                                                      >
-                                                                                                          <a
-                                                                                                              href="#"
-                                                                                                              onClick={(
-                                                                                                                  e,
-                                                                                                              ) => {
-                                                                                                                  e.preventDefault();
-                                                                                                                  const detail =
-                                                                                                                      braDataForResort._detail;
-                                                                                                                  setBeraModal(
-                                                                                                                      {
-                                                                                                                          resortName:
-                                                                                                                              resort.name,
-                                                                                                                          detail,
-                                                                                                                          loading: true,
-                                                                                                                      },
-                                                                                                                  );
-                                                                                                                  // Fetch le PDF
-                                                                                                                  fetch(
-                                                                                                                      `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
-                                                                                                                      {
-                                                                                                                          headers:
-                                                                                                                              {
-                                                                                                                                  apikey: MF_API_KEY,
-                                                                                                                              },
-                                                                                                                      },
-                                                                                                                  )
-                                                                                                                      .then(
-                                                                                                                          (
-                                                                                                                              r,
-                                                                                                                          ) =>
-                                                                                                                              r.blob(),
-                                                                                                                      )
-                                                                                                                      .then(
-                                                                                                                          (
-                                                                                                                              blob,
-                                                                                                                          ) => {
-                                                                                                                              const url =
-                                                                                                                                  URL.createObjectURL(
-                                                                                                                                      blob,
-                                                                                                                                  );
-                                                                                                                              setBeraModal(
-                                                                                                                                  (
-                                                                                                                                      prev,
-                                                                                                                                  ) =>
-                                                                                                                                      prev
-                                                                                                                                          ? {
-                                                                                                                                                ...prev,
-                                                                                                                                                pdfUrl: url,
-                                                                                                                                                loading: false,
-                                                                                                                                            }
-                                                                                                                                          : null,
-                                                                                                                              );
-                                                                                                                          },
-                                                                                                                      )
-                                                                                                                      .catch(
-                                                                                                                          () => {
-                                                                                                                              setBeraModal(
-                                                                                                                                  (
-                                                                                                                                      prev,
-                                                                                                                                  ) =>
-                                                                                                                                      prev
-                                                                                                                                          ? {
-                                                                                                                                                ...prev,
-                                                                                                                                                loading: false,
-                                                                                                                                                pdfError: true,
-                                                                                                                                            }
-                                                                                                                                          : null,
-                                                                                                                              );
-                                                                                                                          },
+                                                                                                      {/* Vent */}
+                                                                                                      <div className="info-row">
+                                                                                                          <span
+                                                                                                              className="info-icon"
+                                                                                                              title="Vent"
+                                                                                                          >
+                                                                                                              💨
+                                                                                                          </span>
+                                                                                                          <span>
+                                                                                                              {Math.round(
+                                                                                                                  dayWeather.wind,
+                                                                                                              )}{" "}
+                                                                                                              km/h
+                                                                                                          </span>
+                                                                                                          {dayWeather.windDirection !==
+                                                                                                              null &&
+                                                                                                              (() => {
+                                                                                                                  const windDir =
+                                                                                                                      getWindDirectionDisplay(
+                                                                                                                          dayWeather.windDirection,
                                                                                                                       );
-                                                                                                              }}
-                                                                                                              style={{
-                                                                                                                  color: "var(--accent-blue)",
-                                                                                                                  textDecoration:
-                                                                                                                      "underline",
-                                                                                                                  cursor: "pointer",
-                                                                                                              }}
-                                                                                                          >
-                                                                                                              Voir
-                                                                                                              le
-                                                                                                              BERA
-                                                                                                          </a>
+                                                                                                                  return (
+                                                                                                                      <span
+                                                                                                                          style={{
+                                                                                                                              marginLeft:
+                                                                                                                                  "2px",
+                                                                                                                          }}
+                                                                                                                      >
+                                                                                                                          <span className="wind-arrow">
+                                                                                                                              {
+                                                                                                                                  windDir.arrow
+                                                                                                                              }
+                                                                                                                          </span>
+                                                                                                                          <span className="wind-cardinal">
+                                                                                                                              {
+                                                                                                                                  windDir.cardinal
+                                                                                                                              }
+                                                                                                                          </span>
+                                                                                                                      </span>
+                                                                                                                  );
+                                                                                                              })()}
                                                                                                       </div>
-                                                                                                  )}
+
+                                                                                                      {/* Risque avalanche */}
+                                                                                                      {braEcheance &&
+                                                                                                          braEcheance.haut >
+                                                                                                              0 && (
+                                                                                                              <div className="info-row">
+                                                                                                                  <span
+                                                                                                                      className="info-icon"
+                                                                                                                      title="Risque avalanche"
+                                                                                                                  >
+                                                                                                                      ⚠
+                                                                                                                  </span>
+                                                                                                                  <span
+                                                                                                                      style={{
+                                                                                                                          backgroundColor:
+                                                                                                                              getBRAColor(
+                                                                                                                                  braEcheance.haut,
+                                                                                                                              ),
+                                                                                                                          color: "white",
+                                                                                                                          padding:
+                                                                                                                              "1px 6px",
+                                                                                                                          borderRadius:
+                                                                                                                              "3px",
+                                                                                                                          fontWeight: 700,
+                                                                                                                          fontSize:
+                                                                                                                              "0.65rem",
+                                                                                                                          boxShadow:
+                                                                                                                              "0 1px 2px rgba(0,0,0,0.15)",
+                                                                                                                      }}
+                                                                                                                  >
+                                                                                                                      Risque
+                                                                                                                      :{" "}
+                                                                                                                      {
+                                                                                                                          braEcheance.haut
+                                                                                                                      }
+                                                                                                                      /5
+                                                                                                                  </span>
+                                                                                                              </div>
+                                                                                                          )}
+
+                                                                                                      {/* Lien BERA — Jour J uniquement */}
+                                                                                                      {offset ===
+                                                                                                          0 &&
+                                                                                                          braDataForResort?._detail && (
+                                                                                                              <div
+                                                                                                                  className="info-row"
+                                                                                                                  style={{
+                                                                                                                      fontSize:
+                                                                                                                          "0.65rem",
+                                                                                                                  }}
+                                                                                                              >
+                                                                                                                  <span className="info-icon"></span>
+                                                                                                                  <a
+                                                                                                                      href="#"
+                                                                                                                      onClick={(
+                                                                                                                          e,
+                                                                                                                      ) => {
+                                                                                                                          e.preventDefault();
+                                                                                                                          const detail =
+                                                                                                                              braDataForResort._detail;
+                                                                                                                          setBeraModal(
+                                                                                                                              {
+                                                                                                                                  resortName:
+                                                                                                                                      resort.name,
+                                                                                                                                  detail,
+                                                                                                                                  loading: true,
+                                                                                                                              },
+                                                                                                                          );
+                                                                                                                          fetch(
+                                                                                                                              `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
+                                                                                                                              {
+                                                                                                                                  headers:
+                                                                                                                                      {
+                                                                                                                                          apikey: MF_API_KEY,
+                                                                                                                                      },
+                                                                                                                              },
+                                                                                                                          )
+                                                                                                                              .then(
+                                                                                                                                  (
+                                                                                                                                      r,
+                                                                                                                                  ) =>
+                                                                                                                                      r.blob(),
+                                                                                                                              )
+                                                                                                                              .then(
+                                                                                                                                  (
+                                                                                                                                      blob,
+                                                                                                                                  ) => {
+                                                                                                                                      const url =
+                                                                                                                                          URL.createObjectURL(
+                                                                                                                                              blob,
+                                                                                                                                          );
+                                                                                                                                      setBeraModal(
+                                                                                                                                          (
+                                                                                                                                              prev,
+                                                                                                                                          ) =>
+                                                                                                                                              prev
+                                                                                                                                                  ? {
+                                                                                                                                                        ...prev,
+                                                                                                                                                        pdfUrl: url,
+                                                                                                                                                        loading: false,
+                                                                                                                                                    }
+                                                                                                                                                  : null,
+                                                                                                                                      );
+                                                                                                                                  },
+                                                                                                                              )
+                                                                                                                              .catch(
+                                                                                                                                  () => {
+                                                                                                                                      setBeraModal(
+                                                                                                                                          (
+                                                                                                                                              prev,
+                                                                                                                                          ) =>
+                                                                                                                                              prev
+                                                                                                                                                  ? {
+                                                                                                                                                        ...prev,
+                                                                                                                                                        loading: false,
+                                                                                                                                                        pdfError: true,
+                                                                                                                                                    }
+                                                                                                                                                  : null,
+                                                                                                                                      );
+                                                                                                                                  },
+                                                                                                                              );
+                                                                                                                      }}
+                                                                                                                      style={{
+                                                                                                                          color: "var(--accent-blue)",
+                                                                                                                          textDecoration:
+                                                                                                                              "underline",
+                                                                                                                          cursor: "pointer",
+                                                                                                                      }}
+                                                                                                                  >
+                                                                                                                      Voir
+                                                                                                                      le
+                                                                                                                      BERA
+                                                                                                                  </a>
+                                                                                                              </div>
+                                                                                                          )}
+                                                                                                  </div>
+                                                                                              </div>
                                                                                           </td>
                                                                                       );
                                                                                   },
