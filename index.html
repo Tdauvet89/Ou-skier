@@ -1562,30 +1562,50 @@
                         processSnowData(results);
 
                         // Charger les données BRA pour tous les secteurs
+                        console.log(
+                            "🔄 Début chargement BRA pour",
+                            resorts.length,
+                            "stations",
+                        );
                         const braPromises = resorts.map(async (resort) => {
                             const massif = getMassifFromCoords(
                                 resort.lat,
                                 resort.lon,
                             );
+                            console.log(
+                                `🏔️ getMassifFromCoords(${resort.lat}, ${resort.lon}) pour ${resort.name}:`,
+                                massif,
+                            );
                             if (massif) {
-                                console.log(
-                                    `🏔️ Massif détecté pour ${resort.name}: ${massif.name} (ID ${massif.id})`,
-                                );
-                                const data = await fetchBRAData(massif.id);
-                                return data
-                                    ? { name: resort.name, data }
-                                    : null;
+                                try {
+                                    const data = await fetchBRAData(massif.id);
+                                    console.log(
+                                        `✅ BRA pour ${resort.name} (massif ${massif.id}):`,
+                                        data ? "OK" : "null",
+                                    );
+                                    return data
+                                        ? { name: resort.name, data }
+                                        : null;
+                                } catch (e) {
+                                    console.error(
+                                        `❌ Erreur BRA pour ${resort.name}:`,
+                                        e,
+                                    );
+                                    return null;
+                                }
                             }
                             return null;
                         });
 
                         const braResults = await Promise.all(braPromises);
+                        console.log("📊 braResults:", braResults);
                         const braDataObj = {};
                         braResults.forEach((result) => {
                             if (result) {
                                 braDataObj[result.name] = result.data;
                             }
                         });
+                        console.log("📊 braDataObj final:", braDataObj);
                         setBraData(braDataObj);
 
                         // Sauvegarder dans le cache
