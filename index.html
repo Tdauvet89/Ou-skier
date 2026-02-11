@@ -1094,69 +1094,24 @@
                 );
             }
 
-            // === Météo France BRA — Token auto-renouvelé ===
-            const MF_APPLICATION_ID =
-                "T193MWh6SHVrSVpwVkxkU1BmcGhhNmFRX0ZrYTpDTHFPcUY5NkNJVTZaRW92QUliODR1YzdPQWNh";
-            let _mfToken = null;
-            let _mfTokenExp = 0;
-
-            async function getMeteoFranceToken() {
-                // Réutiliser le token s'il est encore valide (marge de 5 min)
-                if (_mfToken && Date.now() < _mfTokenExp - 300000) {
-                    return _mfToken;
-                }
-                try {
-                    const resp = await fetch(
-                        "https://portail-api.meteofrance.fr/token",
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: "Basic " + MF_APPLICATION_ID,
-                                "Content-Type":
-                                    "application/x-www-form-urlencoded",
-                            },
-                            body: "grant_type=client_credentials",
-                        },
-                    );
-                    if (!resp.ok)
-                        throw new Error(`Token MF: HTTP ${resp.status}`);
-                    const data = await resp.json();
-                    _mfToken = data.access_token;
-                    _mfTokenExp = Date.now() + (data.expires_in || 3600) * 1000;
-                    console.log(
-                        "🔑 Token Météo France renouvelé (expire dans " +
-                            Math.round((data.expires_in || 3600) / 60) +
-                            " min)",
-                    );
-                    return _mfToken;
-                } catch (err) {
-                    console.error(
-                        "Erreur renouvellement token Météo France:",
-                        err,
-                    );
-                    return _mfToken; // Retourner l'ancien token en fallback
-                }
-            }
+            // === Météo France BRA — API Key (header apikey:) ===
+            // Générer sur https://portail-api.meteofrance.fr > Mes APIs > Générer Token
+            // Mettre la durée au maximum (ex: 31536000 = 1 an) pour éviter de renouveler
+            const MF_API_KEY =
+                "eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZGF1dmV0QGNhcmJvbi5zdXBlciIsImFwcGxpY2F0aW9uIjp7Im93bmVyIjoidGRhdXZldCIsInRpZXJRdW90YVR5cGUiOm51bGwsInRpZXIiOiJVbmxpbWl0ZWQiLCJuYW1lIjoiRGVmYXVsdEFwcGxpY2F0aW9uIiwiaWQiOjM2OTU0LCJ1dWlkIjoiOWI5Y2VhNDAtYmEwZi00YzVhLTgwNDctM2EwYjM3NWQyODM3In0sImlzcyI6Imh0dHBzOlwvXC9wb3J0YWlsLWFwaS5tZXRlb2ZyYW5jZS5mcjo0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyI1MFBlck1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkRvbm5lZXNQdWJsaXF1ZXNCUkEiLCJjb250ZXh0IjoiXC9wdWJsaWNcL0RQQlJBXC92MSIsInB1Ymxpc2hlciI6ImJhc3RpZW5nIiwidmVyc2lvbiI6InYxIiwic3Vic2NyaXB0aW9uVGllciI6IjUwUGVyTWluIn1dLCJleHAiOjE4MDIzODIxMDEsInRva2VuX3R5cGUiOiJhcGlLZXkiLCJpYXQiOjE3NzA4NDYxMDEsImp0aSI6IjhkYzI2MjU0LTlmZTktNGIwNC1iYTQyLWIxNzhkZmQzMzI3MCJ9.T0Sah5HGtP61Lk2f7dUMVqxQUTj0kiOz0yn_ceaHuy_gtUSHFfZ0SDec28M72AHqh12On_IETCDNRFR90mrlzbWUTREK8h8b5GvR-wRtPrBAze0WQ_1GhSsOIMcHCETqioCSa84kAy6Kv1yazPlkHnP5Cn9ZNzB5K_x8Dqo1kyyNazuO-7lpnkovmWMg-vnCVYEGmkWaFPPQTpOR_uBn84hiEb1PoG0RJ5vjl5Yxv72kJ24uWSwS-hBQbxsXNhB_ddPTEdd4WIiwuC_wZ7aNsFRplJMCmgCeH7K0sRKy4sLWB4kuQuTozrIgeWny9q_QDlzpc73ZQBV4sSbXF_FcOg==";
 
             /**
              * Récupère les données BRA (Bulletin Risque Avalanche) pour un massif
-             * Extrait les niveaux de risque par altitude et par jour du XML
              * @param {number} massifId - ID du massif Météo France
-             * @returns {Promise<object>} Données BRA { aujourd'hui: {bas, haut}, demain: {bas, haut}, apresdemain: {bas, haut} }
+             * @returns {Promise<object>} Données BRA
              */
             async function fetchBRAData(massifId) {
                 if (!massifId) return null;
 
-                const token = await getMeteoFranceToken();
-                if (!token) {
-                    console.warn("Pas de token Météo France disponible");
-                    return null;
-                }
-
                 const baseUrl =
                     "https://public-api.meteofrance.fr/public/DPBRA/v1";
                 const headers = {
-                    Authorization: `Bearer ${token}`,
+                    apikey: MF_API_KEY,
                 };
 
                 try {
