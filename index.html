@@ -2894,50 +2894,6 @@
                                                                                     "?"}
                                                                                 m)
                                                                             </div>
-                                                                            {braData[
-                                                                                resort
-                                                                                    .name
-                                                                            ]
-                                                                                ?._detail && (
-                                                                                <div
-                                                                                    style={{
-                                                                                        fontSize:
-                                                                                            "0.65rem",
-                                                                                        marginTop:
-                                                                                            "4px",
-                                                                                    }}
-                                                                                >
-                                                                                    <a
-                                                                                        href="#"
-                                                                                        onClick={(
-                                                                                            e,
-                                                                                        ) => {
-                                                                                            e.preventDefault();
-                                                                                            setBeraModal(
-                                                                                                {
-                                                                                                    resortName:
-                                                                                                        resort.name,
-                                                                                                    detail: braData[
-                                                                                                        resort
-                                                                                                            .name
-                                                                                                    ]
-                                                                                                        ._detail,
-                                                                                                },
-                                                                                            );
-                                                                                        }}
-                                                                                        style={{
-                                                                                            color: "var(--accent-blue)",
-                                                                                            textDecoration:
-                                                                                                "underline",
-                                                                                            cursor: "pointer",
-                                                                                        }}
-                                                                                    >
-                                                                                        Voir
-                                                                                        le
-                                                                                        BERA
-                                                                                    </a>
-                                                                                </div>
-                                                                            )}
                                                                         </td>
 
                                                                         {viewMode ===
@@ -3112,6 +3068,103 @@
                                                                                                               }
                                                                                                               /5
                                                                                                           </div>
+                                                                                                      </div>
+                                                                                                  )}
+
+                                                                                              {/* Lien Voir le BERA — uniquement Jour J */}
+                                                                                              {offset ===
+                                                                                                  0 &&
+                                                                                                  braDataForResort?._detail && (
+                                                                                                      <div
+                                                                                                          style={{
+                                                                                                              marginTop:
+                                                                                                                  "4px",
+                                                                                                              fontSize:
+                                                                                                                  "0.6rem",
+                                                                                                          }}
+                                                                                                      >
+                                                                                                          <a
+                                                                                                              href="#"
+                                                                                                              onClick={(
+                                                                                                                  e,
+                                                                                                              ) => {
+                                                                                                                  e.preventDefault();
+                                                                                                                  const detail =
+                                                                                                                      braDataForResort._detail;
+                                                                                                                  setBeraModal(
+                                                                                                                      {
+                                                                                                                          resortName:
+                                                                                                                              resort.name,
+                                                                                                                          detail,
+                                                                                                                          loading: true,
+                                                                                                                      },
+                                                                                                                  );
+                                                                                                                  // Fetch le PDF
+                                                                                                                  fetch(
+                                                                                                                      `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
+                                                                                                                      {
+                                                                                                                          headers:
+                                                                                                                              {
+                                                                                                                                  apikey: MF_API_KEY,
+                                                                                                                              },
+                                                                                                                      },
+                                                                                                                  )
+                                                                                                                      .then(
+                                                                                                                          (
+                                                                                                                              r,
+                                                                                                                          ) =>
+                                                                                                                              r.blob(),
+                                                                                                                      )
+                                                                                                                      .then(
+                                                                                                                          (
+                                                                                                                              blob,
+                                                                                                                          ) => {
+                                                                                                                              const url =
+                                                                                                                                  URL.createObjectURL(
+                                                                                                                                      blob,
+                                                                                                                                  );
+                                                                                                                              setBeraModal(
+                                                                                                                                  (
+                                                                                                                                      prev,
+                                                                                                                                  ) =>
+                                                                                                                                      prev
+                                                                                                                                          ? {
+                                                                                                                                                ...prev,
+                                                                                                                                                pdfUrl: url,
+                                                                                                                                                loading: false,
+                                                                                                                                            }
+                                                                                                                                          : null,
+                                                                                                                              );
+                                                                                                                          },
+                                                                                                                      )
+                                                                                                                      .catch(
+                                                                                                                          () => {
+                                                                                                                              setBeraModal(
+                                                                                                                                  (
+                                                                                                                                      prev,
+                                                                                                                                  ) =>
+                                                                                                                                      prev
+                                                                                                                                          ? {
+                                                                                                                                                ...prev,
+                                                                                                                                                loading: false,
+                                                                                                                                                pdfError: true,
+                                                                                                                                            }
+                                                                                                                                          : null,
+                                                                                                                              );
+                                                                                                                          },
+                                                                                                                      );
+                                                                                                              }}
+                                                                                                              style={{
+                                                                                                                  color: "var(--accent-blue)",
+                                                                                                                  textDecoration:
+                                                                                                                      "underline",
+                                                                                                                  cursor: "pointer",
+                                                                                                              }}
+                                                                                                          >
+                                                                                                              Voir
+                                                                                                              le
+                                                                                                              BERA
+                                                                                                          </a>
                                                                                                       </div>
                                                                                                   )}
                                                                                           </td>
@@ -3325,7 +3378,7 @@
                             onAdd={addResort}
                         />
 
-                        {/* Modale BERA */}
+                        {/* Modale BERA — PDF embed */}
                         {beraModal && (
                             <div
                                 style={{
@@ -3339,306 +3392,159 @@
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    padding: "20px",
+                                    padding: "16px",
                                 }}
-                                onClick={() => setBeraModal(null)}
+                                onClick={() => {
+                                    if (beraModal.pdfUrl)
+                                        URL.revokeObjectURL(beraModal.pdfUrl);
+                                    setBeraModal(null);
+                                }}
                             >
                                 <div
                                     style={{
                                         background: "white",
-                                        borderRadius: "16px",
-                                        maxWidth: "600px",
+                                        borderRadius: "12px",
                                         width: "100%",
-                                        maxHeight: "85vh",
-                                        overflow: "auto",
-                                        padding: "28px",
+                                        maxWidth: "900px",
+                                        height: "90vh",
+                                        display: "flex",
+                                        flexDirection: "column",
                                         position: "relative",
                                         boxShadow:
                                             "0 20px 60px rgba(0,0,0,0.3)",
+                                        overflow: "hidden",
                                     }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    {/* Bouton fermer */}
-                                    <button
-                                        onClick={() => setBeraModal(null)}
+                                    {/* Header */}
+                                    <div
                                         style={{
-                                            position: "absolute",
-                                            top: "12px",
-                                            right: "12px",
-                                            background: "#e0e0e0",
-                                            border: "none",
-                                            borderRadius: "50%",
-                                            width: "32px",
-                                            height: "32px",
-                                            fontSize: "1.1rem",
-                                            cursor: "pointer",
                                             display: "flex",
                                             alignItems: "center",
-                                            justifyContent: "center",
+                                            justifyContent: "space-between",
+                                            padding: "16px 20px",
+                                            borderBottom: "1px solid #e0e0e0",
+                                            flexShrink: 0,
                                         }}
                                     >
-                                        X
-                                    </button>
-
-                                    {/* Titre */}
-                                    <h2
-                                        style={{
-                                            margin: "0 0 4px 0",
-                                            fontSize: "1.3rem",
-                                            color: "var(--deep-blue)",
-                                        }}
-                                    >
-                                        BERA — {beraModal.detail.massifName}
-                                    </h2>
-                                    <div
-                                        style={{
-                                            fontSize: "0.8rem",
-                                            color: "#666",
-                                            marginBottom: "16px",
-                                        }}
-                                    >
-                                        Bulletin du{" "}
-                                        {new Date(
-                                            beraModal.detail.dateBulletin,
-                                        ).toLocaleDateString("fr-FR", {
-                                            weekday: "long",
-                                            day: "numeric",
-                                            month: "long",
-                                            year: "numeric",
-                                        })}{" "}
-                                        — Station : {beraModal.resortName}
-                                    </div>
-
-                                    {/* Risque */}
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "12px",
-                                            marginBottom: "16px",
-                                            flexWrap: "wrap",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                backgroundColor: getBRAColor(
-                                                    beraModal.detail.risqueMaxi,
-                                                ),
-                                                color: "white",
-                                                padding: "10px 16px",
-                                                borderRadius: "8px",
-                                                fontWeight: "700",
-                                                fontSize: "1rem",
-                                                boxShadow:
-                                                    "0 2px 6px rgba(0,0,0,0.2)",
-                                            }}
-                                        >
-                                            Risque J1 :{" "}
-                                            {beraModal.detail.risqueMaxi}/5
-                                            {beraModal.detail.evoluRisque1 >
-                                                0 &&
-                                                beraModal.detail
-                                                    .evoluRisque1 !==
-                                                    beraModal.detail
-                                                        .risqueMaxi && (
-                                                    <span
-                                                        style={{
-                                                            fontWeight: "400",
-                                                            fontSize: "0.85rem",
-                                                        }}
-                                                    >
-                                                        {" "}
-                                                        evol.{" "}
-                                                        {
-                                                            beraModal.detail
-                                                                .evoluRisque1
-                                                        }
-                                                        /5
-                                                    </span>
-                                                )}
-                                        </div>
-                                        {beraModal.detail.risqueMaxiJ2 > 0 && (
+                                        <div>
+                                            <h2
+                                                style={{
+                                                    margin: 0,
+                                                    fontSize: "1.1rem",
+                                                    color: "var(--deep-blue)",
+                                                }}
+                                            >
+                                                BERA —{" "}
+                                                {beraModal.detail.massifName}
+                                            </h2>
                                             <div
                                                 style={{
-                                                    backgroundColor:
-                                                        getBRAColor(
-                                                            beraModal.detail
-                                                                .risqueMaxiJ2,
-                                                        ),
-                                                    color: "white",
-                                                    padding: "10px 16px",
-                                                    borderRadius: "8px",
-                                                    fontWeight: "700",
-                                                    fontSize: "1rem",
-                                                    boxShadow:
-                                                        "0 2px 6px rgba(0,0,0,0.2)",
+                                                    fontSize: "0.75rem",
+                                                    color: "#666",
+                                                    marginTop: "2px",
                                                 }}
                                             >
-                                                Risque J2 :{" "}
-                                                {beraModal.detail.risqueMaxiJ2}
-                                                /5
+                                                {beraModal.resortName} —
+                                                Bulletin du{" "}
+                                                {new Date(
+                                                    beraModal.detail
+                                                        .dateBulletin,
+                                                ).toLocaleDateString("fr-FR", {
+                                                    weekday: "long",
+                                                    day: "numeric",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                })}
                                             </div>
-                                        )}
-                                    </div>
-
-                                    {/* Commentaire risque */}
-                                    {beraModal.detail.commentaireRisque && (
-                                        <div
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                if (beraModal.pdfUrl)
+                                                    URL.revokeObjectURL(
+                                                        beraModal.pdfUrl,
+                                                    );
+                                                setBeraModal(null);
+                                            }}
                                             style={{
-                                                background: "#f0f4ff",
-                                                borderRadius: "8px",
-                                                padding: "12px",
-                                                marginBottom: "12px",
-                                                fontSize: "0.85rem",
-                                                fontStyle: "italic",
-                                                color: "#333",
+                                                background: "#e0e0e0",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                width: "36px",
+                                                height: "36px",
+                                                fontSize: "1.2rem",
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                flexShrink: 0,
                                             }}
                                         >
-                                            {beraModal.detail.commentaireRisque}
-                                        </div>
-                                    )}
+                                            X
+                                        </button>
+                                    </div>
 
-                                    {/* Pentes exposées */}
-                                    {beraModal.detail.pentes.length > 0 && (
-                                        <div style={{ marginBottom: "12px" }}>
-                                            <strong
-                                                style={{ fontSize: "0.85rem" }}
-                                            >
-                                                Pentes les plus dangereuses :
-                                            </strong>
-                                            <span
+                                    {/* Contenu PDF */}
+                                    <div
+                                        style={{ flex: 1, overflow: "hidden" }}
+                                    >
+                                        {beraModal.loading ? (
+                                            <div
                                                 style={{
-                                                    fontSize: "0.85rem",
-                                                    marginLeft: "6px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    height: "100%",
+                                                    fontSize: "1rem",
+                                                    color: "#666",
                                                 }}
                                             >
-                                                {beraModal.detail.pentes.join(
-                                                    ", ",
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
+                                                Chargement du BERA...
+                                            </div>
+                                        ) : beraModal.pdfError ? (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    height: "100%",
+                                                    fontSize: "0.9rem",
+                                                    color: "#c00",
+                                                }}
+                                            >
+                                                Impossible de charger le PDF du
+                                                BERA.
+                                            </div>
+                                        ) : beraModal.pdfUrl ? (
+                                            <iframe
+                                                src={beraModal.pdfUrl}
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    border: "none",
+                                                }}
+                                                title="BERA PDF"
+                                            />
+                                        ) : null}
+                                    </div>
 
-                                    {/* Résumé */}
-                                    {beraModal.detail.resume && (
-                                        <div style={{ marginBottom: "14px" }}>
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.95rem",
-                                                    margin: "0 0 6px 0",
-                                                    color: "var(--deep-blue)",
-                                                }}
-                                            >
-                                                Avalanches
-                                            </h3>
-                                            <p
-                                                style={{
-                                                    fontSize: "0.85rem",
-                                                    lineHeight: "1.5",
-                                                    margin: 0,
-                                                    whiteSpace: "pre-line",
-                                                    color: "#333",
-                                                }}
-                                            >
-                                                {beraModal.detail.resume}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Stabilité */}
-                                    {beraModal.detail.stabilite && (
-                                        <div style={{ marginBottom: "14px" }}>
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.95rem",
-                                                    margin: "0 0 6px 0",
-                                                    color: "var(--deep-blue)",
-                                                }}
-                                            >
-                                                Stabilite du manteau neigeux
-                                            </h3>
-                                            <p
-                                                style={{
-                                                    fontSize: "0.85rem",
-                                                    lineHeight: "1.5",
-                                                    margin: 0,
-                                                    whiteSpace: "pre-line",
-                                                    color: "#333",
-                                                }}
-                                            >
-                                                {beraModal.detail.stabilite}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Qualité neige */}
-                                    {beraModal.detail.qualiteNeige && (
-                                        <div style={{ marginBottom: "14px" }}>
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.95rem",
-                                                    margin: "0 0 6px 0",
-                                                    color: "var(--deep-blue)",
-                                                }}
-                                            >
-                                                Qualite de la neige
-                                            </h3>
-                                            <p
-                                                style={{
-                                                    fontSize: "0.85rem",
-                                                    lineHeight: "1.5",
-                                                    margin: 0,
-                                                    whiteSpace: "pre-line",
-                                                    color: "#333",
-                                                }}
-                                            >
-                                                {beraModal.detail.qualiteNeige}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Enneigement */}
-                                    {beraModal.detail.enneigement && (
-                                        <div style={{ marginBottom: "14px" }}>
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.95rem",
-                                                    margin: "0 0 6px 0",
-                                                    color: "var(--deep-blue)",
-                                                }}
-                                            >
-                                                Enneigement
-                                            </h3>
-                                            <p
-                                                style={{
-                                                    fontSize: "0.85rem",
-                                                    margin: 0,
-                                                    color: "#333",
-                                                }}
-                                            >
-                                                Limite Nord :{" "}
-                                                {
-                                                    beraModal.detail.enneigement
-                                                        .limiteNord
-                                                }
-                                                m — Limite Sud :{" "}
-                                                {
-                                                    beraModal.detail.enneigement
-                                                        .limiteSud
-                                                }
-                                                m
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {/* Bouton fermer en bas */}
+                                    {/* Footer */}
                                     <div
                                         style={{
+                                            padding: "12px 20px",
+                                            borderTop: "1px solid #e0e0e0",
                                             textAlign: "center",
-                                            marginTop: "20px",
+                                            flexShrink: 0,
                                         }}
                                     >
                                         <button
-                                            onClick={() => setBeraModal(null)}
+                                            onClick={() => {
+                                                if (beraModal.pdfUrl)
+                                                    URL.revokeObjectURL(
+                                                        beraModal.pdfUrl,
+                                                    );
+                                                setBeraModal(null);
+                                            }}
                                             style={{
                                                 background: "var(--deep-blue)",
                                                 color: "white",
