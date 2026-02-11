@@ -2,6 +2,46 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.4.0] - 2026-02-12
+
+### Modifie
+- **Cellules vue jour redesignees** : layout horizontal 30/70 (icone meteo a gauche x2 taille, infos a droite alignees)
+- Suppression des icones inline (temperature, vent, risque) pour plus de lisibilite
+- Taille de police harmonisee sur les 4 lignes d'info (temperature, vent, risque, lien BERA)
+- **Tooltip sur les icones meteo** : au survol, affiche la description (ex: "Neige legere") en vue jour et vue horaire
+- Titre du tableau passe de "Meteo Comparative (7 jours)" a "Meteo Comparative (5 jours)"
+
+## [6.3.0] - 2026-02-12
+
+### Ajoute
+- **Modale BERA PDF** : au clic sur "Voir le BERA", le PDF officiel Meteo France est telecharge via l'API et affiche dans un iframe
+- Le PDF contient toutes les images officielles : risque avalanche, rose des pentes, enneigement, neige fraiche, apercu meteo
+- Lien "Voir le BERA" deplace dans la cellule Jour J (au lieu de la colonne station)
+- Modale avec header (titre + X), contenu PDF plein ecran, footer (bouton Fermer)
+- Fermeture par clic sur fond sombre, bouton X ou bouton Fermer
+- Liberation du blob URL a la fermeture (pas de fuite memoire)
+
+### Supprime
+- Ancienne modale BERA textuelle (remplacee par le PDF embed)
+
+## [6.2.0] - 2026-02-11
+
+### Corrige
+- **Parsing BRA corrige** : lecture des attributs `RISQUE1`, `RISQUEMAXI`, `RISQUEMAXIJ2` depuis `CARTOUCHERISQUE > RISQUE` (au lieu des balises `ECHEANCE` qui contenaient des donnees meteo, pas les risques)
+- Support des risques differencies par altitude (`LOC1`/`LOC2`/`RISQUE2`)
+- Extraction des donnees detaillees du BERA : massif, commentaire risque, resume avalanches, stabilite, qualite neige, enneigement, pentes exposees
+
+### Modifie
+- Badge BRA simplifie : affiche "Risque : X/5" sans fleches haut/bas
+
+## [6.1.0] - 2026-02-11
+
+### Modifie
+- **API Key Meteo France BRA** : remplacement du systeme OAuth2 (token 1h + auto-renouvellement) par une API Key statique 1 an via header `apikey:`
+- Suppression de la fonction `getMeteoFranceToken()` et des variables OAuth2 (`MF_APPLICATION_ID`)
+- Plus de probleme CORS (le endpoint `/token` bloquait les requetes navigateur, le header `apikey:` fonctionne directement)
+- Mise a jour de la cle API Meteoblue (`LuUd7q9wHpiG1aWh`)
+
 ## [6.0.0] - 2026-02-11
 
 ### Ajouté
