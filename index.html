@@ -532,13 +532,6 @@
                 gap: 4px;
             }
 
-            .day-cell-info .info-icon {
-                width: 14px;
-                text-align: center;
-                flex-shrink: 0;
-                font-size: 0.7rem;
-            }
-
             .day-cell.today-cell {
                 background: rgba(39, 174, 96, 0.08);
             }
@@ -2689,7 +2682,7 @@
                                                     <span className="icon">
                                                         🌤️
                                                     </span>
-                                                    Météo Comparative (7 jours)
+                                                    Météo Comparative (5 jours)
                                                 </h2>
                                                 <div className="view-toggle">
                                                     <button
@@ -3012,23 +3005,18 @@
                                                                                               className={`day-cell ${offset === 0 ? "today-cell" : ""}`}
                                                                                           >
                                                                                               <div className="day-cell-inner">
-                                                                                                  {/* 30% gauche : icône météo */}
-                                                                                                  <div className="day-cell-icon">
+                                                                                                  <div
+                                                                                                      className="day-cell-icon"
+                                                                                                      title={
+                                                                                                          dayWeather.condition
+                                                                                                      }
+                                                                                                  >
                                                                                                       {
                                                                                                           dayWeather.icon
                                                                                                       }
                                                                                                   </div>
-
-                                                                                                  {/* 70% droite : infos */}
                                                                                                   <div className="day-cell-info">
-                                                                                                      {/* Température */}
                                                                                                       <div className="info-row">
-                                                                                                          <span
-                                                                                                              className="info-icon"
-                                                                                                              title="Température"
-                                                                                                          >
-                                                                                                              🌡
-                                                                                                          </span>
                                                                                                           <span
                                                                                                               style={{
                                                                                                                   fontWeight: 600,
@@ -3037,23 +3025,17 @@
                                                                                                               {Math.round(
                                                                                                                   dayWeather.temp_min,
                                                                                                               )}
+
                                                                                                               °
                                                                                                               /{" "}
                                                                                                               {Math.round(
                                                                                                                   dayWeather.temp_max,
                                                                                                               )}
+
                                                                                                               °
                                                                                                           </span>
                                                                                                       </div>
-
-                                                                                                      {/* Vent */}
                                                                                                       <div className="info-row">
-                                                                                                          <span
-                                                                                                              className="info-icon"
-                                                                                                              title="Vent"
-                                                                                                          >
-                                                                                                              💨
-                                                                                                          </span>
                                                                                                           <span>
                                                                                                               {Math.round(
                                                                                                                   dayWeather.wind,
@@ -3088,18 +3070,10 @@
                                                                                                                   );
                                                                                                               })()}
                                                                                                       </div>
-
-                                                                                                      {/* Risque avalanche */}
                                                                                                       {braEcheance &&
                                                                                                           braEcheance.haut >
                                                                                                               0 && (
                                                                                                               <div className="info-row">
-                                                                                                                  <span
-                                                                                                                      className="info-icon"
-                                                                                                                      title="Risque avalanche"
-                                                                                                                  >
-                                                                                                                      ⚠
-                                                                                                                  </span>
                                                                                                                   <span
                                                                                                                       style={{
                                                                                                                           backgroundColor:
@@ -3112,8 +3086,6 @@
                                                                                                                           borderRadius:
                                                                                                                               "3px",
                                                                                                                           fontWeight: 700,
-                                                                                                                          fontSize:
-                                                                                                                              "0.65rem",
                                                                                                                           boxShadow:
                                                                                                                               "0 1px 2px rgba(0,0,0,0.15)",
                                                                                                                       }}
@@ -3127,19 +3099,10 @@
                                                                                                                   </span>
                                                                                                               </div>
                                                                                                           )}
-
-                                                                                                      {/* Lien BERA — Jour J uniquement */}
                                                                                                       {offset ===
                                                                                                           0 &&
                                                                                                           braDataForResort?._detail && (
-                                                                                                              <div
-                                                                                                                  className="info-row"
-                                                                                                                  style={{
-                                                                                                                      fontSize:
-                                                                                                                          "0.65rem",
-                                                                                                                  }}
-                                                                                                              >
-                                                                                                                  <span className="info-icon"></span>
+                                                                                                              <div className="info-row">
                                                                                                                   <a
                                                                                                                       href="#"
                                                                                                                       onClick={(
@@ -3368,7 +3331,12 @@
                                                                                                               }
                                                                                                               className={`hourly-cell ${offset === 0 ? "today-cell" : ""}`}
                                                                                                           >
-                                                                                                              <div className="cell-icon">
+                                                                                                              <div
+                                                                                                                  className="cell-icon"
+                                                                                                                  title={
+                                                                                                                      hourData.condition
+                                                                                                                  }
+                                                                                                              >
                                                                                                                   {
                                                                                                                       hourData.icon
                                                                                                                   }
