@@ -293,27 +293,24 @@ function getMassifFromCoords(lat, lon, stationName) {
 
 /**
  * Exemples de mapping pour vos secteurs actuels
+ * Note: ne pas appeler getMassifFromCoords ici pour eviter les logs au chargement
  */
 const EXEMPLES_SECTEURS = {
   "Pic de Lurtet": {
     coords: { lat: 42.8691, lon: 0.10149 },
-    massif: getMassifFromCoords(42.8691, 0.10149),
-    // → Haute-Bigorre (65)
+    expectedMassif: "Haute-Bigorre (65)",
   },
   "Pic du Pourtalet": {
     coords: { lat: 42.7833, lon: -0.4167 },
-    massif: getMassifFromCoords(42.7833, -0.4167),
-    // → Aspe-Ossau (64)
+    expectedMassif: "Aspe-Ossau (64)",
   },
   Panticosa: {
     coords: { lat: 42.7189, lon: -0.2822 },
-    massif: getMassifFromCoords(42.7189, -0.2822),
-    // → Aspe-Ossau (64) ou Haute-Bigorre (65)
+    expectedMassif: "Aspe-Ossau (64)",
   },
   "Pic du Midi de Bigorre": {
     coords: { lat: 42.9367, lon: 0.1419 },
-    massif: getMassifFromCoords(42.9367, 0.1419),
-    // → Haute-Bigorre (65)
+    expectedMassif: "Haute-Bigorre (65)",
   },
 };
 
