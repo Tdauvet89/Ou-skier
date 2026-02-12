@@ -1661,6 +1661,7 @@
                             const massif = getMassifFromCoords(
                                 resort.lat,
                                 resort.lon,
+                                resort.name,
                             );
                             if (massif) {
                                 const data = await fetchBRAData(massif.id);
@@ -1747,6 +1748,7 @@
                             const massif = getMassifFromCoords(
                                 newResort.lat,
                                 newResort.lon,
+                                newResort.name,
                             );
                             if (massif) {
                                 console.log(
@@ -1859,6 +1861,7 @@
                             const massif = getMassifFromCoords(
                                 resort.lat,
                                 resort.lon,
+                                resort.name,
                             );
                             if (massif) {
                                 const data = await fetchBRAData(massif.id);

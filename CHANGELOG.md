@@ -2,6 +2,15 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.5.0] - 2026-02-12
+
+### Corrige
+- **Mapping massifs BRA corrige** : Piau-Engaly et Saint-Lary sont maintenant correctement associes a Haute-Bigorre (au lieu d'un mauvais massif), Guzet a Couserans
+- Ajout d'un mapping direct par nom de station (`STATIONS_MASSIF_MAP`) base sur les donnees officielles Meteo France, prioritaire sur les bounding boxes GPS
+- Le mapping couvre toutes les stations principales des Pyrenees : Aspe-Ossau, Haute-Bigorre, Aure-Louron, Luchonnais, Couserans, Haute-Ariege, Capcir-Puymorens, Cerdagne-Canigou
+- Match insensible a la casse et partiel (ex: "Saint-Lary" matche "saint lary soulan")
+- `getMassifFromCoords` accepte un 3e parametre optionnel `stationName`
+
 ## [6.4.0] - 2026-02-12
 
 ### Modifie

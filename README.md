@@ -40,9 +40,10 @@ Fichiers obligatoires : `index.html`, `weatherCodes.js`, `massifMapping.js`
 - Export : `getWeatherInfo(code, hour)`, `adjustWeatherCodeForDaylight()`
 
 ### `massifMapping.js`
-- Mapping coordonnees GPS -> massifs Pyrenees Meteo France
+- Mapping stations/coordonnees GPS -> massifs Pyrenees Meteo France
+- Mapping direct par nom de station (`STATIONS_MASSIF_MAP`) + fallback bounding boxes GPS
 - Utilise pour recuperer les bulletins d'avalanche (BRA)
-- Export : `getMassifFromCoords(lat, lon)`, `MASSIFS_PYRENEES`
+- Export : `getMassifFromCoords(lat, lon, stationName)`, `MASSIFS_PYRENEES`
 
 ## APIs
 
@@ -61,7 +62,7 @@ Fichiers obligatoires : `index.html`, `weatherCodes.js`, `massifMapping.js`
 
 ## Version Actuelle
 
-**V6.4.0** - Redesign cellules jour, tooltips meteo, harmonisation UI
+**V6.5.0** - Correction mapping massifs BRA (station -> massif par nom)
 
 Voir `CHANGELOG.md` pour l'historique complet.
 
