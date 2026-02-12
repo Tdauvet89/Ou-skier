@@ -208,13 +208,20 @@ const MASSIFS_ESPAGNOLS_EQUIVALENTS = {
  * @returns {object|null} { id: number, name: string, zone: string } ou null si hors zone
  */
 function getMassifFromCoords(lat, lon, stationName) {
+  console.log(
+    `🏔️ getMassifFromCoords called: lat=${lat}, lon=${lon}, stationName="${stationName}"`,
+  );
   // 1) Chercher par nom de station (le plus fiable)
   if (stationName) {
     const normalizedName = stationName.toLowerCase().trim();
+    console.log(`🏔️ Recherche par nom: "${normalizedName}"`);
     // Match exact
     if (STATIONS_MASSIF_MAP[normalizedName] !== undefined) {
       const massifId = STATIONS_MASSIF_MAP[normalizedName];
       const massif = MASSIFS_PYRENEES.find((m) => m.id === massifId);
+      console.log(
+        `🏔️ Match exact trouvé: "${normalizedName}" -> massif ${massifId} (${massif?.name})`,
+      );
       if (massif) {
         return { id: massif.id, name: massif.name, zone: massif.zone };
       }
@@ -223,11 +230,19 @@ function getMassifFromCoords(lat, lon, stationName) {
     for (const [key, massifId] of Object.entries(STATIONS_MASSIF_MAP)) {
       if (normalizedName.includes(key) || key.includes(normalizedName)) {
         const massif = MASSIFS_PYRENEES.find((m) => m.id === massifId);
+        console.log(
+          `🏔️ Match partiel trouvé: "${normalizedName}" ~ "${key}" -> massif ${massifId} (${massif?.name})`,
+        );
         if (massif) {
           return { id: massif.id, name: massif.name, zone: massif.zone };
         }
       }
     }
+    console.log(
+      `🏔️ Aucun match par nom pour "${normalizedName}", fallback bounding box`,
+    );
+  } else {
+    console.log(`🏔️ Pas de stationName fourni, fallback bounding box`);
   }
 
   // 2) Chercher par bounding box
