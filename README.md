@@ -62,7 +62,7 @@ Fichiers obligatoires : `index.html`, `weatherCodes.js`, `massifMapping.js`
 
 ## Version Actuelle
 
-**V6.5.0** - Correction mapping massifs BRA (station -> massif par nom)
+**V6.6.0** - Correction IDs massifs BRA (verifies via API Meteo France)
 
 Voir `CHANGELOG.md` pour l'historique complet.
 

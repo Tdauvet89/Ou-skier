@@ -13,8 +13,20 @@
  */
 const MASSIFS_PYRENEES = [
   // PYRÉNÉES OCCIDENTALES
+  // IDs vérifiés via API: https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=XX&format=xml
   {
     id: 64,
+    name: "Pays-Basque",
+    zone: "Pyrénées Occidentales",
+    bounds: {
+      latMin: 42.9,
+      latMax: 43.3,
+      lonMin: -1.8,
+      lonMax: -0.7,
+    },
+  },
+  {
+    id: 65,
     name: "Aspe-Ossau",
     zone: "Pyrénées Occidentales",
     bounds: {
@@ -25,7 +37,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 65,
+    id: 66,
     name: "Haute-Bigorre",
     zone: "Pyrénées Occidentales",
     bounds: {
@@ -36,7 +48,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 66,
+    id: 67,
     name: "Aure-Louron",
     zone: "Pyrénées Occidentales",
     bounds: {
@@ -47,7 +59,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 67,
+    id: 68,
     name: "Luchonnais",
     zone: "Pyrénées Centrales",
     bounds: {
@@ -58,7 +70,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 68,
+    id: 69,
     name: "Couserans",
     zone: "Pyrénées Centrales",
     bounds: {
@@ -69,7 +81,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 69,
+    id: 70,
     name: "Haute-Ariège",
     zone: "Pyrénées Centrales",
     bounds: {
@@ -80,18 +92,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 70,
-    name: "Andorre",
-    zone: "Pyrénées Centrales",
-    bounds: {
-      latMin: 42.4,
-      latMax: 42.7,
-      lonMin: 1.4,
-      lonMax: 1.8,
-    },
-  },
-  {
-    id: 71,
+    id: 72,
     name: "Orlu - St-Barthélémy",
     zone: "Pyrénées Centrales",
     bounds: {
@@ -102,7 +103,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 72,
+    id: 73,
     name: "Capcir-Puymorens",
     zone: "Pyrénées Orientales",
     bounds: {
@@ -113,7 +114,7 @@ const MASSIFS_PYRENEES = [
     },
   },
   {
-    id: 73,
+    id: 74,
     name: "Cerdagne-Canigou",
     zone: "Pyrénées Orientales",
     bounds: {
@@ -131,60 +132,60 @@ const MASSIFS_PYRENEES = [
  * Clés en minuscules pour matching insensible à la casse
  */
 const STATIONS_MASSIF_MAP = {
-  // Aspe-Ossau (64)
-  artouste: 64,
-  gourette: 64,
-  issarbe: 64,
-  "la pierre st martin": 64,
-  "pierre saint martin": 64,
-  somport: 64,
-  // Haute-Bigorre (65)
-  campan: 65,
-  "campan payolle": 65,
-  gavarnie: 65,
-  gedre: 65,
-  hautacam: 65,
-  "la mongie": 65,
-  tourmalet: 65,
-  "piau engaly": 65,
-  "piau-engaly": 65,
-  "saint lary": 65,
-  "saint-lary": 65,
-  "saint lary soulan": 65,
-  "saint-lary-soulan": 65,
-  "val d'azun": 65,
-  // Aure-Louron (66)
-  nistos: 66,
-  peyragudes: 66,
-  "val louron": 66,
-  // Luchonnais (67)
-  "le mourtis": 67,
-  superbagneres: 67,
-  superbagnères: 67,
-  luchon: 67,
-  "bagneres de luchon": 67,
-  // Couserans (68)
-  guzet: 68,
-  "guzet neige": 68,
-  // Haute-Ariège (69)
-  "ax les thermes": 69,
-  "ax-les-thermes": 69,
-  "ax 3 domaines": 69,
-  ascou: 69,
-  beille: 69,
-  "les monts d'olmes": 69,
-  "monts d'olmes": 69,
-  // Capcir-Puymorens (72)
-  "les angles": 72,
-  formigueres: 72,
-  formiguères: 72,
-  "porté puymorens": 72,
-  "porte puymorens": 72,
-  "cambre d'aze": 72,
-  // Cerdagne-Canigou (73)
-  "font romeu": 73,
-  "font-romeu": 73,
-  "err puigmal": 73,
+  // Aspe-Ossau (65)
+  artouste: 65,
+  gourette: 65,
+  issarbe: 65,
+  "la pierre st martin": 65,
+  "pierre saint martin": 65,
+  somport: 65,
+  // Haute-Bigorre (66)
+  campan: 66,
+  "campan payolle": 66,
+  gavarnie: 66,
+  gedre: 66,
+  hautacam: 66,
+  "la mongie": 66,
+  tourmalet: 66,
+  "piau engaly": 66,
+  "piau-engaly": 66,
+  "saint lary": 66,
+  "saint-lary": 66,
+  "saint lary soulan": 66,
+  "saint-lary-soulan": 66,
+  "val d'azun": 66,
+  // Aure-Louron (67)
+  nistos: 67,
+  peyragudes: 67,
+  "val louron": 67,
+  // Luchonnais (68)
+  "le mourtis": 68,
+  superbagneres: 68,
+  superbagnères: 68,
+  luchon: 68,
+  "bagneres de luchon": 68,
+  // Couserans (69)
+  guzet: 69,
+  "guzet neige": 69,
+  // Haute-Ariège (70)
+  "ax les thermes": 70,
+  "ax-les-thermes": 70,
+  "ax 3 domaines": 70,
+  ascou: 70,
+  beille: 70,
+  "les monts d'olmes": 70,
+  "monts d'olmes": 70,
+  // Capcir-Puymorens (73)
+  "les angles": 73,
+  formigueres: 73,
+  formiguères: 73,
+  "porté puymorens": 73,
+  "porte puymorens": 73,
+  "cambre d'aze": 73,
+  // Cerdagne-Canigou (74)
+  "font romeu": 74,
+  "font-romeu": 74,
+  "err puigmal": 74,
 };
 
 /**
@@ -193,9 +194,9 @@ const STATIONS_MASSIF_MAP = {
  */
 const MASSIFS_ESPAGNOLS_EQUIVALENTS = {
   // Panticosa, Formigal → équivalent Haute-Bigorre
-  "Aragon-Gallego": 65,
+  "Aragon-Gallego": 66,
   // Ordesa, Vignemale → équivalent Haute-Bigorre ou Luchonnais
-  "Alto-Aragon": 65,
+  "Alto-Aragon": 66,
 };
 
 /**
@@ -208,20 +209,13 @@ const MASSIFS_ESPAGNOLS_EQUIVALENTS = {
  * @returns {object|null} { id: number, name: string, zone: string } ou null si hors zone
  */
 function getMassifFromCoords(lat, lon, stationName) {
-  console.log(
-    `🏔️ getMassifFromCoords called: lat=${lat}, lon=${lon}, stationName="${stationName}"`,
-  );
   // 1) Chercher par nom de station (le plus fiable)
   if (stationName) {
     const normalizedName = stationName.toLowerCase().trim();
-    console.log(`🏔️ Recherche par nom: "${normalizedName}"`);
     // Match exact
     if (STATIONS_MASSIF_MAP[normalizedName] !== undefined) {
       const massifId = STATIONS_MASSIF_MAP[normalizedName];
       const massif = MASSIFS_PYRENEES.find((m) => m.id === massifId);
-      console.log(
-        `🏔️ Match exact trouvé: "${normalizedName}" -> massif ${massifId} (${massif?.name})`,
-      );
       if (massif) {
         return { id: massif.id, name: massif.name, zone: massif.zone };
       }
@@ -230,19 +224,11 @@ function getMassifFromCoords(lat, lon, stationName) {
     for (const [key, massifId] of Object.entries(STATIONS_MASSIF_MAP)) {
       if (normalizedName.includes(key) || key.includes(normalizedName)) {
         const massif = MASSIFS_PYRENEES.find((m) => m.id === massifId);
-        console.log(
-          `🏔️ Match partiel trouvé: "${normalizedName}" ~ "${key}" -> massif ${massifId} (${massif?.name})`,
-        );
         if (massif) {
           return { id: massif.id, name: massif.name, zone: massif.zone };
         }
       }
     }
-    console.log(
-      `🏔️ Aucun match par nom pour "${normalizedName}", fallback bounding box`,
-    );
-  } else {
-    console.log(`🏔️ Pas de stationName fourni, fallback bounding box`);
   }
 
   // 2) Chercher par bounding box

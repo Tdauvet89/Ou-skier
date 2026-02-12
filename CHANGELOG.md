@@ -2,19 +2,16 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
-## [6.5.1] - 2026-02-12
+## [6.6.0] - 2026-02-12
 
 ### Corrige
-- **Invalidation cache** : ajout d'un `CACHE_VERSION` pour forcer le rechargement des donnees BRA apres correction du mapping massifs (l'ancien cache contenait les mauvais massifId)
-
-## [6.5.0] - 2026-02-12
-
-### Corrige
-- **Mapping massifs BRA corrige** : Piau-Engaly et Saint-Lary sont maintenant correctement associes a Haute-Bigorre (au lieu d'un mauvais massif), Guzet a Couserans
-- Ajout d'un mapping direct par nom de station (`STATIONS_MASSIF_MAP`) base sur les donnees officielles Meteo France, prioritaire sur les bounding boxes GPS
-- Le mapping couvre toutes les stations principales des Pyrenees : Aspe-Ossau, Haute-Bigorre, Aure-Louron, Luchonnais, Couserans, Haute-Ariege, Capcir-Puymorens, Cerdagne-Canigou
-- Match insensible a la casse et partiel (ex: "Saint-Lary" matche "saint lary soulan")
-- `getMassifFromCoords` accepte un 3e parametre optionnel `stationName`
+- **IDs massifs Meteo France corriges** : tous les IDs etaient decales de 1 (ex: Haute-Bigorre etait 65 au lieu de 66). IDs verifies via l'API `DPBRA/v1/massif/BRA`
+- Mapping complet : Pays-Basque (64), Aspe-Ossau (65), Haute-Bigorre (66), Aure-Louron (67), Luchonnais (68), Couserans (69), Haute-Ariege (70), Orlu St-Barthelemy (72), Capcir-Puymorens (73), Cerdagne-Canigou (74)
+- Ajout du massif Pays-Basque (64), suppression d'Andorre (71, pas de BRA disponible)
+- **Mapping direct par nom de station** (`STATIONS_MASSIF_MAP`) base sur meteofrance.com, prioritaire sur les bounding boxes GPS
+- `getMassifFromCoords` accepte un 3e parametre `stationName` pour un matching fiable
+- Ajout de `CACHE_VERSION` pour invalider automatiquement le cache apres un changement de logique
+- Cache-busting sur les fichiers JS externes (`?v=X.X.X`)
 
 ## [6.4.0] - 2026-02-12
 
