@@ -1070,12 +1070,18 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
+            const CACHE_VERSION = 2; // Incrémenter pour invalider le cache après un changement de logique
 
             function getWeatherCache() {
                 try {
                     const raw = localStorage.getItem(CACHE_KEY);
                     if (!raw) return null;
                     const cache = JSON.parse(raw);
+                    // Invalider si version différente
+                    if (cache.version !== CACHE_VERSION) {
+                        localStorage.removeItem(CACHE_KEY);
+                        return null;
+                    }
                     const age = Date.now() - cache.timestamp;
                     if (age > CACHE_TTL_MS) {
                         localStorage.removeItem(CACHE_KEY);
@@ -1097,6 +1103,7 @@
 
             function setWeatherCache(resorts, results, braDataObj) {
                 const cache = {
+                    version: CACHE_VERSION,
                     timestamp: Date.now(),
                     resortKeys: resorts.map(
                         (r) => `${r.name}_${r.lat}_${r.lon}_${r.altitude}`,
