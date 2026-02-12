@@ -2,6 +2,11 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.5.1] - 2026-02-12
+
+### Corrige
+- **Invalidation cache** : ajout d'un `CACHE_VERSION` pour forcer le rechargement des donnees BRA apres correction du mapping massifs (l'ancien cache contenait les mauvais massifId)
+
 ## [6.5.0] - 2026-02-12
 
 ### Corrige
