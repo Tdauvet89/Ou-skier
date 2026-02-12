@@ -62,7 +62,7 @@ Fichiers obligatoires : `index.html`, `weatherCodes.js`, `massifMapping.js`
 
 ## Version Actuelle
 
-**V6.6.0** - Correction IDs massifs BRA (verifies via API Meteo France)
+**V6.7.0** - Correction liens Meteoblue + hyperlinks bleus
 
 Voir `CHANGELOG.md` pour l'historique complet.
 

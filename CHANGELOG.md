@@ -2,6 +2,16 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.7.0] - 2026-02-12
+
+### Corrige
+- **Liens Meteoblue corriges** : les noms de stations pointaient vers de mauvaises pages (ex: Missouri, USA au lieu de Guzet, France). Utilisation du champ `url` officiel retourne par l'API de recherche Meteoblue (ex: `guzet-neige_france_7580803`)
+- Le `mbUrl` est stocke avec chaque station (DEFAULT_RESORTS et ajout dynamique)
+
+### Modifie
+- **Hyperlinks en bleu** : tous les liens dans les tableaux sont desormais en bleu (`#2980b9`) avec soulignement pour indiquer clairement qu'ils sont cliquables
+- Suppression des styles inline de couleur sur les liens (centralise en CSS)
+
 ## [6.6.0] - 2026-02-12
 
 ### Corrige

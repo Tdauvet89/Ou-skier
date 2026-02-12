@@ -532,6 +532,17 @@
                 gap: 4px;
             }
 
+            /* Liens cliquables - bleu visible */
+            table a,
+            .info-row a {
+                color: #2980b9;
+                text-decoration: underline;
+            }
+            table a:hover,
+            .info-row a:hover {
+                color: #1a5276;
+            }
+
             .day-cell.today-cell {
                 background: rgba(39, 174, 96, 0.08);
             }
@@ -1050,18 +1061,26 @@
 
             // Configuration des secteurs de ski avec coordonnées
             const DEFAULT_RESORTS = [
-                { name: "Guzet", lat: 42.7857, lon: 1.2261, altitude: 1400 },
+                {
+                    name: "Guzet",
+                    lat: 42.7857,
+                    lon: 1.2261,
+                    altitude: 1400,
+                    mbUrl: "guzet-neige_france_7580803",
+                },
                 {
                     name: "Piau-Engaly",
                     lat: 42.7833,
                     lon: 0.1667,
                     altitude: 1850,
+                    mbUrl: "piau-engaly_france_8426488",
                 },
                 {
                     name: "Saint-Lary",
                     lat: 42.8167,
                     lon: 0.3167,
                     altitude: 1700,
+                    mbUrl: "saint-lary-soulan_france_2978975",
                 },
             ];
 
@@ -1070,7 +1089,7 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            const CACHE_VERSION = 4; // Incrémenter pour invalider le cache après un changement de logique
+            const CACHE_VERSION = 5; // Incrémenter pour invalider le cache après un changement de logique
 
             function getWeatherCache() {
                 try {
@@ -1350,22 +1369,18 @@
              * @param {number} lon - Longitude
              * @returns {string} URL Meteoblue
              */
-            function getMeteoblueUrl(name, lat, lon) {
-                // Convertir le nom en slug (format Meteoblue)
-                const slug = name
+            function getMeteoblueUrl(resort) {
+                if (resort.mbUrl) {
+                    return `https://www.meteoblue.com/fr/meteo/semaine/${resort.mbUrl}`;
+                }
+                // Fallback : URL basée sur les coordonnées (moins fiable)
+                const slug = resort.name
                     .toLowerCase()
                     .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "") // Supprimer accents
-                    .replace(/[^a-z0-9]+/g, "-") // Remplacer espaces et caractères spéciaux par -
-                    .replace(/^-+|-+$/g, ""); // Supprimer - au début et fin
-
-                // Format: https://www.meteoblue.com/fr/meteo/semaine/[slug]_france_[id]
-                // On utilise les coordonnées pour générer un ID unique approximatif
-                const coordId = Math.abs(
-                    Math.round(lat * 100000 + lon * 100000),
-                );
-
-                return `https://www.meteoblue.com/fr/meteo/semaine/${slug}_france_${coordId}?coords=${lat},${lon}`;
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, "");
+                return `https://www.meteoblue.com/fr/meteo/semaine/${slug}?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
             }
 
             function AddResortModal({ isOpen, onClose, onAdd }) {
@@ -1412,6 +1427,7 @@
                         lat: location.lat,
                         lon: location.lon,
                         altitude: location.asl || 1000,
+                        mbUrl: location.url || null,
                     });
                     setSearchQuery("");
                     setSearchResults([]);
@@ -2604,9 +2620,7 @@
                                                             const meteoblueUrl =
                                                                 resortInfo
                                                                     ? getMeteoblueUrl(
-                                                                          resort.name,
-                                                                          resortInfo.lat,
-                                                                          resortInfo.lon,
+                                                                          resortInfo,
                                                                       )
                                                                     : "#";
                                                             return (
@@ -2619,9 +2633,6 @@
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
                                                                             style={{
-                                                                                color: "var(--deep-blue)",
-                                                                                textDecoration:
-                                                                                    "none",
                                                                                 fontWeight:
                                                                                     "600",
                                                                             }}
@@ -2886,9 +2897,7 @@
                                                                 const meteoblueUrl =
                                                                     resortInfo
                                                                         ? getMeteoblueUrl(
-                                                                              resort.name,
-                                                                              resortInfo.lat,
-                                                                              resortInfo.lon,
+                                                                              resortInfo,
                                                                           )
                                                                         : "#";
                                                                 return (
@@ -2905,9 +2914,6 @@
                                                                                 target="_blank"
                                                                                 rel="noopener noreferrer"
                                                                                 style={{
-                                                                                    color: "var(--deep-blue)",
-                                                                                    textDecoration:
-                                                                                        "none",
                                                                                     fontWeight:
                                                                                         "700",
                                                                                     display:
@@ -3184,9 +3190,6 @@
                                                                                                                               );
                                                                                                                       }}
                                                                                                                       style={{
-                                                                                                                          color: "var(--accent-blue)",
-                                                                                                                          textDecoration:
-                                                                                                                              "underline",
                                                                                                                           cursor: "pointer",
                                                                                                                       }}
                                                                                                                   >
