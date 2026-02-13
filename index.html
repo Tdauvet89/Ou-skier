@@ -1144,14 +1144,34 @@
 
             .feedback-modal-body {
                 flex: 1;
-                overflow: hidden;
+                padding: 32px 24px;
+                text-align: center;
             }
 
-            .feedback-modal-body iframe {
-                display: block;
-                width: 100%;
-                height: 600px;
-                border: none;
+            .feedback-modal-body p {
+                font-size: 1.05rem;
+                color: var(--storm-gray);
+                margin: 0 0 24px;
+                line-height: 1.5;
+            }
+
+            .feedback-modal-link {
+                display: inline-block;
+                background: var(--deep-blue);
+                color: white;
+                font-family: "Barlow Condensed", sans-serif;
+                font-size: 1.1rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                text-decoration: none;
+                padding: 14px 32px;
+                border-radius: 10px;
+                transition: background 0.2s, transform 0.15s;
+            }
+
+            .feedback-modal-link:hover {
+                background: var(--alpine-blue);
+                transform: translateY(-2px);
             }
         </style>
     </head>
@@ -4096,11 +4116,15 @@
                                         </button>
                                     </div>
                                     <div className="feedback-modal-body">
-                                        <iframe
-                                            src="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
-                                            title="Proposer une amélioration"
-                                            allowFullScreen
-                                        />
+                                        <p>Partagez vos idées pour améliorer Où Skier ! Votre formulaire s'ouvrira sur Notion.</p>
+                                        <a
+                                            className="feedback-modal-link"
+                                            href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Ouvrir le formulaire
+                                        </a>
                                     </div>
                                 </div>
                             </div>
