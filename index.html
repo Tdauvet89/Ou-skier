@@ -7,8 +7,9 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="weatherCodes.js?v=6.6.0"></script>
-        <script src="massifMapping.js?v=6.6.0"></script>
+        <script src="icons.js?v=7.0.0"></script>
+        <script src="weatherCodes.js?v=7.0.0"></script>
+        <script src="massifMapping.js?v=7.0.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -219,7 +220,13 @@
             }
 
             .icon {
-                font-size: 1.8rem;
+                display: inline-flex;
+                align-items: center;
+                vertical-align: middle;
+            }
+            .icon svg {
+                width: 24px;
+                height: 24px;
             }
 
             table {
@@ -314,9 +321,14 @@
             }
 
             .weather-icon {
-                font-size: 1.5rem;
+                display: inline-flex;
+                align-items: center;
                 margin-right: 8px;
                 vertical-align: middle;
+            }
+            .weather-icon svg {
+                width: 22px;
+                height: 22px;
             }
 
             .temp {
@@ -515,8 +527,11 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                font-size: 2.2rem;
                 text-align: center;
+            }
+            .day-cell-icon svg {
+                width: 32px;
+                height: 32px;
             }
 
             .day-cell-info {
@@ -564,8 +579,14 @@
             }
 
             .cell-icon {
-                font-size: 1.1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 margin: 1px 0;
+            }
+            .cell-icon svg {
+                width: 18px;
+                height: 18px;
             }
 
             .cell-temp {
@@ -587,9 +608,14 @@
             }
 
             .wind-arrow {
-                font-size: 0.8rem;
+                display: inline-flex;
+                align-items: center;
                 color: #3498db;
                 line-height: 1;
+            }
+            .wind-arrow svg {
+                width: 14px;
+                height: 14px;
             }
 
             .wind-cardinal {
@@ -692,8 +718,14 @@
             }
 
             .hour-icon {
-                font-size: 1.3rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 margin: 3px 0;
+            }
+            .hour-icon svg {
+                width: 22px;
+                height: 22px;
             }
 
             .hour-temp {
@@ -1763,7 +1795,7 @@
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="modal-header">
-                                🏔️ Ajouter un Secteur
+                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Ajouter un Secteur
                             </div>
 
                             <input
@@ -1778,7 +1810,7 @@
                             <div className="search-results">
                                 {isSearching && (
                                     <div className="loading-search">
-                                        🔍 Recherche en cours...
+                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.search}}></span> Recherche en cours...
                                     </div>
                                 )}
 
@@ -1811,7 +1843,7 @@
                                                 {result.name}
                                             </div>
                                             <div className="result-info">
-                                                📍 {result.country || ""}{" "}
+                                                <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.mapPin}}></span>{result.country || ""}{" "}
                                                 {result.admin1
                                                     ? `• ${result.admin1}`
                                                     : ""}{" "}
@@ -2746,14 +2778,15 @@
                     return (
                         <div className="container">
                             <header>
-                                <h1>⛷️ Météo Montagne</h1>
+                                <h1><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Météo Montagne</h1>
                                 <div className="subtitle">
                                     Dashboard Ski • Powered by Meteoblue
                                 </div>
                             </header>
                             <div className="main-content">
                                 <div className="loading">
-                                    🔄 Chargement des données météo depuis
+                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.refresh}}></span>{" "}
+                                    Chargement des données météo depuis
                                     Meteoblue...
                                 </div>
                             </div>
@@ -2764,13 +2797,13 @@
                 return (
                     <div className="container">
                         <header>
-                            <h1>⛷️ Météo Montagne</h1>
+                            <h1><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Météo Montagne</h1>
                             <div className="subtitle">
                                 Dashboard Ski • Powered by Meteoblue
                             </div>
                             <div className="header-controls">
                                 <div className="date-display">
-                                    📅 Dernière mise à jour : {currentDate}
+                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span>{" "}Dernière mise à jour : {currentDate}
                                     {USE_MOCK_DATA && (
                                         <span
                                             style={{
@@ -2808,11 +2841,11 @@
                                             opacity: 0.8,
                                         }}
                                     >
-                                        📊 Appels API aujourd'hui :{" "}
+                                        <span className="icon" style={{marginRight:'4px'}} dangerouslySetInnerHTML={{__html: uiSvg.barChart}}></span> Appels API aujourd'hui :{" "}
                                         {getApiStats().today} | Total :{" "}
                                         {getApiStats().total}
                                         {getApiStats().failed > 0 &&
-                                            ` | ⚠️ Échecs : ${getApiStats().failed}`}
+                                            ` | Échecs : ${getApiStats().failed}`}
                                     </div>
                                 </div>
                                 <div
@@ -2833,7 +2866,7 @@
                                                 : "pointer",
                                         }}
                                     >
-                                        🔄 Actualiser
+                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.refresh}}></span> Actualiser
                                     </button>
                                     <div
                                         style={{ display: "flex", gap: "5px" }}
@@ -2851,7 +2884,7 @@
                                             }}
                                             title="Télécharger le log des appels API"
                                         >
-                                            📥 Log
+                                            <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.download}}></span> Log
                                         </button>
                                         <button
                                             onClick={clearLog}
@@ -2866,7 +2899,7 @@
                                             }}
                                             title="Réinitialiser le log"
                                         >
-                                            🗑️
+                                            <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.trash}}></span>
                                         </button>
                                     </div>
                                 </div>
@@ -2874,7 +2907,7 @@
                         </header>
 
                         <div className="main-content">
-                            {error && <div className="error">⚠️ {error}</div>}
+                            {error && <div className="error"><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span> {error}</div>}
 
                             <div style={{ marginBottom: "30px" }}>
                                 <h3
@@ -2886,7 +2919,7 @@
                                         marginBottom: "15px",
                                     }}
                                 >
-                                    📍 Mes Secteurs
+                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mapPin}}></span> Mes Secteurs
                                 </h3>
                                 {resorts.length > 0 ? (
                                     <div className="resort-list">
@@ -2928,7 +2961,7 @@
                                     onClick={() => setIsModalOpen(true)}
                                     style={{ marginTop: "15px" }}
                                 >
-                                    ➕ Ajouter un Secteur
+                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
                                 </button>
                             </div>
 
@@ -2937,7 +2970,7 @@
                                     {snowData.length > 0 && (
                                         <section className="section">
                                             <h2>
-                                                <span className="icon">❄️</span>
+                                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
                                                 Chutes de Neige (7 jours)
                                             </h2>
                                             <table>
@@ -3051,9 +3084,7 @@
                                                 }}
                                             >
                                                 <h2 style={{ margin: 0 }}>
-                                                    <span className="icon">
-                                                        🌤️
-                                                    </span>
+                                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.sunUi}}></span>
                                                     Météo Comparative (5 jours)
                                                 </h2>
                                                 <div className="view-toggle">
@@ -3063,7 +3094,7 @@
                                                             setViewMode("day")
                                                         }
                                                     >
-                                                        📅 Vue Jour
+                                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
                                                     </button>
                                                     <button
                                                         className={`view-toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
@@ -3073,7 +3104,7 @@
                                                             )
                                                         }
                                                     >
-                                                        🕐 Vue Horaire
+                                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.clock}}></span> Vue Horaire
                                                     </button>
                                                 </div>
                                             </div>
@@ -3406,9 +3437,7 @@
                                                                                                           dayWeather.condition
                                                                                                       }
                                                                                                   >
-                                                                                                      {
-                                                                                                          dayWeather.icon
-                                                                                                      }
+                                                                                                      <span dangerouslySetInnerHTML={{__html: dayWeather.icon}}></span>
                                                                                                       <div
                                                                                                           style={{
                                                                                                               fontSize:
@@ -3470,13 +3499,12 @@
                                                                                                                   style={{
                                                                                                                       marginRight:
                                                                                                                           "3px",
+                                                                                                                      display: "inline-flex",
+                                                                                                                      alignItems: "center",
+                                                                                                                      gap: "2px",
                                                                                                                   }}
                                                                                                               >
-                                                                                                                  <span className="wind-arrow">
-                                                                                                                      {
-                                                                                                                          windDir.arrow
-                                                                                                                      }
-                                                                                                                  </span>
+                                                                                                                  <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(dayWeather.windDirection, 14)}}></span>
                                                                                                                   <span className="wind-cardinal">
                                                                                                                       {
                                                                                                                           windDir.cardinal
@@ -3542,7 +3570,7 @@
                                                                                                                       color: "#3498db",
                                                                                                                   }}
                                                                                                               >
-                                                                                                                  ❄️{" "}
+                                                                                                                  <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
                                                                                                                   {
                                                                                                                       dayWeather.snowCm
                                                                                                                   }{" "}
@@ -3560,7 +3588,7 @@
                                                                                                                           color: "#2980b9",
                                                                                                                       }}
                                                                                                                   >
-                                                                                                                      🌧️{" "}
+                                                                                                                      <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.droplet}}></span>
                                                                                                                       {
                                                                                                                           dayWeather.rainMm
                                                                                                                       }{" "}
@@ -3835,11 +3863,8 @@
                                                                                                                   title={
                                                                                                                       hourData.condition
                                                                                                                   }
-                                                                                                              >
-                                                                                                                  {
-                                                                                                                      hourData.icon
-                                                                                                                  }
-                                                                                                              </div>
+                                                                                                                  dangerouslySetInnerHTML={{__html: hourData.icon}}
+                                                                                                              ></div>
                                                                                                               <div className="cell-temp">
                                                                                                                   {
                                                                                                                       hourData.temp
@@ -3862,11 +3887,7 @@
                                                                                                                               );
                                                                                                                           return (
                                                                                                                               <>
-                                                                                                                                  <span className="wind-arrow">
-                                                                                                                                      {
-                                                                                                                                          windDir.arrow
-                                                                                                                                      }
-                                                                                                                                  </span>
+                                                                                                                                  <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(hourData.windDirection, 12)}}></span>
                                                                                                                                   <span className="wind-cardinal">
                                                                                                                                       {
                                                                                                                                           windDir.cardinal
