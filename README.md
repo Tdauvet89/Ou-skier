@@ -5,7 +5,7 @@ Application web de comparaison meteo multi-stations pour le ski, avec bulletins 
 ## Fonctionnalites
 
 - **Comparaison multi-stations** : ajout/suppression de stations de ski via recherche Meteoblue
-- **Vue jour** (5 jours) : icone meteo, temperatures min/max, vent, risque avalanche
+- **Vue jour** (5 jours) : icone meteo + description, temperature moyenne (min/max), vent moyen + direction, rafales min-max colorees, precipitations (neige cm / pluie mm), risque avalanche BERA
 - **Vue horaire** : detail heure par heure avec temperatures, vent, precipitation, neige
 - **Bulletins d'avalanche (BERA)** : risque avalanche par massif avec badge colore "Risque : X/5"
 - **Modale BERA PDF** : affichage du bulletin officiel Meteo France en PDF (rose des pentes, enneigement, risques)
@@ -62,7 +62,7 @@ Fichiers obligatoires : `index.html`, `weatherCodes.js`, `massifMapping.js`
 
 ## Version Actuelle
 
-**V6.7.0** - Correction liens Meteoblue + hyperlinks bleus
+**V6.8.0** - Refonte cellules Vue Jour (vent moyen, rafales colorees, precipitations, BERA)
 
 Voir `CHANGELOG.md` pour l'historique complet.
 

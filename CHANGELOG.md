@@ -2,6 +2,20 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [6.8.0] - 2026-02-12
+
+### Modifie
+- **Cellules Vue Jour redesignees** : nouveau layout inspire des apps meteo modernes
+  - A gauche : icone meteo + description textuelle en dessous
+  - A droite : temperature moyenne en gros + min/max entre parentheses
+  - Vent moyen (`windspeed_mean`) avec fleche de direction + cardinal
+  - Rafales min-max (`gust_min`-`gust_max`), colorees selon intensite (jaune 30+, orange 50+, rouge 80+ km/h)
+  - Precipitations : neige en cm (❄️) ou pluie en mm (🌧️), masquees si <= 0
+  - BERA : badge risque + lien "Voir le BERA" visible sur J0 et J1 (avant J0 seulement)
+- **Donnees journalieres enrichies** : `wind_mean`, `snowCm`, `rainMm` calcules a partir de l'API
+- `CACHE_VERSION` incremente a 6 (invalidation cache)
+- Largeur minimum des cellules jour augmentee (200px)
+
 ## [6.7.0] - 2026-02-12
 
 ### Corrige

@@ -499,7 +499,7 @@
             .day-cell {
                 padding: 8px 6px;
                 border-right: 2px solid var(--glacier);
-                min-width: 150px;
+                min-width: 200px;
                 vertical-align: middle;
             }
 
@@ -512,9 +512,11 @@
             .day-cell-icon {
                 flex: 0 0 30%;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 font-size: 2.2rem;
+                text-align: center;
             }
 
             .day-cell-info {
@@ -1089,7 +1091,7 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            const CACHE_VERSION = 5; // Incrémenter pour invalider le cache après un changement de logique
+            const CACHE_VERSION = 6; // Incrémenter pour invalider le cache après un changement de logique
 
             function getWeatherCache() {
                 try {
@@ -1360,6 +1362,16 @@
 
                 const index = Math.round(normalized / 45) % 8;
                 return directions[index];
+            }
+
+            /**
+             * Couleur du vent selon la vitesse (km/h)
+             */
+            function getWindColor(speed) {
+                if (speed >= 80) return "#c0392b"; // rouge — dangereux
+                if (speed >= 50) return "#e67e22"; // orange — très fort
+                if (speed >= 30) return "#f39c12"; // jaune-orange — fort
+                return "inherit";
             }
 
             /**
@@ -2102,6 +2114,18 @@
                                 );
                             }
 
+                            // Neige en cm : snowfraction * precipitation
+                            const snowFraction =
+                                dayData.snowfraction?.[dataIndex] || 0;
+                            const precip =
+                                dayData.precipitation?.[dataIndex] || 0;
+                            const snowCm = Math.round(
+                                (snowFraction * precip) / 10,
+                            );
+                            const rainMm = Math.round(
+                                (1 - snowFraction) * precip,
+                            );
+
                             days[offset] = {
                                 offset,
                                 date: dayData.time?.[dataIndex] || "",
@@ -2111,11 +2135,15 @@
                                     dayData.temperature_max?.[dataIndex] || 0,
                                 temp_min:
                                     dayData.temperature_min?.[dataIndex] || 0,
-                                wind: dayData.windspeed_max?.[dataIndex] || 0,
+                                wind_mean:
+                                    dayData.windspeed_mean?.[dataIndex] || 0,
+                                gust_min: dayData.gust_min?.[dataIndex] || 0,
+                                gust_max: dayData.gust_max?.[dataIndex] || 0,
                                 windDirection:
                                     dayData.winddirection?.[dataIndex] || null,
-                                precipitation:
-                                    dayData.precipitation?.[dataIndex] || 0,
+                                precipitation: precip,
+                                snowCm,
+                                rainMm,
                                 hourly: hourlyData,
                             };
                         }
@@ -2228,33 +2256,15 @@
                                 hourData.temperature?.[i] || 0,
                             );
 
-                            // CORRECTION VENT : Tester TOUTES les variables possibles
-                            let wind = 0;
-                            let windVariableUsed = "none";
-
-                            // Ordre de préférence pour correspondre à Meteoblue
-                            if (hourData.windgust && hourData.windgust[i]) {
-                                wind = Math.round(hourData.windgust[i]);
-                                windVariableUsed = "windgust";
-                            } else if (
-                                hourData.windspeed_max &&
-                                hourData.windspeed_max[i]
-                            ) {
-                                wind = Math.round(hourData.windspeed_max[i]);
-                                windVariableUsed = "windspeed_max";
-                            } else if (
-                                hourData.windspeed_mean &&
-                                hourData.windspeed_mean[i]
-                            ) {
-                                wind = Math.round(hourData.windspeed_mean[i]);
-                                windVariableUsed = "windspeed_mean";
-                            } else if (
-                                hourData.windspeed &&
-                                hourData.windspeed[i]
-                            ) {
-                                wind = Math.round(hourData.windspeed[i]);
-                                windVariableUsed = "windspeed";
-                            }
+                            // Vent : windspeed et gust séparés
+                            const wind = Math.round(
+                                hourData.windspeed?.[i] || 0,
+                            );
+                            const gust = Math.round(
+                                hourData.windgust?.[i] ||
+                                    hourData.windspeed?.[i] ||
+                                    0,
+                            );
 
                             // NOUVEAU : Direction du vent
                             const windDirection =
@@ -2280,6 +2290,7 @@
                             result[localHour] = {
                                 temp,
                                 wind,
+                                gust,
                                 windDirection,
                                 windDirectionCardinal: windDirCard,
                                 icon: weatherInfo.icon,
@@ -2291,25 +2302,8 @@
 
                             if (debugMode) {
                                 console.log(
-                                    `   ✓ ${localHour}h (${isUTC ? hour + "h UTC" : "locale"}): temp=${temp}°, vent=${wind}km/h (${windVariableUsed}) ${windDirCard}, code=${weatherCode}${weatherCode !== adjustedCode ? "→" + adjustedCode : ""}, icône=${weatherInfo.icon} [${timeStr}]`,
+                                    `   ✓ ${localHour}h (${isUTC ? hour + "h UTC" : "locale"}): temp=${temp}°, vent=${wind}km/h, raf=${gust}km/h ${windDirCard}, code=${weatherCode}${weatherCode !== adjustedCode ? "→" + adjustedCode : ""}, icône=${weatherInfo.icon} [${timeStr}]`,
                                 );
-                                // Afficher toutes les valeurs de vent disponibles
-                                if (hourData.windspeed)
-                                    console.log(
-                                        `      windspeed: ${Math.round(hourData.windspeed[i])}km/h`,
-                                    );
-                                if (hourData.windspeed_mean)
-                                    console.log(
-                                        `      windspeed_mean: ${Math.round(hourData.windspeed_mean[i])}km/h`,
-                                    );
-                                if (hourData.windspeed_max)
-                                    console.log(
-                                        `      windspeed_max: ${Math.round(hourData.windspeed_max[i])}km/h`,
-                                    );
-                                if (hourData.windgust)
-                                    console.log(
-                                        `      windgust: ${Math.round(hourData.windgust[i])}km/h`,
-                                    );
                             }
                         }
                     }
@@ -3013,6 +3007,33 @@
                                                                                               braDataForResort.apresdemain;
                                                                                       }
 
+                                                                                      // Vent moyen + direction
+                                                                                      const windMean =
+                                                                                          Math.round(
+                                                                                              dayWeather.wind_mean,
+                                                                                          );
+                                                                                      const gustMin =
+                                                                                          Math.round(
+                                                                                              dayWeather.gust_min,
+                                                                                          );
+                                                                                      const gustMax =
+                                                                                          Math.round(
+                                                                                              dayWeather.gust_max,
+                                                                                          );
+                                                                                      const windDir =
+                                                                                          dayWeather.windDirection !==
+                                                                                          null
+                                                                                              ? getWindDirectionDisplay(
+                                                                                                    dayWeather.windDirection,
+                                                                                                )
+                                                                                              : null;
+
+                                                                                      // Couleur rafales (sur le max)
+                                                                                      const gustColor =
+                                                                                          getWindColor(
+                                                                                              gustMax,
+                                                                                          );
+
                                                                                       return (
                                                                                           <td
                                                                                               key={
@@ -3021,6 +3042,7 @@
                                                                                               className={`day-cell ${offset === 0 ? "today-cell" : ""}`}
                                                                                           >
                                                                                               <div className="day-cell-inner">
+                                                                                                  {/* Colonne gauche : icone + description */}
                                                                                                   <div
                                                                                                       className="day-cell-icon"
                                                                                                       title={
@@ -3030,14 +3052,48 @@
                                                                                                       {
                                                                                                           dayWeather.icon
                                                                                                       }
+                                                                                                      <div
+                                                                                                          style={{
+                                                                                                              fontSize:
+                                                                                                                  "0.6rem",
+                                                                                                              marginTop:
+                                                                                                                  "2px",
+                                                                                                              color: "#555",
+                                                                                                          }}
+                                                                                                      >
+                                                                                                          {
+                                                                                                              dayWeather.condition
+                                                                                                          }
+                                                                                                      </div>
                                                                                                   </div>
+                                                                                                  {/* Colonne droite : infos */}
                                                                                                   <div className="day-cell-info">
+                                                                                                      {/* Temperature moyenne */}
                                                                                                       <div className="info-row">
                                                                                                           <span
                                                                                                               style={{
-                                                                                                                  fontWeight: 600,
+                                                                                                                  fontSize:
+                                                                                                                      "1.1rem",
+                                                                                                                  fontWeight: 700,
+                                                                                                                  color: "var(--deep-blue)",
                                                                                                               }}
                                                                                                           >
+                                                                                                              {
+                                                                                                                  avgTemp
+                                                                                                              }
+
+                                                                                                              °
+                                                                                                          </span>
+                                                                                                          <span
+                                                                                                              style={{
+                                                                                                                  fontSize:
+                                                                                                                      "0.65rem",
+                                                                                                                  color: "#888",
+                                                                                                                  marginLeft:
+                                                                                                                      "4px",
+                                                                                                              }}
+                                                                                                          >
+                                                                                                              (
                                                                                                               {Math.round(
                                                                                                                   dayWeather.temp_min,
                                                                                                               )}
@@ -3047,45 +3103,115 @@
                                                                                                               {Math.round(
                                                                                                                   dayWeather.temp_max,
                                                                                                               )}
-
-                                                                                                              °
+                                                                                                              °)
                                                                                                           </span>
                                                                                                       </div>
+                                                                                                      {/* Vent moyen + direction */}
                                                                                                       <div className="info-row">
+                                                                                                          {windDir && (
+                                                                                                              <span
+                                                                                                                  style={{
+                                                                                                                      marginRight:
+                                                                                                                          "3px",
+                                                                                                                  }}
+                                                                                                              >
+                                                                                                                  <span className="wind-arrow">
+                                                                                                                      {
+                                                                                                                          windDir.arrow
+                                                                                                                      }
+                                                                                                                  </span>
+                                                                                                                  <span className="wind-cardinal">
+                                                                                                                      {
+                                                                                                                          windDir.cardinal
+                                                                                                                      }
+                                                                                                                  </span>
+                                                                                                              </span>
+                                                                                                          )}
                                                                                                           <span>
-                                                                                                              {Math.round(
-                                                                                                                  dayWeather.wind,
-                                                                                                              )}{" "}
+                                                                                                              Vent{" "}
+                                                                                                              {
+                                                                                                                  windMean
+                                                                                                              }{" "}
                                                                                                               km/h
                                                                                                           </span>
-                                                                                                          {dayWeather.windDirection !==
-                                                                                                              null &&
-                                                                                                              (() => {
-                                                                                                                  const windDir =
-                                                                                                                      getWindDirectionDisplay(
-                                                                                                                          dayWeather.windDirection,
-                                                                                                                      );
-                                                                                                                  return (
-                                                                                                                      <span
-                                                                                                                          style={{
-                                                                                                                              marginLeft:
-                                                                                                                                  "2px",
-                                                                                                                          }}
-                                                                                                                      >
-                                                                                                                          <span className="wind-arrow">
-                                                                                                                              {
-                                                                                                                                  windDir.arrow
-                                                                                                                              }
-                                                                                                                          </span>
-                                                                                                                          <span className="wind-cardinal">
-                                                                                                                              {
-                                                                                                                                  windDir.cardinal
-                                                                                                                              }
-                                                                                                                          </span>
-                                                                                                                      </span>
-                                                                                                                  );
-                                                                                                              })()}
                                                                                                       </div>
+                                                                                                      {/* Rafales min-max */}
+                                                                                                      <div className="info-row">
+                                                                                                          <span
+                                                                                                              style={{
+                                                                                                                  color:
+                                                                                                                      gustColor !==
+                                                                                                                      "inherit"
+                                                                                                                          ? "white"
+                                                                                                                          : "inherit",
+                                                                                                                  backgroundColor:
+                                                                                                                      gustColor !==
+                                                                                                                      "inherit"
+                                                                                                                          ? gustColor
+                                                                                                                          : "transparent",
+                                                                                                                  padding:
+                                                                                                                      gustColor !==
+                                                                                                                      "inherit"
+                                                                                                                          ? "1px 6px"
+                                                                                                                          : "0",
+                                                                                                                  borderRadius:
+                                                                                                                      "3px",
+                                                                                                                  fontWeight:
+                                                                                                                      gustColor !==
+                                                                                                                      "inherit"
+                                                                                                                          ? 700
+                                                                                                                          : 400,
+                                                                                                              }}
+                                                                                                          >
+                                                                                                              Raf.{" "}
+                                                                                                              {
+                                                                                                                  gustMin
+                                                                                                              }
+
+                                                                                                              -
+                                                                                                              {
+                                                                                                                  gustMax
+                                                                                                              }{" "}
+                                                                                                              km/h
+                                                                                                          </span>
+                                                                                                      </div>
+                                                                                                      {/* Precipitations (neige ou pluie) — masque si ≤ 0 */}
+                                                                                                      {dayWeather.snowCm >
+                                                                                                          0 && (
+                                                                                                          <div className="info-row">
+                                                                                                              <span
+                                                                                                                  style={{
+                                                                                                                      fontWeight: 600,
+                                                                                                                      color: "#3498db",
+                                                                                                                  }}
+                                                                                                              >
+                                                                                                                  ❄️{" "}
+                                                                                                                  {
+                                                                                                                      dayWeather.snowCm
+                                                                                                                  }{" "}
+                                                                                                                  cm
+                                                                                                              </span>
+                                                                                                          </div>
+                                                                                                      )}
+                                                                                                      {dayWeather.rainMm >
+                                                                                                          0 &&
+                                                                                                          dayWeather.snowCm <=
+                                                                                                              0 && (
+                                                                                                              <div className="info-row">
+                                                                                                                  <span
+                                                                                                                      style={{
+                                                                                                                          color: "#2980b9",
+                                                                                                                      }}
+                                                                                                                  >
+                                                                                                                      🌧️{" "}
+                                                                                                                      {
+                                                                                                                          dayWeather.rainMm
+                                                                                                                      }{" "}
+                                                                                                                      mm
+                                                                                                                  </span>
+                                                                                                              </div>
+                                                                                                          )}
+                                                                                                      {/* BERA risque */}
                                                                                                       {braEcheance &&
                                                                                                           braEcheance.haut >
                                                                                                               0 && (
@@ -3106,7 +3232,7 @@
                                                                                                                               "0 1px 2px rgba(0,0,0,0.15)",
                                                                                                                       }}
                                                                                                                   >
-                                                                                                                      Risque
+                                                                                                                      BERA
                                                                                                                       :{" "}
                                                                                                                       {
                                                                                                                           braEcheance.haut
@@ -3115,9 +3241,12 @@
                                                                                                                   </span>
                                                                                                               </div>
                                                                                                           )}
-                                                                                                      {offset ===
-                                                                                                          0 &&
-                                                                                                          braDataForResort?._detail && (
+                                                                                                      {/* Lien BERA (uniquement si données disponibles) */}
+                                                                                                      {braDataForResort?._detail &&
+                                                                                                          (offset ===
+                                                                                                              0 ||
+                                                                                                              offset ===
+                                                                                                                  1) && (
                                                                                                               <div className="info-row">
                                                                                                                   <a
                                                                                                                       href="#"
