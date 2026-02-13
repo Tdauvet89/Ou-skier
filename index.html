@@ -1088,6 +1088,194 @@
 
             const API_KEY = "LuUd7q9wHpiG1aWh";
 
+            // === MODE MOCK (fausses données pour itérer sur le design) ===
+            const USE_MOCK_DATA = true;
+
+            // Générer les dates dynamiquement (aujourd'hui + 6 jours)
+            const _mockDays = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() + i);
+                _mockDays.push(d.toISOString().split("T")[0]);
+            }
+
+            // Générer les timestamps horaires (7 jours × 24h, format UTC)
+            const _mockHours = [];
+            for (let i = 0; i < 7; i++) {
+                for (let h = 0; h < 24; h++) {
+                    _mockHours.push(
+                        `${_mockDays[i]}T${String(h).padStart(2, "0")}:00:00`,
+                    );
+                }
+            }
+
+            function _buildMockData(resortConfig) {
+                // Températures de base selon altitude
+                const altFactor = (resortConfig.altitude - 1400) / 400; // 0 pour 1400m, 1 pour 1800m
+                const baseTemps = [-4, -3, -2, -1, 0, 2, 1]; // moyennes par jour
+                const tempAmplitude = [3, 4, 5, 4, 3, 5, 4];
+
+                // Conditions variées : 1=soleil, 2=peu nuageux, 4=nuageux, 6=couvert, 9=pluie, 14=neige legere, 15=neige, 17=orage neige
+                const pictocodes = [2, 1, 6, 15, 14, 4, 1];
+                // Vent
+                const windMean = [12, 8, 25, 45, 35, 15, 10];
+                const gustMin = [15, 10, 35, 55, 45, 20, 12];
+                const gustMax = [25, 18, 55, 85, 65, 30, 20];
+                const windDir = [180, 200, 270, 300, 290, 220, 190];
+                // Precipitations
+                const precip = [0, 0, 2, 18, 8, 0.5, 0];
+                const snowFrac = [0, 0, 0.3, 0.9, 0.85, 0.5, 0];
+
+                // Données journalières
+                const data_day = {
+                    time: [..._mockDays],
+                    temperature_min: baseTemps.map(
+                        (t, i) =>
+                            Math.round(
+                                (t - tempAmplitude[i] - altFactor * 2) * 10,
+                            ) / 10,
+                    ),
+                    temperature_max: baseTemps.map(
+                        (t, i) =>
+                            Math.round(
+                                (t + tempAmplitude[i] - altFactor * 2) * 10,
+                            ) / 10,
+                    ),
+                    windspeed_mean: windMean.map(
+                        (w) => w + Math.round(altFactor * 5),
+                    ),
+                    windspeed_min: windMean.map((w) =>
+                        Math.max(2, w - 8 + Math.round(altFactor * 3)),
+                    ),
+                    windspeed_max: gustMax.map(
+                        (w) => w + Math.round(altFactor * 5),
+                    ),
+                    gust_min: gustMin.map((w) => w + Math.round(altFactor * 5)),
+                    gust_max: gustMax.map((w) => w + Math.round(altFactor * 5)),
+                    winddirection: [...windDir],
+                    precipitation: [...precip],
+                    snowfraction: [...snowFrac],
+                    pictocode: [...pictocodes],
+                };
+
+                // Données horaires (168 valeurs = 7 jours × 24h)
+                const hourlyTemp = [];
+                const hourlyWind = [];
+                const hourlyGust = [];
+                const hourlyDir = [];
+                const hourlyPicto = [];
+
+                for (let d = 0; d < 7; d++) {
+                    const dayBaseTemp = baseTemps[d] - altFactor * 2;
+                    const amp = tempAmplitude[d];
+                    const dayWind = windMean[d] + Math.round(altFactor * 5);
+                    const dayGust = gustMax[d] + Math.round(altFactor * 5);
+                    const dayDir = windDir[d];
+                    const dayPicto = pictocodes[d];
+
+                    for (let h = 0; h < 24; h++) {
+                        // Courbe de température : min à 5h, max à 14h
+                        const tempFrac =
+                            Math.sin(((h - 5) / 24) * Math.PI * 2) * 0.5 + 0.5;
+                        const temp =
+                            Math.round(
+                                (dayBaseTemp - amp + tempFrac * amp * 2) * 10,
+                            ) / 10;
+                        hourlyTemp.push(temp);
+
+                        // Vent : plus fort en journée
+                        const windFrac =
+                            h >= 10 && h <= 17 ? 1.2 : h >= 6 ? 0.9 : 0.6;
+                        hourlyWind.push(Math.round(dayWind * windFrac));
+                        hourlyGust.push(Math.round(dayGust * windFrac));
+                        hourlyDir.push(dayDir + (h % 3) * 5 - 5);
+
+                        // Pictocode : nuit (31-33) ou jour
+                        if (h < 7 || h > 20) {
+                            hourlyPicto.push(
+                                dayPicto <= 2
+                                    ? 31
+                                    : dayPicto <= 6
+                                      ? 33
+                                      : dayPicto,
+                            );
+                        } else {
+                            hourlyPicto.push(dayPicto);
+                        }
+                    }
+                }
+
+                const data_1h = {
+                    time: [..._mockHours],
+                    temperature: hourlyTemp,
+                    windspeed: hourlyWind,
+                    windgust: hourlyGust,
+                    winddirection: hourlyDir,
+                    pictocode: hourlyPicto,
+                };
+
+                return {
+                    ...resortConfig,
+                    data: { data_day, data_1h },
+                };
+            }
+
+            const MOCK_RESULTS = DEFAULT_RESORTS.map((r) => _buildMockData(r));
+
+            const MOCK_BRA_DATA = {
+                Guzet: {
+                    "aujourd'hui": {
+                        bas: 3,
+                        haut: 3,
+                        evolution: 0,
+                        date: _mockDays[0],
+                    },
+                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
+                    _detail: {
+                        massifName: "Couserans",
+                        massifId: 69,
+                        dateBulletin: _mockDays[0] + "T16:00:00",
+                        risqueMaxi: 3,
+                        evoluRisque1: 0,
+                        risqueMaxiJ2: 2,
+                    },
+                },
+                "Piau-Engaly": {
+                    "aujourd'hui": {
+                        bas: 2,
+                        haut: 3,
+                        evolution: 1,
+                        date: _mockDays[0],
+                    },
+                    demain: { bas: 3, haut: 3, date: _mockDays[1] },
+                    _detail: {
+                        massifName: "Aure-Louron",
+                        massifId: 67,
+                        dateBulletin: _mockDays[0] + "T16:00:00",
+                        risqueMaxi: 3,
+                        evoluRisque1: 1,
+                        risqueMaxiJ2: 3,
+                    },
+                },
+                "Saint-Lary": {
+                    "aujourd'hui": {
+                        bas: 2,
+                        haut: 2,
+                        evolution: 0,
+                        date: _mockDays[0],
+                    },
+                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
+                    _detail: {
+                        massifName: "Aure-Louron",
+                        massifId: 67,
+                        dateBulletin: _mockDays[0] + "T16:00:00",
+                        risqueMaxi: 2,
+                        evoluRisque1: 0,
+                        risqueMaxiJ2: 2,
+                    },
+                },
+            };
+
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
@@ -1644,6 +1832,30 @@
                 }, []);
 
                 const loadInitialWeatherData = async () => {
+                    // Mode mock : fausses données, aucun appel API
+                    if (USE_MOCK_DATA) {
+                        console.log("🎭 Mode MOCK actif — aucun appel API");
+                        processWeatherData(MOCK_RESULTS);
+                        processSnowData(MOCK_RESULTS);
+                        setBraData(MOCK_BRA_DATA);
+                        const now = new Date();
+                        setLastUpdate(now.toISOString());
+                        setCurrentDate(
+                            now.toLocaleDateString("fr-FR", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                            }) +
+                                " à " +
+                                now.toLocaleTimeString("fr-FR", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                }),
+                        );
+                        return;
+                    }
+
                     // Vérifier le cache avant d'appeler l'API
                     const cache = getWeatherCache();
                     if (cache && isCacheValidForResorts(cache, resorts)) {
@@ -1875,6 +2087,15 @@
                 };
 
                 const fetchAllWeatherData = async () => {
+                    // Mode mock : pas d'appel API
+                    if (USE_MOCK_DATA) {
+                        console.log("🎭 Mode MOCK — actualisation simulée");
+                        processWeatherData(MOCK_RESULTS);
+                        processSnowData(MOCK_RESULTS);
+                        setBraData(MOCK_BRA_DATA);
+                        return;
+                    }
+
                     console.log(
                         "🔄 Actualisation forcée — appel API Meteoblue",
                     );
@@ -2429,7 +2650,22 @@
                             <div className="header-controls">
                                 <div className="date-display">
                                     📅 Dernière mise à jour : {currentDate}
-                                    {loadedFromCache && (
+                                    {USE_MOCK_DATA && (
+                                        <span
+                                            style={{
+                                                marginLeft: "10px",
+                                                padding: "2px 8px",
+                                                background: "#e74c3c",
+                                                color: "white",
+                                                borderRadius: "4px",
+                                                fontSize: "0.75rem",
+                                                fontWeight: "700",
+                                            }}
+                                        >
+                                            API EN PAUSE
+                                        </span>
+                                    )}
+                                    {loadedFromCache && !USE_MOCK_DATA && (
                                         <span
                                             style={{
                                                 marginLeft: "10px",
