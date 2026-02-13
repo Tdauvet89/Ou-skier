@@ -1053,6 +1053,106 @@
                     grid-template-columns: 1fr;
                 }
             }
+
+            /* === Bouton Feedback fixe === */
+            .feedback-btn {
+                position: fixed;
+                top: 18px;
+                right: 18px;
+                z-index: 900;
+                background: var(--deep-blue);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-family: "Barlow Condensed", sans-serif;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(26, 82, 118, 0.35);
+                transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+            }
+
+            .feedback-btn:hover {
+                background: var(--glacier);
+                box-shadow: 0 6px 20px rgba(93, 173, 226, 0.4);
+                transform: translateY(-1px);
+            }
+
+            /* === Modale Feedback === */
+            .feedback-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1100;
+                animation: fadeInOverlay 0.3s ease-out;
+            }
+
+            .feedback-modal {
+                background: white;
+                border-radius: 16px;
+                padding: 0;
+                max-width: 700px;
+                width: 92%;
+                max-height: 85vh;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: slideInModal 0.3s ease-out;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .feedback-modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 20px 24px;
+                border-bottom: 1px solid var(--fresh-snow);
+            }
+
+            .feedback-modal-header h2 {
+                font-family: "Barlow Condensed", sans-serif;
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: var(--deep-blue);
+                text-transform: uppercase;
+                margin: 0;
+            }
+
+            .feedback-modal-close {
+                background: none;
+                border: none;
+                font-size: 1.6rem;
+                color: var(--storm-gray);
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: background 0.2s;
+            }
+
+            .feedback-modal-close:hover {
+                background: var(--fresh-snow);
+            }
+
+            .feedback-modal-body {
+                flex: 1;
+                overflow: hidden;
+            }
+
+            .feedback-modal-body iframe {
+                display: block;
+                width: 100%;
+                height: 600px;
+                border: none;
+            }
         </style>
     </head>
     <body>
@@ -1736,6 +1836,7 @@
                 const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, _detail: {...} } }
                 const [beraModal, setBeraModal] = useState(null); // { resortName, detail } ou null
                 const [loadedFromCache, setLoadedFromCache] = useState(false);
+                const [feedbackOpen, setFeedbackOpen] = useState(false);
 
                 // Logger un appel API
                 const logApiCall = (
@@ -3962,6 +4063,44 @@
                                         >
                                             Fermer
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Bouton feedback fixe */}
+                        <button
+                            className="feedback-btn"
+                            onClick={() => setFeedbackOpen(true)}
+                        >
+                            Proposer une amélioration
+                        </button>
+
+                        {/* Modale feedback Notion */}
+                        {feedbackOpen && (
+                            <div
+                                className="feedback-modal-overlay"
+                                onClick={() => setFeedbackOpen(false)}
+                            >
+                                <div
+                                    className="feedback-modal"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="feedback-modal-header">
+                                        <h2>Proposer une amélioration</h2>
+                                        <button
+                                            className="feedback-modal-close"
+                                            onClick={() => setFeedbackOpen(false)}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                    <div className="feedback-modal-body">
+                                        <iframe
+                                            src="https://charmed-origami-8bf.notion.site/ebd/3039717d683f807a91d5e7864b74b5cc"
+                                            title="Proposer une amélioration"
+                                            allowFullScreen
+                                        />
                                     </div>
                                 </div>
                             </div>
