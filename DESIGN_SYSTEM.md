@@ -1,14 +1,148 @@
-# 🎨 Design System - Mountain Weather App
+# Design System - Mountain Weather App
 
-Ce document centralise tous les composants, styles et patterns réutilisables de l'application.
+Ce document centralise tous les composants, styles et patterns de l'application.
 
-## 📐 Règles Fonctionnelles
+> **Page interactive** : ouvrir `design-system.html` pour voir tous les composants en live.
+
+## Icônes SVG
+
+Depuis la v7.0, **tous les emojis ont été remplacés par des icônes SVG inline** définies dans `icons.js`.
+
+### Architecture
+
+| Fichier | Rôle |
+|---|---|
+| `icons.js` | Bibliothèque SVG — weather, wind, UI |
+| `weatherCodes.js` | Mapping pictocode Meteoblue → clé SVG + description |
+| `design-system.html` | Showcase interactif de tous les composants |
+
+### Catégories d'icônes
+
+**Weather** (24×24, couleurs intégrées) — accessibles via `weatherSvg.{key}` :
+
+| Clé | Description |
+|---|---|
+| `sun` | Ciel dégagé |
+| `moon` | Nuit claire |
+| `partlyCloudy` | Peu nuageux (soleil + nuage) |
+| `mostlyCloudy` | Nuageux (soleil caché) |
+| `overcast` | Couvert |
+| `moonCloud` | Nuit peu nuageuse |
+| `moonOvercast` | Nuit nuageuse |
+| `fog` | Brouillard |
+| `haze` | Brume |
+| `lightRain` | Pluie légère |
+| `rain` | Pluie |
+| `heavyRain` | Pluie forte |
+| `lightSnow` | Neige légère |
+| `snow` | Neige |
+| `heavySnow` | Neige forte |
+| `thunder` | Orage |
+| `thunderRain` | Orage + pluie |
+| `sleet` | Pluie et neige |
+| `showers` | Averses |
+| `snowShowers` | Averses de neige |
+| `hail` | Grêle |
+| `freezingRain` | Pluie verglaçante |
+
+**Wind** — accessible via `windArrowSvg(degrees, size)` :
+
+```javascript
+// Flèche orientable selon les degrés (0° = Nord)
+windArrowSvg(180, 14)  // → SVG string, flèche pointant vers le sud
+```
+
+**UI** (20×20, `currentColor`) — accessibles via `uiSvg.{key}` :
+
+`search`, `plus`, `close`, `refresh`, `calendar`, `clock`, `mountain`, `snowflake`, `thermometer`, `droplet`, `mapPin`, `barChart`, `download`, `trash`, `alert`, `sunUi`, `externalLink`, `wind`
+
+### Usage dans le JSX React
+
+```jsx
+{/* Icône UI inline */}
+<span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
+
+{/* Icône météo (retournée par getWeatherInfo) */}
+<div className="cell-icon"
+     title={hourData.condition}
+     dangerouslySetInnerHTML={{__html: hourData.icon}}>
+</div>
+
+{/* Flèche de vent orientée */}
+<span className="wind-arrow"
+      dangerouslySetInnerHTML={{__html: windArrowSvg(hourData.windDirection, 12)}}>
+</span>
+```
+
+### Dimensionnement CSS
+
+Les tailles SVG sont contrôlées par CSS selon le contexte :
+
+```css
+.icon svg          { width: 24px; height: 24px; }   /* Titres de section */
+.day-cell-icon svg { width: 32px; height: 32px; }   /* Cellule vue jour */
+.cell-icon svg     { width: 18px; height: 18px; }   /* Cellule vue horaire */
+.hour-icon svg     { width: 22px; height: 22px; }   /* Slot horaire détaillé */
+.wind-arrow svg    { width: 14px; height: 14px; }   /* Flèche vent */
+```
+
+---
+
+## Couleurs (Variables CSS)
+
+### Palette principale
+
+```css
+:root {
+    --deep-blue: #1a5276;
+    --glacier: #5dade2;
+    --powder: #d4e9f7;
+    --storm-gray: #5d6d7e;
+    --fresh-green: #27ae60;
+    --snow-white: #fafbfc;
+    --fresh-snow: #ecf0f1;
+}
+```
+
+### Couleurs météo
+
+```css
+--temp-cold: #3498db;
+--temp-warm: #e67e22;
+--warning-orange: #e67e22;
+--heavy-snow: #e74c3c;
+```
+
+### Couleurs icônes SVG
+
+| Élément | Couleur |
+|---|---|
+| Soleil | `#f59e0b` |
+| Nuage / Brouillard | `#94a3b8` |
+| Pluie / Flèche vent | `#3b82f6` |
+| Neige | `#60a5fa` |
+| Éclair | `#eab308` |
+| Lune | `#64748b` |
+
+---
+
+## Typographie
+
+| Rôle | Police | Poids | Taille |
+|---|---|---|---|
+| H1 titre principal | Barlow Condensed | 800 | 2.8rem |
+| H2 section | Barlow Condensed | 700 | 1.6rem |
+| Corps / données | JetBrains Mono | 400 | 0.9rem |
+| Détails secondaires | JetBrains Mono | 400 | 0.65-0.7rem |
+
+---
+
+## Règles Fonctionnelles
 
 ### Tableaux avec Scroll Horizontal
 
 **RÈGLE OBLIGATOIRE** : Tout tableau avec scroll horizontal DOIT avoir une première colonne sticky.
 
-**Implémentation** :
 ```css
 .sticky-first-col {
     position: -webkit-sticky !important;
@@ -20,303 +154,81 @@ Ce document centralise tous les composants, styles et patterns réutilisables de
 }
 ```
 
-**Usage** :
-```html
-<table>
-    <thead>
-        <tr>
-            <th className="sticky-first-col">Secteur</th>
-            <th>Jour 1</th>
-            <th>Jour 2</th>
-        </tr>
-    </thead>
-</table>
-```
-
-**Pourquoi** : Permet à l'utilisateur de toujours savoir quelle ligne il consulte lors du scroll horizontal.
-
 ---
 
-## 🎨 Composants
+## Composants
 
-### 1. Section Title with Separator
+### Toggle Buttons
 
-**Description** : Titre de section avec trait décoratif en dessous
-
-**CSS** :
-```css
-.section-title-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.section-separator {
-    height: 2px;
-    background: linear-gradient(90deg, 
-        var(--glacier) 0%, 
-        rgba(100, 181, 246, 0.3) 50%, 
-        transparent 100%
-    );
-    margin-bottom: 20px;
-    border-radius: 2px;
-}
-```
-
-**HTML** :
-```jsx
-<div className="section-title-container">
-    <h2>
-        <span className="icon">🌤️</span>
-        Météo Comparative (7 jours)
-    </h2>
-    <div className="view-toggle">
-        {/* Toggle buttons */}
-    </div>
-</div>
-<div className="section-separator"></div>
-```
-
-**Quand l'utiliser** : Pour toutes les sections principales de l'app (Chutes de neige, Météo comparative, etc.)
-
----
-
-### 2. Sticky Column (Tableau)
-
-Voir section "Règles Fonctionnelles" ci-dessus.
-
----
-
-### 3. Toggle Buttons
-
-**CSS** :
-```css
-.view-toggle {
-    display: flex;
-    background: white;
-    border-radius: 8px;
-    padding: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.view-toggle-btn {
-    padding: 10px 20px;
-    border: none;
-    background: transparent;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    color: var(--storm-gray);
-}
-
-.view-toggle-btn.active {
-    background: linear-gradient(135deg, var(--deep-blue), #2874a6);
-    color: white;
-    box-shadow: 0 2px 6px rgba(26, 82, 118, 0.3);
-}
-```
-
-**Usage** :
 ```jsx
 <div className="view-toggle">
     <button className={`view-toggle-btn ${mode === 'day' ? 'active' : ''}`}>
-        📅 Vue Jour
+        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
     </button>
     <button className={`view-toggle-btn ${mode === 'hourly' ? 'active' : ''}`}>
-        🕐 Vue 5h
+        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.clock}}></span> Vue Horaire
     </button>
 </div>
 ```
 
----
+### Weather Data Cell
 
-### 4. Weather Data Cell
-
-**Description** : Cellule d'un tableau météo avec icône, température et vent
-
-**CSS** :
-```css
-.weather-cell {
-    text-align: center;
-    padding: 10px 6px;
-    vertical-align: middle;
-}
-
-.cell-icon {
-    font-size: 1.4rem;
-    margin: 2px 0;
-}
-
-.cell-temp {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--storm-gray);
-    margin: 3px 0;
-}
-
-.cell-wind {
-    font-size: 0.65rem;
-    color: #7f8c8d;
-    margin-top: 2px;
-}
-```
-
-**Usage** :
 ```jsx
-<td className="weather-cell">
-    <div className="cell-icon">☀️</div>
-    <div className="cell-temp">-2°</div>
-    <div className="cell-wind">💨 15 km/h</div>
+<td className="hourly-cell">
+    <div className="cell-icon" title={hourData.condition}
+         dangerouslySetInnerHTML={{__html: hourData.icon}}></div>
+    <div className="cell-temp">{hourData.temp}°</div>
+    <div className="cell-wind">
+        <span>{hourData.wind}</span>
+        <span className="wind-arrow"
+              dangerouslySetInnerHTML={{__html: windArrowSvg(hourData.windDirection, 12)}}></span>
+        <span className="wind-cardinal">{windDir.cardinal}</span>
+    </div>
 </td>
 ```
 
----
-
-### 5. Snow Value Display
-
-**CSS** :
-```css
-.snow-value {
-    font-weight: 600;
-    color: var(--deep-blue);
-    font-size: 0.95rem;
-}
-
-.heavy-snow {
-    color: #e67e22;
-    font-weight: 700;
-}
-```
-
-**Règles** :
-- Valeur > 15cm → Classe `heavy-snow` (orange)
-- Valeur normale → Classe `snow-value` uniquement
-
----
-
-### 6. Today Highlight
-
-**CSS** :
-```css
-.today {
-    background: rgba(39, 174, 96, 0.12);
-    border-left: 3px solid #27ae60;
-}
-
-.today-col {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-}
-
-.today-cell {
-    background: rgba(39, 174, 96, 0.08);
-}
-```
-
-**Usage** :
-- `.today` : Pour les cellules d'en-tête de colonnes
-- `.today-col` : Pour les headers de tableaux (fond vert)
-- `.today-cell` : Pour les cellules de données
-
----
-
-## 🎨 Couleurs (Variables CSS)
+### Snow Value Display
 
 ```css
-:root {
-    --deep-blue: #1a5276;
-    --glacier: #64b5f6;
-    --powder: #e3f2fd;
-    --storm-gray: #546e7a;
-    --shadow-blue: rgba(100, 181, 246, 0.15);
-}
+.snow-value { font-weight: 600; color: var(--deep-blue); font-size: 1.05rem; }
+.heavy-snow { color: var(--warning-orange); font-weight: 700; }
 ```
 
----
+Seuil : > 15cm → classe `heavy-snow` (orange)
 
-## 📏 Typographie
+### Today Highlight
 
-### Polices
-
-- **Titres** : 'Barlow Condensed', sans-serif
-- **Données** : 'JetBrains Mono', monospace (pour les valeurs numériques)
-- **Corps** : System default
-
-### Tailles
-
-- **H2 (Section)** : 1.8rem
-- **H3 (Sous-section)** : 1.3rem
-- **Données tableau** : 0.8rem
-- **Petites infos** : 0.65-0.7rem
-
----
-
-## 🔧 Bonnes Pratiques
-
-### 1. Responsive Design
-
-Tous les tableaux doivent avoir :
 ```css
-overflow-x: auto;
-```
-
-### 2. Animations
-
-Utiliser des transitions douces (0.3s ease) pour :
-- Hover sur boutons
-- Changement d'état
-- Apparition de modaux
-
-### 3. Accessibilité
-
-- Toujours mettre un `title` sur les boutons d'action
-- Utiliser des couleurs avec bon contraste
-- Taille de police minimum : 0.65rem
-
----
-
-## 📦 Structure HTML Standard
-
-### Section Complète
-
-```jsx
-<section className="section">
-    {/* Titre avec toggle optionnel */}
-    <div className="section-title-container">
-        <h2>
-            <span className="icon">❄️</span>
-            Titre de la Section
-        </h2>
-        {/* Toggle si nécessaire */}
-    </div>
-    
-    {/* Trait décoratif */}
-    <div className="section-separator"></div>
-    
-    {/* Contenu */}
-    <div className="unified-table-wrapper">
-        <table className="unified-weather-table">
-            {/* ... */}
-        </table>
-    </div>
-</section>
+.today      { background: rgba(39, 174, 96, 0.12); border-left: 3px solid #27ae60; }
+.today-col  { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.today-cell { background: rgba(39, 174, 96, 0.08); }
 ```
 
 ---
 
-## 🚀 Évolution Future
+## Espacements
 
-Quand ce design system sera complet, nous pourrons :
-1. Créer de nouveaux tableaux en 5 minutes
-2. Garantir une cohérence visuelle totale
-3. Faciliter la maintenance
-4. Accélérer le développement de nouvelles features
+```css
+--padding-xs: 4px;   --margin-xs: 4px;
+--padding-sm: 8px;   --margin-sm: 8px;
+--padding-md: 15px;  --margin-md: 15px;
+--padding-lg: 20px;  --margin-lg: 25px;
+--padding-xl: 40px;  --margin-xl: 40px;
+
+--space-between-sections: 40px;
+--space-between-elements: 15px;
+```
 
 ---
 
-**Version** : 1.0
-**Dernière mise à jour** : 10 février 2026
+## Bonnes Pratiques
+
+1. **Responsive** : Tous les tableaux doivent avoir `overflow-x: auto`
+2. **Animations** : Transitions douces (0.3s ease) pour hover, état, modaux
+3. **Accessibilité** : `title` sur les boutons d'action, bon contraste, taille min 0.65rem
+4. **Icônes** : Toujours utiliser `dangerouslySetInnerHTML` pour rendre les SVG dans le JSX React
+
+---
+
+**Version** : 2.0 — SVG icon system
+**Dernière mise à jour** : 13 février 2026
