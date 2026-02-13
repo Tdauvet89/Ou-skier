@@ -191,18 +191,31 @@
             }
 
             .sample-btn.primary {
-                background: linear-gradient(135deg, var(--deep-blue), #2874a6);
+                background: var(--deep-blue);
                 color: white;
+            }
+
+            .sample-btn.primary:hover {
+                background: #2874a6;
             }
 
             .sample-btn.success {
-                background: linear-gradient(135deg, #27ae60, #2ecc71);
+                background: var(--fresh-green);
                 color: white;
             }
 
+            .sample-btn.success:hover {
+                background: #219a52;
+            }
+
             .sample-btn.secondary {
-                background: #95a5a6;
-                color: white;
+                background: #f1f5f9;
+                color: var(--storm-gray);
+                border: 1px solid #e2e8f0;
+            }
+
+            .sample-btn.secondary:hover {
+                background: #e2e8f0;
             }
 
             .sample-tag {
@@ -210,8 +223,9 @@
                 align-items: center;
                 gap: 6px;
                 padding: 6px 14px;
-                background: var(--glacier);
+                background: #edf5fd;
                 color: var(--deep-blue);
+                border: 1px solid #c8dff5;
                 border-radius: 20px;
                 font-weight: 600;
                 font-size: 0.85rem;
@@ -219,14 +233,14 @@
 
             .sample-toggle {
                 display: inline-flex;
-                background: white;
-                border-radius: 8px;
-                padding: 4px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                background: #f1f5f9;
+                border-radius: 24px;
+                padding: 3px;
+                border: 1px solid #e2e8f0;
             }
 
             .sample-toggle button {
-                padding: 8px 18px;
+                padding: 8px 20px;
                 border: none;
                 background: transparent;
                 font-family: "Barlow Condensed", sans-serif;
@@ -234,13 +248,20 @@
                 font-weight: 700;
                 text-transform: uppercase;
                 cursor: pointer;
-                border-radius: 6px;
+                border-radius: 22px;
                 color: var(--storm-gray);
+                transition: all 0.2s ease;
             }
 
             .sample-toggle button.active {
-                background: linear-gradient(135deg, var(--deep-blue), #2874a6);
+                background: var(--deep-blue);
                 color: white;
+                box-shadow: 0 2px 8px rgba(26, 82, 118, 0.25);
+            }
+
+            .sample-toggle button:hover:not(.active) {
+                background: #e2e8f0;
+                color: var(--deep-blue);
             }
 
             /* Wind arrow demo */
