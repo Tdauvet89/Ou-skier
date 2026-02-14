@@ -16,49 +16,8 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
+        <link rel="stylesheet" href="design-system.css?v=7.0.0" />
         <style>
-            :root {
-                /* === DESIGN SYSTEM - VARIABLES === */
-                /* Couleurs Principales */
-                --deep-blue: #1a5276;
-                --glacier: #5dade2;
-                --powder: #d4e9f7;
-                --storm-gray: #5d6d7e;
-                --fresh-green: #27ae60;
-                --shadow-blue: rgba(0, 0, 0, 0.1);
-                --ice-blue: #d4e9f7;
-                --snow-white: #fafbfc;
-                --fresh-snow: #ecf0f1;
-
-                /* Couleurs Météo */
-                --temp-cold: #3498db;
-                --temp-warm: #e67e22;
-                --warning-orange: #e67e22;
-                --heavy-snow: #e74c3c;
-
-                /* Espacements */
-                --padding-xs: 4px;
-                --padding-sm: 8px;
-                --padding-md: 15px;
-                --padding-lg: 20px;
-                --padding-xl: 40px;
-
-                --margin-xs: 4px;
-                --margin-sm: 8px;
-                --margin-md: 15px;
-                --margin-lg: 25px;
-                --margin-xl: 40px;
-
-                --space-between-sections: 40px;
-                --space-between-elements: 15px;
-            }
-
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
             body {
                 font-family: "JetBrains Mono", monospace;
                 background: linear-gradient(
@@ -76,17 +35,6 @@
                 max-width: 1800px;
                 margin: 0 auto;
                 animation: slideDown 0.6s ease-out;
-            }
-
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
             }
 
             header {
@@ -135,31 +83,7 @@
             }
 
             .refresh-btn {
-                padding: 10px 22px;
-                background: var(--deep-blue);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-family: "Barlow Condensed", sans-serif;
                 font-size: 0.95rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .refresh-btn:hover {
-                background: #2874a6;
-                box-shadow: 0 2px 8px rgba(26, 82, 118, 0.25);
-            }
-
-            .refresh-btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
             }
 
             .main-content {
@@ -201,17 +125,6 @@
                 animation-delay: 0.2s;
             }
 
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
             h2 {
                 font-family: "Barlow Condensed", sans-serif;
                 font-size: 1.5rem;
@@ -227,15 +140,6 @@
                 gap: 8px;
             }
 
-            .icon {
-                display: inline-flex;
-                align-items: center;
-                vertical-align: middle;
-            }
-            .icon svg {
-                width: 24px;
-                height: 24px;
-            }
 
             table {
                 width: 100%;
@@ -381,42 +285,7 @@
                 margin-bottom: 20px;
             }
 
-            .view-toggle {
-                display: inline-flex;
-                background: #f1f5f9;
-                border-radius: 24px;
-                padding: 3px;
-                border: 1px solid #e2e8f0;
-            }
-
-            .view-toggle-btn {
-                padding: 8px 22px;
-                border: none;
-                background: transparent;
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 0.9rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-                cursor: pointer;
-                border-radius: 22px;
-                transition: all 0.2s ease;
-                color: var(--storm-gray);
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .view-toggle-btn.active {
-                background: var(--deep-blue);
-                color: white;
-                box-shadow: 0 2px 8px rgba(26, 82, 118, 0.25);
-            }
-
-            .view-toggle-btn:hover:not(.active) {
-                background: #e2e8f0;
-                color: var(--deep-blue);
-            }
+            /* Toggle : utilise .toggle / .toggle-btn de design-system.css */
 
             /* Unified Table — clean Surfline style */
             .unified-weather-table {
@@ -809,106 +678,13 @@
             }
 
             .add-resort-btn {
-                padding: 10px 24px;
-                background: var(--fresh-green);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 1rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-                cursor: pointer;
-                transition: all 0.2s ease;
                 margin-top: 10px;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
             }
 
-            .add-resort-btn:hover {
-                background: #219a52;
-                box-shadow: 0 2px 8px rgba(39, 174, 96, 0.25);
-            }
-
-            .modal-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(15, 23, 42, 0.5);
-                backdrop-filter: blur(4px);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                animation: fadeInOverlay 0.2s ease-out;
-            }
-
-            @keyframes fadeInOverlay {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
-            }
-
-            .modal {
-                background: white;
-                border-radius: 14px;
-                padding: 32px;
-                max-width: 560px;
-                width: 92%;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-                animation: slideInModal 0.2s ease-out;
-            }
-
-            @keyframes slideInModal {
-                from {
-                    opacity: 0;
-                    transform: translateY(-50px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .modal-header {
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: var(--deep-blue);
-                margin-bottom: 20px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
+            /* Modal, input : utilise .modal-overlay / .modal / .modal-header / .input de design-system.css */
 
             .search-input {
-                width: 100%;
-                padding: 12px 16px;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                font-family: "JetBrains Mono", monospace;
-                font-size: 0.9rem;
                 margin-bottom: 16px;
-                transition: border-color 0.2s ease, box-shadow 0.2s ease;
-                background: #f8fafc;
-            }
-
-            .search-input:focus {
-                outline: none;
-                border-color: var(--glacier);
-                box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.15);
-                background: white;
             }
 
             .search-results {
@@ -952,24 +728,6 @@
             .modal-btn {
                 flex: 1;
                 padding: 14px;
-                border: none;
-                border-radius: 8px;
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 1rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .modal-btn-cancel {
-                background: #f1f5f9;
-                color: var(--storm-gray);
-                border: 1px solid #e2e8f0;
-            }
-
-            .modal-btn-cancel:hover {
-                background: #e2e8f0;
             }
 
             .loading-search {
@@ -992,18 +750,7 @@
                 margin-bottom: 15px;
             }
 
-            .resort-tag {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                padding: 6px 14px;
-                background: #edf5fd;
-                color: var(--deep-blue);
-                border: 1px solid #c8dff5;
-                border-radius: 20px;
-                font-weight: 600;
-                font-size: 0.85rem;
-            }
+            /* Tag : utilise .tag de design-system.css */
 
             .remove-resort {
                 background: none;
@@ -1091,22 +838,8 @@
                 top: 16px;
                 right: 16px;
                 z-index: 900;
-                background: var(--deep-blue);
-                color: white;
-                border: none;
-                border-radius: 8px;
                 padding: 8px 18px;
-                font-family: "Barlow Condensed", sans-serif;
                 font-size: 0.85rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.3px;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-
-            .feedback-btn:hover {
-                background: #2874a6;
             }
 
             /* === Modale Feedback === */
@@ -1789,7 +1522,7 @@
 
                             <input
                                 type="text"
-                                className="search-input"
+                                className="input search-input"
                                 placeholder="Rechercher une commune (min. 3 caractères - ex: Guzet, Saint-Lary...)"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -1846,7 +1579,7 @@
 
                             <div className="modal-buttons">
                                 <button
-                                    className="modal-btn modal-btn-cancel"
+                                    className="btn btn-secondary modal-btn"
                                     onClick={onClose}
                                 >
                                     Annuler
@@ -2849,7 +2582,7 @@
                                     }}
                                 >
                                     <button
-                                        className="refresh-btn"
+                                        className="btn btn-primary refresh-btn"
                                         onClick={fetchAllWeatherData}
                                         disabled={loading}
                                         style={{
@@ -2919,7 +2652,7 @@
                                         {resorts.map((resort, index) => (
                                             <div
                                                 key={index}
-                                                className="resort-tag"
+                                                className="tag"
                                             >
                                                 {resort.name}
                                                 <button
@@ -2950,7 +2683,7 @@
                                     </div>
                                 )}
                                 <button
-                                    className="add-resort-btn"
+                                    className="btn btn-success add-resort-btn"
                                     onClick={() => setIsModalOpen(true)}
                                     style={{ marginTop: "15px" }}
                                 >
@@ -3080,9 +2813,9 @@
                                                     <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.sunUi}}></span>
                                                     Météo Comparative (5 jours)
                                                 </h2>
-                                                <div className="view-toggle">
+                                                <div className="toggle">
                                                     <button
-                                                        className={`view-toggle-btn ${viewMode === "day" ? "active" : ""}`}
+                                                        className={`toggle-btn ${viewMode === "day" ? "active" : ""}`}
                                                         onClick={() =>
                                                             setViewMode("day")
                                                         }
@@ -3090,7 +2823,7 @@
                                                         <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
                                                     </button>
                                                     <button
-                                                        className={`view-toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
+                                                        className={`toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
                                                         onClick={() =>
                                                             setViewMode(
                                                                 "hourly",
@@ -4104,7 +3837,7 @@
 
                         {/* Bouton feedback fixe */}
                         <button
-                            className="feedback-btn"
+                            className="btn btn-primary feedback-btn"
                             onClick={() => setFeedbackOpen(true)}
                         >
                             Proposer une amélioration
