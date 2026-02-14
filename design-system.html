@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.2.0"></script>
+        <script src="icons.js?v=7.3.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.2.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.3.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -311,6 +311,11 @@
                 <div class="meta">JetBrains Mono 400 — 0.7rem — Détails secondaires</div>
             </div>
 
+            <div class="type-sample">
+                <div style="font-family:'Garnett',sans-serif;font-size:36px;font-weight:500;color:#1F2023">Trouves le bon spot pour ta rando</div>
+                <div class="meta">Garnett Medium 500 — 36px — Footer CTA titre</div>
+            </div>
+
             <!-- ============================================================ -->
             <!-- ICÔNES MÉTÉO -->
             <!-- ============================================================ -->
@@ -343,6 +348,8 @@
                 <button class="btn btn-primary">Actualiser</button>
                 <button class="btn btn-success">Ajouter un Secteur</button>
                 <button class="btn btn-secondary">Annuler</button>
+                <button class="btn btn-dark">Proposer une amélioration</button>
+                <button class="btn btn-ghost">Faire un don</button>
             </div>
 
             <h3>Tags secteur</h3>
@@ -368,11 +375,16 @@
             <div style="max-width:800px;margin-bottom:24px">
                 <div class="footer-cta">
                     <div class="footer-cta-title">
-                        Trouve le bon spot pour plus de poudreuse
+                        Trouves le bon spot pour ta rando
                     </div>
-                    <a class="btn btn-light" href="#" style="font-size:1.1rem;padding:14px 32px;text-decoration:none">
-                        Proposer une amélioration
-                    </a>
+                    <div class="footer-cta-buttons">
+                        <a class="btn btn-dark" href="#" style="text-decoration:none">
+                            Proposer une amélioration
+                        </a>
+                        <a class="btn btn-ghost" href="#" style="text-decoration:none">
+                            Faire un don
+                        </a>
+                    </div>
                 </div>
             </div>
 
