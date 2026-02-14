@@ -7,16 +7,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.2.0"></script>
-        <script src="weatherCodes.js?v=7.2.0"></script>
-        <script src="massifMapping.js?v=7.2.0"></script>
+        <script src="icons.js?v=7.3.0"></script>
+        <script src="weatherCodes.js?v=7.3.0"></script>
+        <script src="massifMapping.js?v=7.3.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.2.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.3.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -3734,18 +3734,28 @@
                         {/* Footer CTA */}
                         <div className="footer-cta">
                             <div className="footer-cta-title">
-                                Trouve le bon spot pour plus de poudreuse
+                                Trouves le bon spot pour ta rando
                             </div>
-                            <a
-                                className="btn btn-light"
-                                href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{fontSize: "1.1rem", padding: "14px 32px", textDecoration: "none"}}
-                            >
-                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.externalLink}}></span>
-                                Proposer une amélioration
-                            </a>
+                            <div className="footer-cta-buttons">
+                                <a
+                                    className="btn btn-dark"
+                                    href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{textDecoration: "none"}}
+                                >
+                                    Proposer une amélioration
+                                </a>
+                                <a
+                                    className="btn btn-ghost"
+                                    href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{textDecoration: "none"}}
+                                >
+                                    Faire un don
+                                </a>
+                            </div>
                         </div>
                     </div>
                 );
