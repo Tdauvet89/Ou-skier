@@ -50,6 +50,18 @@ Les overrides spécifiques à une page vont dans le `<style>` local. Exemple :
 }
 ```
 
+### Checklist avant chaque commit touchant un composant UI
+
+- [ ] Le style de base est dans `design-system.css` (pas dupliqué dans `<style>`)
+- [ ] Le HTML/JSX utilise les classes partagées (`.btn`, `.toggle-btn`, `.tag`, etc.)
+- [ ] `design-system.html` est mis à jour si le composant est nouveau ou modifié
+- [ ] Le paramètre `?v=X.X.X` est incrémenté dans `index.html` ET `design-system.html` pour invalider le cache
+
+### Règle de versioning cache
+
+Tous les fichiers JS/CSS locaux utilisent un paramètre `?v=X.X.X` pour forcer le cache bust.
+Quand tu modifies `design-system.css`, `icons.js`, `weatherCodes.js` ou `massifMapping.js`, tu **DOIS** incrémenter le numéro de version dans les balises `<script>` et `<link>` des **deux** fichiers HTML.
+
 ### Fichiers du design system
 
 - `design-system.css` — CSS partagé (tokens + composants)
@@ -60,6 +72,7 @@ Les overrides spécifiques à une page vont dans le `<style>` local. Exemple :
 ## Architecture du projet
 
 - **index.html** — App principale (React/HTM, single-page)
+- **design-system.css** — Source unique de vérité CSS (importé par les deux pages HTML)
 - **icons.js** — Icônes SVG exportées sur `window`
 - **weatherCodes.js** — Mapping codes météo → icônes SVG
 - **massifMapping.js** — Mapping communes → massifs
