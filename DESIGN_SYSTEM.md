@@ -168,6 +168,7 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 <button className="btn btn-primary">Actualiser</button>
 <button className="btn btn-success">Ajouter un Secteur</button>
 <button className="btn btn-secondary">Annuler</button>
+<a className="btn btn-light" href="#">Lien sur fond coloré</a>
 ```
 
 ### Toggle Buttons
@@ -194,6 +195,21 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 ```jsx
 <input className="input" type="text" placeholder="Rechercher..." />
 ```
+
+### Footer CTA
+
+```jsx
+<div className="footer-cta">
+    <div className="footer-cta-title">
+        Trouve le bon spot pour plus de poudreuse
+    </div>
+    <a className="btn btn-light" href="https://..." target="_blank" rel="noopener noreferrer">
+        Proposer une amélioration
+    </a>
+</div>
+```
+
+Gradient : `linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f97316 100%)` — purple → pink → orange.
 
 ### Modals
 
@@ -265,5 +281,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 3.0 — CSS partagé + design system centralisé
+**Version** : 3.1 — Ajout footer CTA + btn-light
 **Dernière mise à jour** : 14 février 2026
