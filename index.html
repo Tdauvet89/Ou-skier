@@ -1680,26 +1680,17 @@
              */
             function getWindDirectionDisplay(degrees) {
                 if (degrees === null || degrees === undefined) {
-                    return { arrow: "", cardinal: "" };
+                    return { cardinal: "" };
                 }
 
                 // Normaliser entre 0-360
                 const normalized = ((degrees % 360) + 360) % 360;
 
                 // Points cardinaux (8 directions)
-                const directions = [
-                    { name: "N", arrow: "↓" }, // 0° = Nord = vent vient du nord (flèche vers bas)
-                    { name: "NE", arrow: "↙" }, // 45°
-                    { name: "E", arrow: "←" }, // 90°
-                    { name: "SE", arrow: "↖" }, // 135°
-                    { name: "S", arrow: "↑" }, // 180°
-                    { name: "SW", arrow: "↗" }, // 225°
-                    { name: "W", arrow: "→" }, // 270°
-                    { name: "NW", arrow: "↘" }, // 315°
-                ];
+                const cardinals = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 
                 const index = Math.round(normalized / 45) % 8;
-                return directions[index];
+                return { cardinal: cardinals[index] };
             }
 
             /**
