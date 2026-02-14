@@ -289,13 +289,42 @@ var uiSvg = {
 
 
 // ---------------------------------------------------------------------------
+//  LOGO
+// ---------------------------------------------------------------------------
+
+var logoSvg = (function() {
+    var rc = '#3b82f6'; // radar color
+    var tc = '#1e293b'; // text/stroke color
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 60 60" fill="none">' +
+        '<circle cx="30" cy="30" r="26" stroke="' + rc + '" stroke-width="1" opacity="0.15"/>' +
+        '<circle cx="30" cy="30" r="20" stroke="' + rc + '" stroke-width="1" opacity="0.25"/>' +
+        '<circle cx="30" cy="30" r="14" stroke="' + rc + '" stroke-width="1.5" opacity="0.35"/>' +
+        '<g transform="translate(30, 30)">' +
+        '<circle cx="0" cy="0" r="10" fill="' + rc + '" opacity="0.1"/>' +
+        '<line x1="0" y1="-8" x2="0" y2="8" stroke="' + tc + '" stroke-width="2" stroke-linecap="round"/>' +
+        '<line x1="-8" y1="0" x2="8" y2="0" stroke="' + tc + '" stroke-width="2" stroke-linecap="round"/>' +
+        '<line x1="-5.6" y1="-5.6" x2="5.6" y2="5.6" stroke="' + tc + '" stroke-width="2" stroke-linecap="round"/>' +
+        '<line x1="-5.6" y1="5.6" x2="5.6" y2="-5.6" stroke="' + tc + '" stroke-width="2" stroke-linecap="round"/>' +
+        '</g>' +
+        '<line x1="30" y1="30" x2="30" y2="6" stroke="' + rc + '" stroke-width="2" stroke-linecap="round" opacity="0.7">' +
+        '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 30 30" to="360 30 30" dur="3s" repeatCount="indefinite"/>' +
+        '</line>' +
+        '<circle cx="42" cy="18" r="3.5" fill="' + rc + '">' +
+        '<animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>' +
+        '</circle>' +
+        '</svg>';
+})();
+
+
+// ---------------------------------------------------------------------------
 //  Export
 // ---------------------------------------------------------------------------
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { weatherSvg: weatherSvg, windArrowSvg: windArrowSvg, uiSvg: uiSvg };
+    module.exports = { weatherSvg: weatherSvg, windArrowSvg: windArrowSvg, uiSvg: uiSvg, logoSvg: logoSvg };
 } else {
     window.weatherSvg = weatherSvg;
     window.windArrowSvg = windArrowSvg;
     window.uiSvg = uiSvg;
+    window.logoSvg = logoSvg;
 }

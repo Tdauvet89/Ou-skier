@@ -3,20 +3,20 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Météo Montagne - Dashboard Ski</title>
+        <title>Ski Rando Météo - Dashboard Ski de Randonnée</title>
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.3.0"></script>
-        <script src="weatherCodes.js?v=7.3.0"></script>
-        <script src="massifMapping.js?v=7.3.0"></script>
+        <script src="icons.js?v=7.4.0"></script>
+        <script src="weatherCodes.js?v=7.4.0"></script>
+        <script src="massifMapping.js?v=7.4.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.3.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.4.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -45,16 +45,9 @@
             }
 
             h1 {
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 2.8rem;
-                font-weight: 800;
-                color: var(--deep-blue);
-                text-transform: uppercase;
-                letter-spacing: 2px;
                 margin-bottom: 6px;
                 display: flex;
                 align-items: center;
-                gap: 10px;
             }
 
             .subtitle {
@@ -774,8 +767,15 @@
             }
 
             @media (max-width: 1200px) {
-                h1 {
-                    font-size: 2.5rem;
+                .logo-text-primary {
+                    font-size: 1.6rem;
+                }
+                .logo-text-secondary {
+                    font-size: 1.1rem;
+                }
+                .logo-icon svg {
+                    width: 40px;
+                    height: 40px;
                 }
 
                 .main-content {
@@ -797,8 +797,18 @@
                     padding: 10px;
                 }
 
-                h1 {
-                    font-size: 2rem;
+                .logo-text-primary {
+                    font-size: 1.4rem;
+                }
+                .logo-text-secondary {
+                    font-size: 1rem;
+                }
+                .logo-icon svg {
+                    width: 36px;
+                    height: 36px;
+                }
+                .logo {
+                    gap: 10px;
                 }
 
                 h2 {
@@ -2396,9 +2406,17 @@
                     return (
                         <div className="container">
                             <header>
-                                <h1><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Météo Montagne</h1>
+                                <h1>
+                                    <div className="logo">
+                                        <span className="logo-icon" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                        <div>
+                                            <div className="logo-text-primary">Ski Rando</div>
+                                            <div className="logo-text-secondary">météo</div>
+                                        </div>
+                                    </div>
+                                </h1>
                                 <div className="subtitle">
-                                    Dashboard Ski • Powered by Meteoblue
+                                    Dashboard Ski de Randonnée • Powered by Meteoblue
                                 </div>
                             </header>
                             <div className="main-content">
@@ -2415,9 +2433,17 @@
                 return (
                     <div className="container">
                         <header>
-                            <h1><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Météo Montagne</h1>
+                            <h1>
+                                <div className="logo">
+                                    <span className="logo-icon" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                    <div>
+                                        <div className="logo-text-primary">Ski Rando</div>
+                                        <div className="logo-text-secondary">météo</div>
+                                    </div>
+                                </div>
+                            </h1>
                             <div className="subtitle">
-                                Dashboard Ski • Powered by Meteoblue •{" "}
+                                Dashboard Ski de Randonnée • Powered by Meteoblue •{" "}
                                 <a href="design-system.html" target="_blank" rel="noopener noreferrer"
                                    style={{color:'var(--glacier)',textDecoration:'none',fontSize:'0.85rem'}}>
                                     Design System
