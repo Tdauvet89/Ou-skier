@@ -295,7 +295,7 @@ var uiSvg = {
 var logoSvg = (function() {
     var rc = '#3b82f6'; // radar color
     var tc = '#1e293b'; // text/stroke color
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 60 60" fill="none">' +
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" viewBox="0 0 60 60" fill="none">' +
         '<circle cx="30" cy="30" r="26" stroke="' + rc + '" stroke-width="1" opacity="0.15"/>' +
         '<circle cx="30" cy="30" r="20" stroke="' + rc + '" stroke-width="1" opacity="0.25"/>' +
         '<circle cx="30" cy="30" r="14" stroke="' + rc + '" stroke-width="1.5" opacity="0.35"/>' +
