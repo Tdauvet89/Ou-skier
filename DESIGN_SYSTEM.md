@@ -12,9 +12,11 @@ Depuis la v7.0, **tous les emojis ont été remplacés par des icônes SVG inlin
 
 | Fichier | Rôle |
 |---|---|
+| `design-system.css` | **Source unique de vérité** — tokens + composants partagés |
 | `icons.js` | Bibliothèque SVG — weather, wind, UI |
 | `weatherCodes.js` | Mapping pictocode Meteoblue → clé SVG + description |
 | `design-system.html` | Showcase interactif de tous les composants |
+| `CLAUDE.md` | Règles pour maintenir la cohérence du design system |
 
 ### Catégories d'icônes
 
@@ -156,18 +158,51 @@ Les tailles SVG sont contrôlées par CSS selon le contexte :
 
 ---
 
-## Composants
+## Composants partagés (design-system.css)
+
+Les classes partagées sont définies dans `design-system.css` et utilisées par les deux pages.
+
+### Boutons
+
+```jsx
+<button className="btn btn-primary">Actualiser</button>
+<button className="btn btn-success">Ajouter un Secteur</button>
+<button className="btn btn-secondary">Annuler</button>
+```
 
 ### Toggle Buttons
 
 ```jsx
-<div className="view-toggle">
-    <button className={`view-toggle-btn ${mode === 'day' ? 'active' : ''}`}>
+<div className="toggle">
+    <button className={`toggle-btn ${mode === 'day' ? 'active' : ''}`}>
         <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
     </button>
-    <button className={`view-toggle-btn ${mode === 'hourly' ? 'active' : ''}`}>
+    <button className={`toggle-btn ${mode === 'hourly' ? 'active' : ''}`}>
         <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.clock}}></span> Vue Horaire
     </button>
+</div>
+```
+
+### Tags
+
+```jsx
+<span className="tag">Guzet</span>
+```
+
+### Inputs
+
+```jsx
+<input className="input" type="text" placeholder="Rechercher..." />
+```
+
+### Modals
+
+```jsx
+<div className="modal-overlay">
+    <div className="modal">
+        <div className="modal-header">Titre</div>
+        {/* contenu */}
+    </div>
 </div>
 ```
 
@@ -230,5 +265,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 2.0 — SVG icon system
-**Dernière mise à jour** : 13 février 2026
+**Version** : 3.0 — CSS partagé + design system centralisé
+**Dernière mise à jour** : 14 février 2026
