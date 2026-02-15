@@ -2495,29 +2495,23 @@
                                     )}
 
                                     {weatherData.length > 0 && (
-                                        <section className="section">
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    alignItems: "center",
-                                                    marginBottom: "20px",
-                                                }}
-                                            >
-                                                <h2 style={{ margin: 0 }}>
-                                                    Météo Comparative (5 jours)
-                                                </h2>
-                                                <div style={{ 
-                                                    fontFamily: '"JetBrains Mono", monospace', 
-                                                    fontWeight: 400, 
-                                                    fontSize: '0.7rem', 
-                                                    color: 'var(--storm-gray)',
-                                                    marginTop: '4px'
-                                                }}>
-                                                    Les données ci-dessous viennent de Metéobleu et de Metéo France
-                                                </div>
-                                                <div className="toggle">
+    <section className="section">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+            <div>
+                <h2 style={{ margin: 0 }}> Météo Comparative (5 jours) </h2>
+                {/* Ajout du sous-texte ci-dessous */}
+                <div style={{ 
+                    fontFamily: '"JetBrains Mono", monospace', 
+                    fontWeight: 400, 
+                    fontSize: '0.7rem', 
+                    color: 'var(--storm-gray)',
+                    marginTop: '4px'
+                }}>
+                    Les données ci-dessous viennent de Metéobleu et de Metéo France
+                </div>
+            </div>
+            <div className="toggle">
+                ...
                                                     <button
                                                         className={`toggle-btn ${viewMode === "day" ? "active" : ""}`}
                                                         onClick={() =>
