@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.4.0"></script>
+        <script src="icons.js?v=7.5.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.4.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.5.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -203,7 +203,7 @@
             <a href="index.html" class="back-link">&larr; Retour au dashboard</a>
 
             <h1>Design System</h1>
-            <div class="subtitle">Ou-skier v7.4 — Composants, icônes, couleurs et typographie</div>
+            <div class="subtitle">Ou-skier v7.5 — Composants, icônes, couleurs et typographie</div>
 
             <!-- ============================================================ -->
             <!-- COULEURS -->
@@ -395,6 +395,51 @@
             <h3>Input</h3>
             <div class="component-row" style="max-width:400px">
                 <input class="input" type="text" placeholder="Rechercher une commune..." />
+            </div>
+
+            <h3>Tableau Chutes de Neige</h3>
+            <div style="max-width:1290px;margin-bottom:24px">
+                <div class="snow-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Secteur</th>
+                                <th><span class="day-abbr">Dim</span><span class="day-num">15</span></th>
+                                <th><span class="day-abbr">Lun</span><span class="day-num">16</span></th>
+                                <th><span class="day-abbr">Mar</span><span class="day-num">17</span></th>
+                                <th><span class="day-abbr">Mer</span><span class="day-num">18</span></th>
+                                <th><span class="day-abbr">Jeu</span><span class="day-num">19</span></th>
+                                <th><span class="day-abbr">Ven</span><span class="day-num">20</span></th>
+                                <th><span class="day-abbr">Sam</span><span class="day-num">21</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="sector-name">Pic du pourtalet</span> <span class="sector-altitude">(2000m)</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">5</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">12</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">8</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="sector-name">Cauterets</span> <span class="sector-altitude">(2000m)</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">3</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                                <td><span class="snow-value">0</span> <span class="snow-unit">cm</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classes : <code>.snow-table</code>, <code>.sector-name</code>, <code>.sector-altitude</code>, <code>.snow-value</code>, <code>.snow-unit</code>, <code>.day-abbr</code>, <code>.day-num</code>
             </div>
 
             <h3>Footer CTA</h3>

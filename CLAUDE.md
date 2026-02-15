@@ -25,7 +25,9 @@ Avant de créer ou modifier un composant UI (bouton, toggle, tag, modal, input, 
 | Modals | `.modal-overlay`, `.modal`, `.modal-header` | design-system.css |
 | Inputs | `.input` | design-system.css |
 | Icônes | `.icon` | design-system.css |
-| Footer CTA | `.footer-cta`, `.footer-cta-title` | design-system.css |
+| Snow Table | `.snow-table`, `.sector-name`, `.sector-altitude`, `.snow-value`, `.snow-unit`, `.day-abbr`, `.day-num` | design-system.css |
+| Section Title | `.section-title` | design-system.css |
+| Footer CTA | `.footer-cta`, `.footer-cta-title`, `.footer-cta-buttons` | design-system.css |
 | Animations | `fadeIn`, `fadeInOverlay`, `slideInModal`, `slideDown` | design-system.css |
 
 ### Pattern de composition

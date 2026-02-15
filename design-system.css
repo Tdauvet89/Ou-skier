@@ -241,12 +241,133 @@
     background: white;
 }
 
+/* === SNOW TABLE === */
+.snow-table {
+    display: flex;
+    width: 100%;
+    max-width: 1290px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.snow-table table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.snow-table thead tr {
+    height: 82px;
+    border-radius: 15px 15px 0 0;
+    border: 1px solid #E1E8F2;
+    background: #F9FAFC;
+}
+
+.snow-table thead th {
+    padding: 16px;
+    text-align: center;
+    font-family: "Garnett", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1F2023;
+    border: 1px solid #E1E8F2;
+    background: #F9FAFC;
+    vertical-align: middle;
+}
+
+.snow-table thead th:first-child {
+    text-align: left;
+    padding-left: 24px;
+}
+
+.snow-table .day-abbr {
+    display: block;
+    color: #5E7690;
+    font-family: "Garnett", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.snow-table .day-num {
+    display: block;
+    color: #1F2023;
+    font-family: "Garnett", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.snow-table tbody td {
+    height: 87px;
+    border: 1px solid #E1E8F2;
+    vertical-align: middle;
+}
+
+.snow-table tbody td:first-child {
+    width: 277px;
+    background: #FFF;
+    padding: 16px 24px;
+}
+
+.snow-table tbody td:not(:first-child) {
+    background: #F9FAFC;
+    text-align: center;
+    padding: 16px;
+}
+
+.snow-table .sector-name {
+    color: #1F2023;
+    font-family: "Garnett", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.snow-table .sector-altitude {
+    color: #5E7690;
+    font-family: "Garnett", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.snow-table .snow-value {
+    color: #1F2023;
+    text-align: center;
+    font-family: "Garnett", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.snow-table .snow-unit {
+    color: #5E7690;
+    font-family: "Garnett", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: normal;
+}
+
+/* === SECTION TITLE === */
+.section-title {
+    font-family: "Garnett", sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: #1F2023;
+    line-height: normal;
+    margin-bottom: 20px;
+}
+
 /* === FOOTER CTA === */
 .footer-cta {
     background: radial-gradient(95.04% 241.97% at 50% -76.74%, #FFF 54.74%, #FFE7E3 68.1%, #B892F6 84.91%);
     padding: 80px 20px;
     text-align: center;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0;
 }
 
 .footer-cta-title {

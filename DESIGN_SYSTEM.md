@@ -196,20 +196,60 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 <input className="input" type="text" placeholder="Rechercher..." />
 ```
 
+### Snow Table (Chutes de Neige)
+
+```jsx
+<div className="snow-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Secteur</th>
+                <th><span className="day-abbr">Dim</span><span className="day-num">15</span></th>
+                {/* ... */}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <span className="sector-name">Pic du pourtalet</span>
+                    <span className="sector-altitude"> (2000m)</span>
+                </td>
+                <td>
+                    <span className="snow-value">5</span>
+                    {" "}<span className="snow-unit">cm</span>
+                </td>
+                {/* ... */}
+            </tr>
+        </tbody>
+    </table>
+</div>
+```
+
+| Classe | Rôle | Styles |
+|--------|------|--------|
+| `.snow-table` | Conteneur flex | max-width: 1290px, border-radius: 15px |
+| `.sector-name` | Nom du secteur | Garnett 16px 500, #1F2023 |
+| `.sector-altitude` | Altitude | Garnett 13px 500, #5E7690 |
+| `.snow-value` | Valeur neige | Garnett 16px 500, #1F2023 |
+| `.snow-unit` | Unité "cm" | Garnett 13px 500, #5E7690 |
+| `.day-abbr` | Jour abrégé | Garnett 13px 500, #5E7690 |
+| `.day-num` | Numéro du jour | Garnett 16px 500, #1F2023 |
+
 ### Footer CTA
 
 ```jsx
 <div className="footer-cta">
     <div className="footer-cta-title">
-        Trouve le bon spot pour plus de poudreuse
+        Trouves le bon spot pour ta rando
     </div>
-    <a className="btn btn-light" href="https://..." target="_blank" rel="noopener noreferrer">
-        Proposer une amélioration
-    </a>
+    <div className="footer-cta-buttons">
+        <a className="btn btn-dark" href="...">Proposer une amélioration</a>
+        <a className="btn btn-ghost" href="...">Faire un don</a>
+    </div>
 </div>
 ```
 
-Gradient : `linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f97316 100%)` — purple → pink → orange.
+Gradient : `radial-gradient(95.04% 241.97% at 50% -76.74%, #FFF 54.74%, #FFE7E3 68.1%, #B892F6 84.91%)`.
 
 ### Modals
 
@@ -281,5 +321,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 3.1 — Ajout footer CTA + btn-light
-**Dernière mise à jour** : 14 février 2026
+**Version** : 3.2 — Ajout snow-table component + redesign layout
+**Dernière mise à jour** : 15 février 2026
