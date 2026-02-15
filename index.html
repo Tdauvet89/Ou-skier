@@ -20,7 +20,7 @@
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
-                background: #FAFAFA;
+                background: white;
                 min-height: 100vh;
                 padding: 0;
                 color: var(--storm-gray);
@@ -29,7 +29,7 @@
             .container {
                 max-width: 1440px;
                 margin: 0 auto;
-                background: #FAFAFA;
+                background: white;
                 animation: slideDown 0.6s ease-out;
             }
 
@@ -40,6 +40,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
             }
 
             h1 {
@@ -78,7 +81,7 @@
             }
 
             .main-content {
-                background: #FAFAFA;
+                background: white;
                 padding: 40px 75px;
                 border-radius: 0;
                 box-shadow: none;
@@ -2434,6 +2437,16 @@
                                     {snowData.length > 0 && (
                                         <section className="section">
                                             <h2>Chutes de Neige (7 jours)</h2>
+                                            <div style={{ 
+                                            fontFamily: '"JetBrains Mono", monospace', 
+                                            fontWeight: 400, 
+                                            fontSize: '0.7rem', 
+                                            color: 'var(--storm-gray)', 
+                                            marginTop: '-15px', 
+                                            marginBottom: '20px' 
+                                        }}>
+                                            Les données ci-dessous viennent de Metéobleu
+                                        </div>
                                             <div className="snow-table">
                                                 <table>
                                                     <thead>
@@ -2498,6 +2511,15 @@
                                                 <h2 style={{ margin: 0 }}>
                                                     Météo Comparative (5 jours)
                                                 </h2>
+                                                <div style={{ 
+                                                    fontFamily: '"JetBrains Mono", monospace', 
+                                                    fontSize: '0.7rem', 
+                                                    fontWeight: 400, 
+                                                    color: 'var(--storm-gray)' 
+                                                }}>
+                                                    Les données ci-dessous viennent de Metéobleu et de Metéo France
+                                                </div>
+                                            </div>
                                                 <div className="toggle">
                                                     <button
                                                         className={`toggle-btn ${viewMode === "day" ? "active" : ""}`}
