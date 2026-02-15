@@ -764,7 +764,196 @@
                     grid-template-columns: 1fr;
                 }
             }
+                /* === NOUVEAU DESIGN TABLEAU (PREVIEW) === */
+.new-weather-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    margin-top: 50px; /* Espace pour séparer de l'ancien tableau */
+    margin-bottom: 50px;
+}
 
+.new-table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.new-weather-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1000px; /* Force le scroll sur mobile */
+}
+
+.new-weather-table th {
+    background: #f8fafc; /* slate-50 */
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-family: "Barlow Condensed", sans-serif;
+}
+
+.new-weather-table .th-sector {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--deep-blue);
+}
+
+.new-weather-table .th-date {
+    text-align: center;
+    min-width: 140px;
+}
+
+.new-date-day {
+    font-size: 0.75rem;
+    color: #64748b; /* slate-500 */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.new-date-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--deep-blue);
+    display: block;
+    margin-top: 4px;
+    line-height: 1;
+}
+
+.new-weather-table td {
+    padding: 24px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    background: white;
+    vertical-align: top;
+}
+
+.new-weather-table tr:last-child td {
+    border-bottom: none;
+}
+
+.new-weather-table tr:hover td {
+    background: #f8fafc;
+}
+
+.new-weather-table .td-sector {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: white; /* Important pour cacher le scroll */
+    border-right: 1px solid #f1f5f9;
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--deep-blue);
+}
+
+.new-weather-table tr:hover .td-sector {
+    background: #f8fafc;
+}
+
+/* Layout de la cellule météo */
+.weather-cell-inner {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+/* Partie Gauche : Icone + Label */
+.weather-left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+    gap: 6px;
+}
+
+.weather-main-icon svg {
+    width: 42px; /* w-10 h-10 équivalent */
+    height: 42px;
+}
+
+.weather-condition-label {
+    font-size: 0.7rem;
+    color: #475569; /* slate-600 */
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Partie Droite : Détails */
+.weather-right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.weather-temp-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.weather-temp-main {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--deep-blue);
+    line-height: 1;
+}
+
+.weather-temp-range {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.weather-detail-row {
+    font-size: 0.85rem;
+    color: var(--storm-gray);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Tags BERA */
+.bera-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.bera-green { background-color: #22c55e; }
+.bera-orange { background-color: #f97316; }
+.bera-red { background-color: #ef4444; }
+
+.bera-link {
+    font-size: 0.8rem;
+    color: #2563eb;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.precip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
         </style>
     </head>
     <body>
