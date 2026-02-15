@@ -1,107 +1,324 @@
-<script type="text/babel">
-    const { useState, useEffect } = React;
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ski rando Météo - Dashboard Ski de Randonnée</title>
+        <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="icons.js?v=7.6.0"></script>
+        <script src="weatherCodes.js?v=7.6.0"></script>
+        <script src="massifMapping.js?v=7.6.0"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="design-system.css?v=7.6.0" />
+        <style>
+            /* --- BASE & STICKY HEADER --- */
+            body {
+                font-family: "JetBrains Mono", monospace;
+                background: white; /* Fond blanc demandé */
+                min-height: 100vh;
+                padding: 0;
+                color: var(--storm-gray);
+            }
 
-    // --- FONCTIONS UTILITAIRES (Fix du bug) ---
-    const getWindDirectionDisplay = (deg) => {
-        if (deg === null || deg === undefined) return { cardinal: "N/A" };
-        const sectors = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
-        const index = Math.round(deg / 45) % 8;
-        return { cardinal: sectors[index] };
-    };
+            .container {
+                max-width: 1440px;
+                margin: 0 auto;
+                background: white;
+                animation: slideDown 0.6s ease-out;
+            }
 
-    const DEFAULT_RESORTS = [
-        { name: "Guzet", lat: 42.7857, lon: 1.2261, altitude: 1400 },
-        { name: "Piau-Engaly", lat: 42.7833, lon: 0.1667, altitude: 1850 },
-        { name: "Saint-Lary", lat: 42.8167, lon: 0.3167, altitude: 1700 },
-    ];
+            header {
+                background: white;
+                padding: 20px 75px;
+                border-bottom: 1px solid #E1E8F2;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                /* Sticky Header */
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
 
-    function MountainWeatherApp() {
-        // ... reste de ton code identique ...
-        const [resorts, setResorts] = useState(DEFAULT_RESORTS);
-        const [weatherData, setWeatherData] = useState([]);
-        const [viewMode, setViewMode] = useState("day");
-        const [braData, setBraData] = useState({});
+            .main-content {
+                background: white;
+                padding: 40px 75px;
+                border-radius: 0;
+                box-shadow: none;
+            }
 
-        // Mock data pour le test
-        useEffect(() => {
-            const mock = resorts.map(r => ({
-                name: r.name,
-                days: Array(5).fill(0).map((_, i) => ({
-                    condition: "Beau temps",
-                    icon: weatherSvg.sun,
-                    temp_min: -2, temp_max: 8,
-                    wind_mean: 15, windDirection: 180,
-                    gust_min: 20, gust_max: 30,
-                    snowCm: i === 2 ? 10 : 0
-                }))
-            }));
-            setWeatherData(mock);
-        }, []);
+            /* --- NOUVEAU DESIGN TABLEAU (STYLES CSS) --- */
+            .new-weather-card {
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                margin-top: 20px;
+            }
+            .new-table-container { overflow-x: auto; width: 100%; }
+            .new-weather-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; border:none; box-shadow:none; }
+            .new-weather-table th { background: #f8fafc; padding: 16px; border-bottom: 1px solid #e2e8f0; color: var(--deep-blue); }
+            .new-weather-table .th-sector { position: sticky; left: 0; z-index: 20; border-right: 1px solid #e2e8f0; background: #f8fafc; }
+            .new-weather-table .th-date { text-align: center; min-width: 150px; }
+            .new-date-day { font-size: 0.75rem; color: #64748b; text-transform: uppercase; display: block; }
+            .new-date-num { font-size: 1.5rem; font-weight: 700; display: block; margin-top: 4px; }
+            .new-weather-table td { padding: 20px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top; background: white; }
+            .new-weather-table .td-sector { position: sticky; left: 0; z-index: 10; border-right: 1px solid #f1f5f9; font-weight: 600; font-size: 1.1rem; background: white; }
+            
+            .weather-cell-inner { display: flex; gap: 12px; align-items: flex-start; }
+            .weather-left-col { display: flex; flex-direction: column; align-items: center; min-width: 80px; gap: 4px; }
+            .weather-main-icon svg { width: 40px; height: 40px; }
+            .weather-condition-label { font-size: 0.7rem; color: #475569; text-align: center; line-height: 1.2; }
+            .weather-right-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+            .weather-temp-main { font-size: 1.4rem; font-weight: 700; color: var(--deep-blue); }
+            .weather-temp-range { font-size: 0.75rem; color: #64748b; }
+            .weather-detail-row { font-size: 0.8rem; color: var(--storm-gray); display: flex; align-items: center; gap: 4px; }
+            
+            .bera-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; color: white; font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
+            .bera-1 { background: #27ae60; } .bera-2 { background: #f1c40f; color: #000; } 
+            .bera-3 { background: #e67e22; } .bera-4, .bera-5 { background: #e74c3c; }
+            
+            .bera-link { font-size: 0.75rem; color: #2563eb; text-decoration: underline; cursor: pointer; margin-top: 2px; }
+            .precip-badge { display: inline-flex; align-items: center; gap: 4px; color: #2563eb; font-weight: 700; font-size: 0.8rem; margin-top: 4px; }
 
-        return (
-            <div className="container">
-                {/* Ton Header Sticky */}
-                <header>
-                    <h1>Ski Rando Météo</h1>
-                </header>
+            /* Style pour les sous-textes */
+            .subtitle-detail {
+                font-family: "JetBrains Mono", monospace;
+                font-weight: 400;
+                font-size: 0.7rem;
+                color: var(--storm-gray);
+                margin-top: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
 
-                <main className="main-content">
-                    {/* TABLEAU 1 (ANCIEN) */}
-                    <section className="section">
-                        <h2>Météo Comparative (5 jours)</h2>
-                        {/* ... ancien tableau ... */}
-                    </section>
+        <script type="text/babel">
+            const { useState, useEffect } = React;
 
-                    {/* TABLEAU 2 (NOUVEAU DESIGN TEST) */}
-                    {weatherData.length > 0 && (
-                        <section className="section">
-                            <h2 style={{marginTop: '40px'}}>Nouveau Design (Test)</h2>
-                            <div className="new-weather-card">
-                                <div className="new-table-container">
-                                    <table className="new-weather-table">
-                                        <thead>
-                                            <tr>
-                                                <th className="th-sector">Secteur</th>
-                                                {[0,1,2,3,4].map(i => (
-                                                    <th key={i} className="th-date">Jour {i+1}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {weatherData.map((resort, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="td-sector">{resort.name}</td>
-                                                    {resort.days.map((day, i) => (
-                                                        <td key={i}>
-                                                            <div className="weather-cell-inner">
-                                                                <div className="weather-left-col">
-                                                                    <div dangerouslySetInnerHTML={{__html: day.icon}}></div>
-                                                                    <div className="weather-condition-label">{day.condition}</div>
-                                                                </div>
-                                                                <div className="weather-right-col">
-                                                                    <div className="weather-temp-main">{Math.round((day.temp_max+day.temp_min)/2)}°</div>
-                                                                    <div className="weather-detail-row">
-                                                                        {/* Utilisation de la fonction fixée */}
-                                                                        <span dangerouslySetInnerHTML={{__html: windArrowSvg(day.windDirection, 14)}}></span>
-                                                                        {getWindDirectionDisplay(day.windDirection).cardinal} {day.wind_mean}km/h
-                                                                    </div>
-                                                                    {day.snowCm > 0 && <div className="precip-badge">❄️ {day.snowCm}cm</div>}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+            // --- FONCTION CORRECTIVE : Direction du vent ---
+            const getWindDirectionDisplay = (deg) => {
+                if (deg === null || deg === undefined) return { cardinal: "N/A" };
+                const sectors = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+                const index = Math.round(deg / 45) % 8;
+                return { cardinal: sectors[index] };
+            };
+
+            const DEFAULT_RESORTS = [
+                { name: "Guzet", lat: 42.7857, lon: 1.2261, altitude: 1400 },
+                { name: "Piau-Engaly", lat: 42.7833, lon: 0.1667, altitude: 1850 },
+                { name: "Saint-Lary", lat: 42.8167, lon: 0.3167, altitude: 1700 },
+                { name: "Couterets", lat: 42.8833, lon: -0.1167, altitude: 1730 },
+                { name: "Tourmalet", lat: 42.908, lon: 0.145, altitude: 1800 },
+                { name: "Peyragudes", lat: 42.793, lon: 0.443, altitude: 1600 },
+                { name: "Ax 3 Domaines", lat: 42.7, lon: 1.833, altitude: 1400 }
+            ];
+
+            const MF_API_KEY = "YmZ6emZ6ZWZ6ZWZ6ZWZ6ZWZ6ZWZ6ZWZ6"; // Dummy key pour l'exemple
+
+            function MountainWeatherApp() {
+                const [resorts, setResorts] = useState(DEFAULT_RESORTS);
+                const [weatherData, setWeatherData] = useState([]);
+                const [snowData, setSnowData] = useState([]);
+                const [braData, setBraData] = useState({});
+                const [viewMode, setViewMode] = useState("day");
+                const [beraModal, setBeraModal] = useState(null);
+
+                // Simulation du chargement (remplace tes fetches réels ici)
+                useEffect(() => {
+                    const mock = DEFAULT_RESORTS.map(r => ({
+                        name: r.name,
+                        days: Array(5).fill(0).map((_, i) => ({
+                            condition: "Beau temps",
+                            icon: typeof weatherSvg !== 'undefined' ? weatherSvg.sun : '',
+                            temp_min: -4, temp_max: 6,
+                            wind_mean: 10, windDirection: 180,
+                            gust_min: 15, gust_max: 25,
+                            snowCm: i === 2 ? 12 : 0,
+                            rainMm: 0
+                        }))
+                    }));
+                    setWeatherData(mock);
+                    setSnowData(mock.map(m => ({ name: m.name, snowByDay: [0,0,12,0,0,0,0] })));
+                }, []);
+
+                return (
+                    <div className="container">
+                        <header>
+                            <div className="logo">
+                                <span className="logo-text-primary">Ski rando</span>
+                                <span className="logo-text-secondary">météo</span>
+                            </div>
+                            <div className="header-controls">
+                                <div className="view-toggle">
+                                    <button className={`toggle-btn ${viewMode === 'day' ? 'active' : ''}`} onClick={() => setViewMode('day')}>7 jours</button>
+                                    <button className={`toggle-btn ${viewMode === 'hourly' ? 'active' : ''}`} onClick={() => setViewMode('hourly')}>Horaire</button>
                                 </div>
                             </div>
-                        </section>
-                    )}
-                </main>
-            </div>
-        );
-    }
+                        </header>
 
-    ReactDOM.render(<MountainWeatherApp />, document.getElementById("root"));
-</script>
+                        <main className="main-content">
+                            {/* --- TABLEAU COMPARATIF ACTUEL --- */}
+                            {weatherData.length > 0 && (
+                                <section className="section">
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <h2 style={{ margin: 0 }}>Météo Comparative (5 jours)</h2>
+                                        <div className="subtitle-detail">
+                                            Les données ci-dessous viennent de Metéobleu et de Metéo France
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="snow-table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Secteur</th>
+                                                    {[0,1,2,3,4].map(i => <th key={i}>Jour {i+1}</th>)}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {weatherData.map((resort, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{resort.name}</td>
+                                                        {resort.days.map((d, i) => <td key={i}>{Math.round((d.temp_min+d.temp_max)/2)}°</td>)}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* --- NOUVEAU DESIGN EN TEST --- */}
+                            {weatherData.length > 0 && viewMode === 'day' && (
+                                <section className="section">
+                                    <h2 style={{ marginTop: '60px', marginBottom: '5px' }}>Nouveau Design (Preview)</h2>
+                                    <div className="subtitle-detail" style={{ marginBottom: '20px' }}>
+                                        Test d'intégration du nouveau design system
+                                    </div>
+
+                                    <div className="new-weather-card">
+                                        <div className="new-table-container">
+                                            <table className="new-weather-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="th-sector">Secteur</th>
+                                                        {[0,1,2,3,4].map(i => {
+                                                            const d = new Date(); d.setDate(d.getDate() + i);
+                                                            return (
+                                                                <th key={i} className="th-date">
+                                                                    <span className="new-date-day">{d.toLocaleDateString("fr-FR", { weekday: "short" })}</span>
+                                                                    <span className="new-date-num">{d.getDate()}</span>
+                                                                </th>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {weatherData.map((resort, idx) => (
+                                                        <tr key={idx}>
+                                                            <td className="td-sector">
+                                                                <div>{resort.name}</div>
+                                                                <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#64748b' }}>
+                                                                    {resorts.find(r => r.name === resort.name)?.altitude}m
+                                                                </div>
+                                                            </td>
+                                                            {resort.days.slice(0, 5).map((day, i) => {
+                                                                const windDir = getWindDirectionDisplay(day.windDirection);
+                                                                return (
+                                                                    <td key={i}>
+                                                                        <div className="weather-cell-inner">
+                                                                            <div className="weather-left-col">
+                                                                                <div className="weather-main-icon" dangerouslySetInnerHTML={{ __html: day.icon }}></div>
+                                                                                <div className="weather-condition-label">{day.condition}</div>
+                                                                            </div>
+                                                                            <div className="weather-right-col">
+                                                                                <div className="weather-temp-row">
+                                                                                    <span className="weather-temp-main">{Math.round((day.temp_max+day.temp_min)/2)}°</span>
+                                                                                    <span className="weather-temp-range">({Math.round(day.temp_min)}°/{Math.round(day.temp_max)}°)</span>
+                                                                                </div>
+                                                                                <div className="weather-detail-row">
+                                                                                    {typeof windArrowSvg !== 'undefined' && <span dangerouslySetInnerHTML={{ __html: windArrowSvg(day.windDirection, 14) }}></span>}
+                                                                                    {windDir.cardinal} {Math.round(day.wind_mean)} km/h
+                                                                                </div>
+                                                                                {day.snowCm > 0 && (
+                                                                                    <div className="precip-badge">
+                                                                                        ❄️ {day.snowCm} cm
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* --- SECTION CHUTES DE NEIGE --- */}
+                            {snowData.length > 0 && (
+                                <section className="section" style={{ marginTop: '60px' }}>
+                                    <h2 style={{ marginBottom: '5px' }}>Chutes de Neige (7 jours)</h2>
+                                    <div className="subtitle-detail" style={{ marginBottom: '20px' }}>
+                                        Les données ci-dessous viennent de Metéobleu
+                                    </div>
+                                    <div className="snow-table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Station</th>
+                                                    {[0,1,2,3,4,5,6].map(i => <th key={i}>J+{i}</th>)}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {snowData.map((s, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{s.name}</td>
+                                                        {s.snowByDay.map((val, i) => <td key={i}>{val > 0 ? `${val}cm` : '-'}</td>)}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            )}
+                        </main>
+
+                        <footer className="footer">
+                            <div className="container">
+                                <div className="footer-content">
+                                    <div className="footer-brand">
+                                        <div className="logo-text-primary">Ski rando</div>
+                                        <div className="logo-text-secondary">météo</div>
+                                        <div className="subtitle-detail" style={{ marginTop: '15px' }}>
+                                            Les données viennent de Metéobleu et de Metéo France.
+                                        </div>
+                                        <div className="footer-tagline" style={{ marginTop: '10px' }}>
+                                            Trouves le bon spot pour ta rando
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                );
+            }
+
+            ReactDOM.render(<MountainWeatherApp />, document.getElementById("root"));
+        </script>
+    </body>
+</html>
