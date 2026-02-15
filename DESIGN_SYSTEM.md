@@ -173,16 +173,20 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 
 ### Toggle Buttons
 
+Pill toggle : 202×36px, border-radius 15px, background #E5E7EF. Bouton actif : 100×32px, bg white, border-radius 15px. Police : Inter 12px 400.
+
 ```jsx
 <div className="toggle">
     <button className={`toggle-btn ${mode === 'day' ? 'active' : ''}`}>
-        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
+        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleCalendar}}></span> Jour
     </button>
     <button className={`toggle-btn ${mode === 'hourly' ? 'active' : ''}`}>
-        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.clock}}></span> Vue Horaire
+        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleClock}}></span> 5h
     </button>
 </div>
 ```
+
+Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleClock` (15×15 horloge), fill #1F2023.
 
 ### Tags
 
@@ -321,5 +325,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 3.2 — Ajout snow-table component + redesign layout
+**Version** : 3.3 — Snow-table appliqué au tableau météo + nouveau toggle Inter + footer CTA fixé
 **Dernière mise à jour** : 15 février 2026

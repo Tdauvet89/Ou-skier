@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.5.0"></script>
+        <script src="icons.js?v=7.6.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.5.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.6.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -203,7 +203,7 @@
             <a href="index.html" class="back-link">&larr; Retour au dashboard</a>
 
             <h1>Design System</h1>
-            <div class="subtitle">Ou-skier v7.5 — Composants, icônes, couleurs et typographie</div>
+            <div class="subtitle">Ou-skier v7.6 — Composants, icônes, couleurs et typographie</div>
 
             <!-- ============================================================ -->
             <!-- COULEURS -->
@@ -387,8 +387,8 @@
             <h3>Toggle vue</h3>
             <div class="component-row">
                 <div class="toggle">
-                    <button class="toggle-btn active">Vue Jour</button>
-                    <button class="toggle-btn">Vue Horaire</button>
+                    <button class="toggle-btn active" id="toggle-jour">Jour</button>
+                    <button class="toggle-btn" id="toggle-5h">5h</button>
                 </div>
             </div>
 
@@ -479,6 +479,10 @@
             // Logo previews
             document.getElementById('logo-type-preview').innerHTML = logoSvg;
             document.getElementById('logo-component-preview').innerHTML = logoSvg;
+
+            // Toggle icons
+            document.getElementById('toggle-jour').innerHTML = uiSvg.toggleCalendar + ' Jour';
+            document.getElementById('toggle-5h').innerHTML = uiSvg.toggleClock + ' 5h';
 
             // Populate weather icons
             var weatherGrid = document.getElementById('weather-icons');

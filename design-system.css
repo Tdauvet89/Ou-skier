@@ -120,39 +120,47 @@
 /* === TOGGLES === */
 .toggle {
     display: inline-flex;
-    background: #f1f5f9;
-    border-radius: 24px;
-    padding: 3px;
-    border: 1px solid #e2e8f0;
+    align-items: center;
+    width: 202px;
+    height: 36px;
+    border-radius: 15px;
+    background: #E5E7EF;
+    padding: 2px;
 }
 
 .toggle-btn {
-    padding: 8px 22px;
+    width: 100px;
+    height: 32px;
     border: none;
     background: transparent;
-    font-family: "Barlow Condensed", sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: normal;
     cursor: pointer;
-    border-radius: 22px;
+    border-radius: 15px;
     transition: all 0.2s ease;
-    color: var(--storm-gray);
+    color: #1F2023;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 4px;
 }
 
 .toggle-btn.active {
-    background: var(--deep-blue);
-    color: white;
-    box-shadow: 0 2px 8px rgba(26, 82, 118, 0.25);
+    background: #FFF;
+    color: #000;
 }
 
 .toggle-btn:hover:not(.active) {
-    background: #e2e8f0;
-    color: var(--deep-blue);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.toggle-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: #1F2023;
 }
 
 /* === TAGS === */
@@ -302,7 +310,7 @@
 }
 
 .snow-table tbody td {
-    height: 87px;
+    min-height: 87px;
     border: 1px solid #E1E8F2;
     vertical-align: middle;
 }
@@ -365,9 +373,17 @@
 /* === FOOTER CTA === */
 .footer-cta {
     background: radial-gradient(95.04% 241.97% at 50% -76.74%, #FFF 54.74%, #FFE7E3 68.1%, #B892F6 84.91%);
+    width: 1390px;
+    max-width: 100%;
+    min-height: 390px;
+    margin: 0 auto;
     padding: 80px 20px;
     text-align: center;
-    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0 0 12px 12px;
 }
 
 .footer-cta-title {

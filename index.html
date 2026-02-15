@@ -7,16 +7,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.5.0"></script>
-        <script src="weatherCodes.js?v=7.5.0"></script>
-        <script src="massifMapping.js?v=7.5.0"></script>
+        <script src="icons.js?v=7.6.0"></script>
+        <script src="weatherCodes.js?v=7.6.0"></script>
+        <script src="massifMapping.js?v=7.6.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.5.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.6.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -271,86 +271,24 @@
 
             /* Toggle : utilise .toggle / .toggle-btn de design-system.css */
 
-            /* Unified Table — clean Surfline style */
-            .unified-weather-table {
-                width: 100%;
-                border-collapse: separate;
-                border-spacing: 0;
-                position: relative;
-                border: 1px solid #e2e8f0;
-            }
-
-            .unified-weather-table thead th {
-                position: -webkit-sticky;
-                position: sticky;
-                top: 0;
-                z-index: 30;
-            }
-
-            .unified-table-wrapper {
-                width: 100%;
-                overflow-x: auto;
-                margin-bottom: 30px;
-                border-radius: 10px;
-                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-                position: relative;
-                border: 1px solid #e2e8f0;
-            }
-
-            /* Sticky first column */
-            .unified-weather-table .sticky-first-col {
-                position: sticky;
-                left: 0;
-                z-index: 20;
-                background: white;
-                font-weight: 600;
-                padding: 12px 16px;
-                min-width: 180px;
-                box-shadow: 3px 0 6px rgba(0, 0, 0, 0.04);
-                border-right: 1px solid #e2e8f0;
-            }
-
-            .unified-weather-table thead .sticky-first-col {
-                background: var(--deep-blue);
-                color: white;
-                z-index: 40;
-            }
-
-            .unified-weather-table tbody .sticky-first-col {
-                background: #fafcfe;
-                color: var(--deep-blue);
-            }
-
-            .day-col-header {
-                text-align: center;
-                padding: 12px 8px;
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 0.8rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                line-height: 1.3;
-                min-width: 140px;
-                border-right: 1px solid rgba(255,255,255,0.08);
-            }
-
-            .day-col-header.today-col {
-                background: var(--fresh-green);
-            }
-
+            /* Hourly sub-header */
             .hourly-col-header {
                 text-align: center;
                 padding: 4px 2px;
-                font-size: 0.65rem;
-                font-weight: 400;
-                color: white;
+                font-family: "Garnett", sans-serif;
+                font-size: 11px;
+                font-weight: 500;
+                color: #5E7690;
                 min-width: 35px;
                 max-width: 35px;
-                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                border-right: 1px solid #E1E8F2;
+                background: #F9FAFC;
             }
 
             /* Une heure sur deux en bold pour faciliter la lecture */
             .hourly-col-header:nth-child(2n + 2) {
-                font-weight: 700;
+                font-weight: 500;
+                color: #1F2023;
             }
 
             .hourly-col-header:first-of-type {
@@ -359,7 +297,6 @@
 
             .day-cell {
                 padding: 10px 8px;
-                border-right: 1px solid #e2e8f0;
                 min-width: 200px;
                 vertical-align: middle;
             }
@@ -409,22 +346,14 @@
                 color: #1a5276;
             }
 
-            .day-cell.today-cell {
-                background: rgba(39, 174, 96, 0.08);
-            }
-
             .hourly-cell {
                 text-align: center;
                 padding: 6px 2px;
                 min-width: 35px;
                 max-width: 35px;
-                border-right: 1px solid #f1f5f9;
+                border-right: 1px solid #E1E8F2;
                 vertical-align: middle;
                 font-size: 0.7rem;
-            }
-
-            .hourly-cell.today-cell {
-                background: rgba(39, 174, 96, 0.08);
             }
 
             .cell-icon {
@@ -2563,11 +2492,10 @@
                                                     justifyContent:
                                                         "space-between",
                                                     alignItems: "center",
-                                                    marginBottom: "10px",
+                                                    marginBottom: "20px",
                                                 }}
                                             >
                                                 <h2 style={{ margin: 0 }}>
-                                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.sunUi}}></span>
                                                     Météo Comparative (5 jours)
                                                 </h2>
                                                 <div className="toggle">
@@ -2577,7 +2505,7 @@
                                                             setViewMode("day")
                                                         }
                                                     >
-                                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.calendar}}></span> Vue Jour
+                                                        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleCalendar}}></span> Jour
                                                     </button>
                                                     <button
                                                         className={`toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
@@ -2587,23 +2515,16 @@
                                                             )
                                                         }
                                                     >
-                                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.clock}}></span> Vue Horaire
+                                                        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleClock}}></span> 5h
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="unified-table-wrapper">
-                                                <table className="unified-weather-table">
+                                            <div className="snow-table" style={{maxWidth: "100%", overflow: "auto"}}>
+                                                <table>
                                                     <thead>
                                                         <tr>
-                                                            <th
-                                                                className="sticky-first-col"
-                                                                style={{
-                                                                    background:
-                                                                        "linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)",
-                                                                    color: "white",
-                                                                }}
-                                                            >
+                                                            <th>
                                                                 Secteur
                                                             </th>
                                                             {viewMode === "day"
@@ -2614,26 +2535,18 @@
                                                                   ].map(
                                                                       (
                                                                           offset,
-                                                                      ) => (
-                                                                          <th
-                                                                              key={
-                                                                                  offset
-                                                                              }
-                                                                              className={`day-col-header ${offset === 0 ? "today-col" : ""}`}
-                                                                              style={{
-                                                                                  background:
-                                                                                      offset ===
-                                                                                      0
-                                                                                          ? ""
-                                                                                          : "linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)",
-                                                                                  color: "white",
-                                                                              }}
-                                                                          >
-                                                                              {getDayLabel(
-                                                                                  offset,
-                                                                              )}
-                                                                          </th>
-                                                                      ),
+                                                                      ) => {
+                                                                          const date = new Date();
+                                                                          date.setDate(date.getDate() + offset);
+                                                                          const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
+                                                                          const dayNum = date.getDate();
+                                                                          return (
+                                                                              <th key={offset}>
+                                                                                  <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
+                                                                                  <span className="day-num">{dayNum}</span>
+                                                                              </th>
+                                                                          );
+                                                                      },
                                                                   )
                                                                 : // Vue horaire (23 heures par jour : 1h-23h)
                                                                   [
@@ -2642,47 +2555,28 @@
                                                                   ].map(
                                                                       (
                                                                           offset,
-                                                                      ) => (
-                                                                          <th
-                                                                              key={
-                                                                                  offset
-                                                                              }
-                                                                              colSpan={
-                                                                                  23
-                                                                              }
-                                                                              className={`day-col-header ${offset === 0 ? "today-col" : ""}`}
-                                                                              style={{
-                                                                                  background:
-                                                                                      offset ===
-                                                                                      0
-                                                                                          ? ""
-                                                                                          : "linear-gradient(135deg, var(--deep-blue) 0%, #2874a6 100%)",
-                                                                                  color: "white",
-                                                                                  padding:
-                                                                                      "8px 4px",
-                                                                              }}
-                                                                          >
-                                                                              {getDayLabel(
-                                                                                  offset,
-                                                                              )}
-                                                                          </th>
-                                                                      ),
+                                                                      ) => {
+                                                                          const date = new Date();
+                                                                          date.setDate(date.getDate() + offset);
+                                                                          const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
+                                                                          const dayNum = date.getDate();
+                                                                          return (
+                                                                              <th
+                                                                                  key={offset}
+                                                                                  colSpan={23}
+                                                                              >
+                                                                                  <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
+                                                                                  <span className="day-num">{dayNum}</span>
+                                                                              </th>
+                                                                          );
+                                                                      },
                                                                   )}
                                                         </tr>
                                                         {viewMode ===
                                                             "hourly" && (
-                                                            <tr
-                                                                style={{
-                                                                    background:
-                                                                        "linear-gradient(135deg, #5dade2 0%, #85c1e9 100%)",
-                                                                    color: "white",
-                                                                }}
-                                                            >
+                                                            <tr>
                                                                 <th
-                                                                    className="sticky-first-col"
                                                                     style={{
-                                                                        background:
-                                                                            "linear-gradient(135deg, #5dade2 0%, #85c1e9 100%)",
                                                                         fontSize:
                                                                             "0.7rem",
                                                                     }}
@@ -2771,38 +2665,9 @@
                                                                             resortIndex
                                                                         }
                                                                     >
-                                                                        <td className="sticky-first-col">
-                                                                            <a
-                                                                                href={
-                                                                                    meteoblueUrl
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                style={{
-                                                                                    fontWeight:
-                                                                                        "700",
-                                                                                    display:
-                                                                                        "block",
-                                                                                }}
-                                                                            >
-                                                                                {
-                                                                                    resort.name
-                                                                                }
-                                                                            </a>
-                                                                            <div
-                                                                                style={{
-                                                                                    fontSize:
-                                                                                        "0.7rem",
-                                                                                    opacity: 0.8,
-                                                                                    marginTop:
-                                                                                        "2px",
-                                                                                }}
-                                                                            >
-                                                                                (
-                                                                                {resortInfo?.altitude ||
-                                                                                    "?"}
-                                                                                m)
-                                                                            </div>
+                                                                        <td>
+                                                                            <span className="sector-name">{resort.name}</span>
+                                                                            <span className="sector-altitude"> ({resortInfo?.altitude || "?"}m)</span>
                                                                         </td>
 
                                                                         {viewMode ===
@@ -2910,7 +2775,7 @@
                                                                                               key={
                                                                                                   offset
                                                                                               }
-                                                                                              className={`day-cell ${offset === 0 ? "today-cell" : ""}`}
+                                                                                              className="day-cell"
                                                                                           >
                                                                                               <div className="day-cell-inner">
                                                                                                   {/* Colonne gauche : icone + description */}
@@ -3260,7 +3125,7 @@
                                                                                                               key={
                                                                                                                   h
                                                                                                               }
-                                                                                                              className={`hourly-cell ${offset === 0 ? "today-cell" : ""}`}
+                                                                                                              className="hourly-cell"
                                                                                                               style={{
                                                                                                                   fontSize:
                                                                                                                       "0.65rem",
@@ -3322,7 +3187,7 @@
                                                                                                                   key={
                                                                                                                       hour
                                                                                                                   }
-                                                                                                                  className={`hourly-cell ${offset === 0 ? "today-cell" : ""}`}
+                                                                                                                  className="hourly-cell"
                                                                                                                   style={{
                                                                                                                       fontSize:
                                                                                                                           "0.65rem",
@@ -3339,7 +3204,7 @@
                                                                                                               key={
                                                                                                                   hour
                                                                                                               }
-                                                                                                              className={`hourly-cell ${offset === 0 ? "today-cell" : ""}`}
+                                                                                                              className="hourly-cell"
                                                                                                           >
                                                                                                               <div
                                                                                                                   className="cell-icon"

@@ -20,7 +20,7 @@ Avant de créer ou modifier un composant UI (bouton, toggle, tag, modal, input, 
 | Composant | Classes | Fichier source |
 |-----------|---------|----------------|
 | Boutons | `.btn`, `.btn-primary`, `.btn-success`, `.btn-secondary`, `.btn-light` | design-system.css |
-| Toggles | `.toggle`, `.toggle-btn` | design-system.css |
+| Toggles | `.toggle`, `.toggle-btn` (Inter 12px, 202x36px pill) | design-system.css |
 | Tags | `.tag` | design-system.css |
 | Modals | `.modal-overlay`, `.modal`, `.modal-header` | design-system.css |
 | Inputs | `.input` | design-system.css |
