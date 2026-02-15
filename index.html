@@ -18,10 +18,10 @@
         />
         <link rel="stylesheet" href="design-system.css?v=7.6.0" />
         <style>
-            /* --- BASE & STICKY HEADER --- */
+            /* --- MODIFICATIONS STRUCTURELLES --- */
             body {
                 font-family: "JetBrains Mono", monospace;
-                background: white; /* Fond blanc demandé */
+                background: white !important; /* Force le blanc */
                 min-height: 100vh;
                 padding: 0;
                 color: var(--storm-gray);
@@ -30,12 +30,11 @@
             .container {
                 max-width: 1440px;
                 margin: 0 auto;
-                background: white;
-                animation: slideDown 0.6s ease-out;
+                background: white !important;
             }
 
             header {
-                background: white;
+                background: white !important;
                 padding: 20px 75px;
                 border-bottom: 1px solid #E1E8F2;
                 display: flex;
@@ -48,13 +47,23 @@
             }
 
             .main-content {
-                background: white;
+                background: white !important;
                 padding: 40px 75px;
                 border-radius: 0;
                 box-shadow: none;
             }
 
-            /* --- NOUVEAU DESIGN TABLEAU (STYLES CSS) --- */
+            /* Sous-texte des titres */
+            .subtitle-detail {
+                font-family: "JetBrains Mono", monospace;
+                font-weight: 400;
+                font-size: 0.7rem;
+                color: var(--storm-gray);
+                margin-top: -12px;
+                margin-bottom: 20px;
+            }
+
+            /* --- STYLES NOUVEAU TABLEAU (TEST) --- */
             .new-weather-card {
                 background: white;
                 border: 1px solid #e2e8f0;
@@ -64,16 +73,16 @@
                 margin-top: 20px;
             }
             .new-table-container { overflow-x: auto; width: 100%; }
-            .new-weather-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; border:none; box-shadow:none; }
+            .new-weather-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; border:none; }
             .new-weather-table th { background: #f8fafc; padding: 16px; border-bottom: 1px solid #e2e8f0; color: var(--deep-blue); }
-            .new-weather-table .th-sector { position: sticky; left: 0; z-index: 20; border-right: 1px solid #e2e8f0; background: #f8fafc; }
+            .new-weather-table .th-sector { position: sticky; left: 0; z-index: 20; border-right: 1px solid #e2e8f0; background: #f8fafc; text-align: left; }
             .new-weather-table .th-date { text-align: center; min-width: 150px; }
             .new-date-day { font-size: 0.75rem; color: #64748b; text-transform: uppercase; display: block; }
             .new-date-num { font-size: 1.5rem; font-weight: 700; display: block; margin-top: 4px; }
             .new-weather-table td { padding: 20px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: top; background: white; }
-            .new-weather-table .td-sector { position: sticky; left: 0; z-index: 10; border-right: 1px solid #f1f5f9; font-weight: 600; font-size: 1.1rem; background: white; }
+            .new-weather-table .td-sector { position: sticky; left: 0; z-index: 10; border-right: 1px solid #f1f5f9; font-weight: 600; font-size: 1.1rem; background: white; text-align: left; }
             
-            .weather-cell-inner { display: flex; gap: 12px; align-items: flex-start; }
+            .weather-cell-inner { display: flex; gap: 12px; align-items: flex-start; text-align: left; }
             .weather-left-col { display: flex; flex-direction: column; align-items: center; min-width: 80px; gap: 4px; }
             .weather-main-icon svg { width: 40px; height: 40px; }
             .weather-condition-label { font-size: 0.7rem; color: #475569; text-align: center; line-height: 1.2; }
@@ -85,18 +94,7 @@
             .bera-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; color: white; font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
             .bera-1 { background: #27ae60; } .bera-2 { background: #f1c40f; color: #000; } 
             .bera-3 { background: #e67e22; } .bera-4, .bera-5 { background: #e74c3c; }
-            
-            .bera-link { font-size: 0.75rem; color: #2563eb; text-decoration: underline; cursor: pointer; margin-top: 2px; }
             .precip-badge { display: inline-flex; align-items: center; gap: 4px; color: #2563eb; font-weight: 700; font-size: 0.8rem; margin-top: 4px; }
-
-            /* Style pour les sous-textes */
-            .subtitle-detail {
-                font-family: "JetBrains Mono", monospace;
-                font-weight: 400;
-                font-size: 0.7rem;
-                color: var(--storm-gray);
-                margin-top: 4px;
-            }
         </style>
     </head>
     <body>
@@ -105,7 +103,7 @@
         <script type="text/babel">
             const { useState, useEffect } = React;
 
-            // --- FONCTION CORRECTIVE : Direction du vent ---
+            // --- UTILITAIRE VENT ---
             const getWindDirectionDisplay = (deg) => {
                 if (deg === null || deg === undefined) return { cardinal: "N/A" };
                 const sectors = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
@@ -113,6 +111,7 @@
                 return { cardinal: sectors[index] };
             };
 
+            // Ta configuration d'origine
             const DEFAULT_RESORTS = [
                 { name: "Guzet", lat: 42.7857, lon: 1.2261, altitude: 1400 },
                 { name: "Piau-Engaly", lat: 42.7833, lon: 0.1667, altitude: 1850 },
@@ -123,7 +122,7 @@
                 { name: "Ax 3 Domaines", lat: 42.7, lon: 1.833, altitude: 1400 }
             ];
 
-            const MF_API_KEY = "YmZ6emZ6ZWZ6ZWZ6ZWZ6ZWZ6ZWZ6ZWZ6"; // Dummy key pour l'exemple
+            const MF_API_KEY = "LuUd7q9wHpiG1aWh";
 
             function MountainWeatherApp() {
                 const [resorts, setResorts] = useState(DEFAULT_RESORTS);
@@ -133,30 +132,59 @@
                 const [viewMode, setViewMode] = useState("day");
                 const [beraModal, setBeraModal] = useState(null);
 
-                // Simulation du chargement (remplace tes fetches réels ici)
+                // Récupération des données (Logique d'origine conservée)
                 useEffect(() => {
-                    const mock = DEFAULT_RESORTS.map(r => ({
-                        name: r.name,
-                        days: Array(5).fill(0).map((_, i) => ({
-                            condition: "Beau temps",
-                            icon: typeof weatherSvg !== 'undefined' ? weatherSvg.sun : '',
-                            temp_min: -4, temp_max: 6,
-                            wind_mean: 10, windDirection: 180,
-                            gust_min: 15, gust_max: 25,
-                            snowCm: i === 2 ? 12 : 0,
-                            rainMm: 0
-                        }))
-                    }));
-                    setWeatherData(mock);
-                    setSnowData(mock.map(m => ({ name: m.name, snowByDay: [0,0,12,0,0,0,0] })));
-                }, []);
+                    const fetchData = async () => {
+                        const allWeatherData = [];
+                        const allSnowData = [];
+                        const allBraData = {};
+
+                        for (const resort of resorts) {
+                            try {
+                                const response = await fetch(`https://my.meteoblue.com/packages/basic-day_wind-day?lat=${resort.lat}&lon=${resort.lon}&apikey=${MF_API_KEY}&format=json`);
+                                const data = await response.json();
+                                
+                                if (data.data_day) {
+                                    const days = data.data_day.time.map((time, i) => ({
+                                        time,
+                                        temp_min: data.data_day.tempmin[i],
+                                        temp_max: data.data_day.tempmax[i],
+                                        condition: weatherCodes[data.data_day.pictocode[i]]?.description || "Inconnu",
+                                        icon: weatherSvg[weatherCodes[data.data_day.pictocode[i]]?.icon] || weatherSvg.sun,
+                                        wind_mean: data.data_day.windspeed_mean[i],
+                                        windDirection: data.data_day.winddirection[i],
+                                        gust_min: data.data_day.windspeed_min[i],
+                                        gust_max: data.data_day.windspeed_max[i],
+                                        snowCm: data.data_day.snowfraction[i] > 0 ? Math.round(data.data_day.precipitation[i]) : 0,
+                                        rainMm: data.data_day.snowfraction[i] === 0 ? data.data_day.precipitation[i] : 0
+                                    }));
+                                    allWeatherData.push({ name: resort.name, days });
+                                    allSnowData.push({ name: resort.name, snowByDay: data.data_day.precipitation.map((p, i) => data.data_day.snowfraction[i] > 0 ? Math.round(p) : 0) });
+                                }
+
+                                // Mock BERA pour démo si massifMapping existe
+                                if (typeof massifMapping !== 'undefined') {
+                                    const massifId = massifMapping[resort.name];
+                                    if (massifId) {
+                                        allBraData[resort.name] = { "aujourd'hui": { haut: 2 }, demain: { haut: 3 } };
+                                    }
+                                }
+                            } catch (e) { console.error(e); }
+                        }
+                        setWeatherData(allWeatherData);
+                        setSnowData(allSnowData);
+                        setBraData(allBraData);
+                    };
+                    fetchData();
+                }, [resorts]);
 
                 return (
                     <div className="container">
+                        {/* --- HEADER D'ORIGINE --- */}
                         <header>
-                            <div className="logo">
-                                <span className="logo-text-primary">Ski rando</span>
-                                <span className="logo-text-secondary">météo</span>
+                            <div className="logo" style={{display: 'flex', alignItems: 'center'}}>
+                                <div className="logo-text-primary">Ski rando</div>
+                                <div className="logo-text-secondary" style={{marginLeft: '5px'}}>météo</div>
                             </div>
                             <div className="header-controls">
                                 <div className="view-toggle">
@@ -167,29 +195,28 @@
                         </header>
 
                         <main className="main-content">
-                            {/* --- TABLEAU COMPARATIF ACTUEL --- */}
+                            {/* --- TABLEAU 1 (DESIGN ACTUEL) --- */}
                             {weatherData.length > 0 && (
                                 <section className="section">
-                                    <div style={{ marginBottom: '20px' }}>
-                                        <h2 style={{ margin: 0 }}>Météo Comparative (5 jours)</h2>
-                                        <div className="subtitle-detail">
-                                            Les données ci-dessous viennent de Metéobleu et de Metéo France
-                                        </div>
-                                    </div>
-                                    
+                                    <h2>Météo Comparative (5 jours)</h2>
+                                    <div className="subtitle-detail">Les données ci-dessous viennent de Metéobleu et de Metéo France</div>
                                     <div className="snow-table-container">
                                         <table>
                                             <thead>
                                                 <tr>
                                                     <th>Secteur</th>
-                                                    {[0,1,2,3,4].map(i => <th key={i}>Jour {i+1}</th>)}
+                                                    {weatherData[0].days.slice(0,5).map((d, i) => (
+                                                        <th key={i}>{new Date(d.time).toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric'})}</th>
+                                                    ))}
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {weatherData.map((resort, idx) => (
                                                     <tr key={idx}>
-                                                        <td>{resort.name}</td>
-                                                        {resort.days.map((d, i) => <td key={i}>{Math.round((d.temp_min+d.temp_max)/2)}°</td>)}
+                                                        <td className="station-name">{resort.name}</td>
+                                                        {resort.days.slice(0,5).map((day, i) => (
+                                                            <td key={i}>{Math.round((day.temp_min + day.temp_max)/2)}°</td>
+                                                        ))}
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -198,22 +225,19 @@
                                 </section>
                             )}
 
-                            {/* --- NOUVEAU DESIGN EN TEST --- */}
+                            {/* --- TABLEAU 2 (NOUVEAU DESIGN TEST) --- */}
                             {weatherData.length > 0 && viewMode === 'day' && (
                                 <section className="section">
-                                    <h2 style={{ marginTop: '60px', marginBottom: '5px' }}>Nouveau Design (Preview)</h2>
-                                    <div className="subtitle-detail" style={{ marginBottom: '20px' }}>
-                                        Test d'intégration du nouveau design system
-                                    </div>
-
+                                    <h2 style={{ marginTop: '60px' }}>Nouveau Design (Preview)</h2>
+                                    <div className="subtitle-detail">Test d'intégration du nouveau design system</div>
                                     <div className="new-weather-card">
                                         <div className="new-table-container">
                                             <table className="new-weather-table">
                                                 <thead>
                                                     <tr>
                                                         <th className="th-sector">Secteur</th>
-                                                        {[0,1,2,3,4].map(i => {
-                                                            const d = new Date(); d.setDate(d.getDate() + i);
+                                                        {weatherData[0].days.slice(0,5).map((day, i) => {
+                                                            const d = new Date(day.time);
                                                             return (
                                                                 <th key={i} className="th-date">
                                                                     <span className="new-date-day">{d.toLocaleDateString("fr-FR", { weekday: "short" })}</span>
@@ -233,6 +257,7 @@
                                                                 </div>
                                                             </td>
                                                             {resort.days.slice(0, 5).map((day, i) => {
+                                                                const bra = braData[resort.name]?.["aujourd'hui"];
                                                                 const windDir = getWindDirectionDisplay(day.windDirection);
                                                                 return (
                                                                     <td key={i}>
@@ -247,14 +272,11 @@
                                                                                     <span className="weather-temp-range">({Math.round(day.temp_min)}°/{Math.round(day.temp_max)}°)</span>
                                                                                 </div>
                                                                                 <div className="weather-detail-row">
-                                                                                    {typeof windArrowSvg !== 'undefined' && <span dangerouslySetInnerHTML={{ __html: windArrowSvg(day.windDirection, 14) }}></span>}
+                                                                                    <span dangerouslySetInnerHTML={{ __html: typeof windArrowSvg !== 'undefined' ? windArrowSvg(day.windDirection, 14) : '' }}></span>
                                                                                     {windDir.cardinal} {Math.round(day.wind_mean)} km/h
                                                                                 </div>
-                                                                                {day.snowCm > 0 && (
-                                                                                    <div className="precip-badge">
-                                                                                        ❄️ {day.snowCm} cm
-                                                                                    </div>
-                                                                                )}
+                                                                                {bra && <div className={`bera-tag bera-${bra.haut}`}>BERA {bra.haut}/5</div>}
+                                                                                {day.snowCm > 0 && <div className="precip-badge">❄️ {day.snowCm} cm</div>}
                                                                             </div>
                                                                         </div>
                                                                     </td>
@@ -269,13 +291,11 @@
                                 </section>
                             )}
 
-                            {/* --- SECTION CHUTES DE NEIGE --- */}
+                            {/* --- TABLEAU CHUTES DE NEIGE (ORIGINAL) --- */}
                             {snowData.length > 0 && (
-                                <section className="section" style={{ marginTop: '60px' }}>
-                                    <h2 style={{ marginBottom: '5px' }}>Chutes de Neige (7 jours)</h2>
-                                    <div className="subtitle-detail" style={{ marginBottom: '20px' }}>
-                                        Les données ci-dessous viennent de Metéobleu
-                                    </div>
+                                <section className="section" style={{marginTop: '60px'}}>
+                                    <h2>Chutes de Neige (7 jours)</h2>
+                                    <div className="subtitle-detail">Les données ci-dessous viennent de Metéobleu</div>
                                     <div className="snow-table-container">
                                         <table>
                                             <thead>
@@ -298,18 +318,21 @@
                             )}
                         </main>
 
+                        {/* --- FOOTER D'ORIGINE --- */}
                         <footer className="footer">
                             <div className="container">
-                                <div className="footer-content">
+                                <div className="footer-content" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                                     <div className="footer-brand">
                                         <div className="logo-text-primary">Ski rando</div>
                                         <div className="logo-text-secondary">météo</div>
-                                        <div className="subtitle-detail" style={{ marginTop: '15px' }}>
+                                        <div className="subtitle-detail" style={{ marginTop: '15px', marginBottom: '5px' }}>
                                             Les données viennent de Metéobleu et de Metéo France.
                                         </div>
-                                        <div className="footer-tagline" style={{ marginTop: '10px' }}>
-                                            Trouves le bon spot pour ta rando
-                                        </div>
+                                        <div className="footer-tagline">Trouves le bon spot pour ta rando</div>
+                                    </div>
+                                    <div className="footer-cta-buttons">
+                                        <a className="btn btn-dark" href="#" style={{marginRight: '10px'}}>Proposer une amélioration</a>
+                                        <a className="btn btn-ghost" href="#">Faire un don</a>
                                     </div>
                                 </div>
                             </div>
