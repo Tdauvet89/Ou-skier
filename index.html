@@ -1334,6 +1334,16 @@
                 }, [searchQuery]);
 
                 const handleSelect = (location) => {
+                    // --- DÉBUT DE L'AJOUT GOOGLE ANALYTICS ---
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'ajout_secteur', {
+                            'nom_secteur': location.name,      // ex: Guzet
+                            'region_secteur': location.admin1, // ex: Occitanie
+                            'altitude_secteur': location.asl   // ex: 1400
+                        });
+                    }
+                    // --- FIN DE L'AJOUT ---
+                    
                     onAdd({
                         name: location.name,
                         lat: location.lat,
