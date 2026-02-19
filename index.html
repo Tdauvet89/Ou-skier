@@ -719,6 +719,30 @@
                 margin-top: 25px;
             }
 
+            .modal-limit-alert {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+                background: #FFF7ED;
+                border: 1px solid #FDDCAB;
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+            .modal-limit-alert .icon svg {
+                width: 20px;
+                height: 20px;
+                color: #EA580C;
+                flex-shrink: 0;
+            }
+            .modal-limit-alert p {
+                margin: 0;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                color: #9A3412;
+                line-height: 20px;
+            }
+
 
             .loading-search {
                 text-align: center;
@@ -1365,7 +1389,7 @@
                 return `https://www.meteoblue.com/fr/meteo/semaine/${slug}?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
             }
 
-            function AddResortModal({ isOpen, onClose, onAdd }) {
+            function AddResortModal({ isOpen, onClose, onAdd, isAtLimit }) {
                 const [searchQuery, setSearchQuery] = useState("");
                 const [searchResults, setSearchResults] = useState([]);
                 const [isSearching, setIsSearching] = useState(false);
@@ -1434,74 +1458,103 @@
                             className="modal"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <h2 className="title" style={{marginBottom:'4px'}}>Ajouter un Secteur</h2>
-                            <p className="subtitle" style={{marginBottom:'20px'}}>Entrer le nom d'une station, d'un pic pour l'ajouter. Les données sont fournis par meteoblue.</p>
+                            <h2 className="title" style={{marginBottom:'16px'}}>Ajouter un Secteur</h2>
 
-                            <input
-                                type="text"
-                                className="input search-input"
-                                placeholder="Rechercher une commune (min. 3 caractères - ex: Guzet, Saint-Lary...)"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                autoFocus
-                            />
-
-                            <div className="search-results">
-                                {isSearching && (
-                                    <div className="loading-search">
-                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.search}}></span> Recherche en cours...
+                            {isAtLimit ? (
+                                <>
+                                    <div className="modal-limit-alert">
+                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span>
+                                        <p>Le nombre de secteur maximum est atteint. Veuillez retirer un secteur pour en ajouter un autre.</p>
                                     </div>
-                                )}
-
-                                {!isSearching &&
-                                    searchResults.length === 0 &&
-                                    searchQuery.length >= 3 && (
-                                        <div className="no-results">
-                                            Aucun résultat trouvé. Essayez une
-                                            autre recherche.
-                                        </div>
-                                    )}
-
-                                {!isSearching &&
-                                    searchQuery.length > 0 &&
-                                    searchQuery.length < 3 && (
-                                        <div className="no-results">
-                                            Tapez au moins 3 caractères pour
-                                            lancer la recherche.
-                                        </div>
-                                    )}
-
-                                {!isSearching &&
-                                    searchResults.map((result, index) => (
-                                        <div
-                                            key={index}
-                                            className="search-result-item"
-                                            onClick={() => handleSelect(result)}
+                                    <div className="modal-buttons">
+                                        <a
+                                            className="btn btn-primary"
+                                            href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{textDecoration:'none'}}
                                         >
-                                            <div className="result-name">
-                                                {result.name}
-                                            </div>
-                                            <div className="result-info">
-                                                {result.country || ""}{" "}
-                                                {result.admin1
-                                                    ? `• ${result.admin1}`
-                                                    : ""}{" "}
-                                                {result.asl
-                                                    ? `• Alt: ${result.asl}m`
-                                                    : ""}
-                                            </div>
-                                        </div>
-                                    ))}
-                            </div>
+                                            Proposer une amélioration
+                                        </a>
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={onClose}
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="subtitle" style={{marginBottom:'20px'}}>Entrer le nom d'une station, d'un pic pour l'ajouter. Les données sont fournis par meteobleu.</p>
 
-                            <div className="modal-buttons">
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={onClose}
-                                >
-                                    Annuler
-                                </button>
-                            </div>
+                                    <input
+                                        type="text"
+                                        className="input search-input"
+                                        placeholder="Rechercher une commune (min. 3 caractères - ex: Guzet, Saint-Lary...)"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        autoFocus
+                                    />
+
+                                    <div className="search-results">
+                                        {isSearching && (
+                                            <div className="loading-search">
+                                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.search}}></span> Recherche en cours...
+                                            </div>
+                                        )}
+
+                                        {!isSearching &&
+                                            searchResults.length === 0 &&
+                                            searchQuery.length >= 3 && (
+                                                <div className="no-results">
+                                                    Aucun résultat trouvé. Essayez une
+                                                    autre recherche.
+                                                </div>
+                                            )}
+
+                                        {!isSearching &&
+                                            searchQuery.length > 0 &&
+                                            searchQuery.length < 3 && (
+                                                <div className="no-results">
+                                                    Tapez au moins 3 caractères pour
+                                                    lancer la recherche.
+                                                </div>
+                                            )}
+
+                                        {!isSearching &&
+                                            searchResults.map((result, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="search-result-item"
+                                                    onClick={() => handleSelect(result)}
+                                                >
+                                                    <div className="result-name">
+                                                        {result.name}
+                                                    </div>
+                                                    <div className="result-info">
+                                                        {result.country || ""}{" "}
+                                                        {result.admin1
+                                                            ? `• ${result.admin1}`
+                                                            : ""}{" "}
+                                                        {result.asl
+                                                            ? `• Alt: ${result.asl}m`
+                                                            : ""}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+
+                                    <div className="modal-buttons">
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={onClose}
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 );
@@ -2467,16 +2520,12 @@
                                         ))}
                                     </div>
                                 )}
-                                {resorts.length < MAX_RESORTS ? (
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => setIsModalOpen(true)}
-                                    >
-                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
-                                    </button>
-                                ) : (
-                                    <p className="subtitle" style={{margin:0}}>Limite de {MAX_RESORTS} secteurs atteinte — retire un secteur pour en ajouter un autre.</p>
-                                )}
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
+                                </button>
                             </div>
 
                             {resorts.length > 0 ? (
@@ -3091,6 +3140,7 @@
                             isOpen={isModalOpen}
                             onClose={() => setIsModalOpen(false)}
                             onAdd={addResort}
+                            isAtLimit={resorts.length >= MAX_RESORTS}
                         />
 
                         {/* Modale BERA — PDF embed */}
