@@ -484,7 +484,10 @@
     border: 1px solid #E2E8F0;
     background: #FFF;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10);
-    overflow: hidden;
+    /* overflow:clip coupe les coins arrondis comme hidden,
+       mais ne crée pas de scroll container — ce qui permet
+       à position:sticky de fonctionner dans .comparison-card-body */
+    overflow: clip;
 }
 
 .comparison-card-header {
