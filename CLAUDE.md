@@ -27,6 +27,7 @@ Avant de créer ou modifier un composant UI (bouton, toggle, tag, modal, input, 
 | Icônes | `.icon` | design-system.css |
 | Snow Table | `.snow-table`, `.sector-name`, `.sector-altitude`, `.snow-value`, `.snow-unit`, `.day-abbr`, `.day-num` | design-system.css |
 | Section Title | `.section-title` | design-system.css |
+| Comparison Card | `.comparison-card`, `.comparison-card-header`, `.comparison-card-body` | design-system.css |
 | Footer CTA | `.footer-cta`, `.footer-cta-title`, `.footer-cta-buttons` | design-system.css |
 | Animations | `fadeIn`, `fadeInOverlay`, `slideInModal`, `slideDown` | design-system.css |
 

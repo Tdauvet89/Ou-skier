@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.6.0"></script>
+        <script src="icons.js?v=7.7.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.6.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.7.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -203,7 +203,7 @@
             <a href="index.html" class="back-link">&larr; Retour au dashboard</a>
 
             <h1>Design System</h1>
-            <div class="subtitle">Ou-skier v7.6 — Composants, icônes, couleurs et typographie</div>
+            <div class="subtitle">Ou-skier v7.7 — Composants, icônes, couleurs et typographie</div>
 
             <!-- ============================================================ -->
             <!-- COULEURS -->
@@ -442,6 +442,57 @@
                 Classes : <code>.snow-table</code>, <code>.sector-name</code>, <code>.sector-altitude</code>, <code>.snow-value</code>, <code>.snow-unit</code>, <code>.day-abbr</code>, <code>.day-num</code>
             </div>
 
+            <h3>Comparison Card (tableau météo comparatif)</h3>
+            <div style="max-width:1382px;margin-bottom:24px">
+                <div class="comparison-card">
+                    <div class="comparison-card-header">
+                        <span class="section-title">Météo Comparative (5 jours)</span>
+                        <div class="toggle">
+                            <button class="toggle-btn active" id="showcase-toggle-jour"></button>
+                            <button class="toggle-btn" id="showcase-toggle-5h"></button>
+                        </div>
+                    </div>
+                    <div class="comparison-card-body">
+                        <div class="snow-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Secteur</th>
+                                        <th><span class="day-abbr">Jeu</span><span class="day-num">20</span></th>
+                                        <th><span class="day-abbr">Ven</span><span class="day-num">21</span></th>
+                                        <th><span class="day-abbr">Sam</span><span class="day-num">22</span></th>
+                                        <th><span class="day-abbr">Dim</span><span class="day-num">23</span></th>
+                                        <th><span class="day-abbr">Lun</span><span class="day-num">24</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="sector-name">Pic du Pourtalet</span><br><span class="sector-altitude">2000m</span></td>
+                                        <td><span class="snow-value">−2</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">0</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">3</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">−1</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">−5</span> <span class="snow-unit">°C</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="sector-name">Cauterets</span><br><span class="sector-altitude">1800m</span></td>
+                                        <td><span class="snow-value">1</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">2</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">5</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">1</span> <span class="snow-unit">°C</span></td>
+                                        <td><span class="snow-value">−2</span> <span class="snow-unit">°C</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classes : <code>.comparison-card</code>, <code>.comparison-card-header</code>, <code>.comparison-card-body</code><br>
+                Utilise <code>.section-title</code>, <code>.toggle</code>/<code>.toggle-btn</code> et <code>.snow-table</code> à l'intérieur.
+            </div>
+
             <h3>Footer CTA</h3>
             <div style="max-width:800px;margin-bottom:24px">
                 <div class="footer-cta">
@@ -483,6 +534,8 @@
             // Toggle icons
             document.getElementById('toggle-jour').innerHTML = uiSvg.toggleCalendar + ' Jour';
             document.getElementById('toggle-5h').innerHTML = uiSvg.toggleClock + ' 5h';
+            document.getElementById('showcase-toggle-jour').innerHTML = uiSvg.toggleCalendar + ' Jour';
+            document.getElementById('showcase-toggle-5h').innerHTML = uiSvg.toggleClock + ' 5h';
 
             // Populate weather icons
             var weatherGrid = document.getElementById('weather-icons');

@@ -16,16 +16,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.6.0"></script>
-        <script src="weatherCodes.js?v=7.6.0"></script>
-        <script src="massifMapping.js?v=7.6.0"></script>
+        <script src="icons.js?v=7.7.0"></script>
+        <script src="weatherCodes.js?v=7.7.0"></script>
+        <script src="massifMapping.js?v=7.7.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.6.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.7.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -2508,41 +2508,34 @@
 
                                     {weatherData.length > 0 && (
                                         <section className="section">
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent:
-                                                        "space-between",
-                                                    alignItems: "center",
-                                                    marginBottom: "20px",
-                                                }}
-                                            >
-                                                <h2 style={{ margin: 0 }}>
-                                                    Météo Comparative (5 jours)
-                                                </h2>
-                                                <div className="toggle">
-                                                    <button
-                                                        className={`toggle-btn ${viewMode === "day" ? "active" : ""}`}
-                                                        onClick={() =>
-                                                            setViewMode("day")
-                                                        }
-                                                    >
-                                                        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleCalendar}}></span> Jour
-                                                    </button>
-                                                    <button
-                                                        className={`toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
-                                                        onClick={() =>
-                                                            setViewMode(
-                                                                "hourly",
-                                                            )
-                                                        }
-                                                    >
-                                                        <span dangerouslySetInnerHTML={{__html: uiSvg.toggleClock}}></span> 5h
-                                                    </button>
+                                            <div className="comparison-card">
+                                                <div className="comparison-card-header">
+                                                    <h2 className="section-title">
+                                                        Météo Comparative (5 jours)
+                                                    </h2>
+                                                    <div className="toggle">
+                                                        <button
+                                                            className={`toggle-btn ${viewMode === "day" ? "active" : ""}`}
+                                                            onClick={() =>
+                                                                setViewMode("day")
+                                                            }
+                                                        >
+                                                            <span dangerouslySetInnerHTML={{__html: uiSvg.toggleCalendar}}></span> Jour
+                                                        </button>
+                                                        <button
+                                                            className={`toggle-btn ${viewMode === "hourly" ? "active" : ""}`}
+                                                            onClick={() =>
+                                                                setViewMode(
+                                                                    "hourly",
+                                                                )
+                                                            }
+                                                        >
+                                                            <span dangerouslySetInnerHTML={{__html: uiSvg.toggleClock}}></span> 5h
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-
-                                            <div className="snow-table" style={{maxWidth: "100%", overflow: "auto"}}>
+                                                <div className="comparison-card-body">
+                                            <div className="snow-table">
                                                 <table>
                                                     <thead>
                                                         <tr>
@@ -3281,6 +3274,8 @@
                                                         )}
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                                </div>
                                             </div>
                                         </section>
                                     )}
