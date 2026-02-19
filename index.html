@@ -872,7 +872,12 @@
                 },
             ];
 
-            const API_KEY = "LuUd7q9wHpiG1aWh";
+            // URL du proxy Cloudflare Worker
+            // Après `wrangler deploy` dans worker/, remplacer par l'URL obtenue
+            // ex : https://ou-skier-proxy.TON_SUBDOMAIN.workers.dev
+            const PROXY_URL = "https://ou-skier-proxy.YOUR_SUBDOMAIN.workers.dev";
+
+            const MAX_RESORTS = 5;
 
             // === MODE MOCK (fausses données pour itérer sur le design) ===
             const USE_MOCK_DATA = true;
@@ -1373,7 +1378,7 @@
 
                     setIsSearching(true);
                     try {
-                        const url = `https://www.meteoblue.com/en/server/search/query3?query=${encodeURIComponent(query)}&apikey=${API_KEY}`;
+                        const url = `${PROXY_URL}/search?query=${encodeURIComponent(query)}`;
                         const response = await fetch(url);
                         const data = await response.json();
 
@@ -1753,6 +1758,7 @@
                 }, [resorts]);
 
                 const addResort = async (newResort) => {
+                    if (resorts.length >= MAX_RESORTS) return;
                     // Ajouter le secteur à la liste
                     const updatedResorts = [...resorts, newResort];
                     setResorts(updatedResorts);
@@ -1820,8 +1826,7 @@
                 };
 
                 const fetchWeatherForResort = async (resort) => {
-                    // Utiliser le package qui inclut les données horaires
-                    const url = `https://my.meteoblue.com/packages/basic-1h_basic-day_snowice-day_wind-1h_wind-day?apikey=${API_KEY}&lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}&format=json`;
+                    const url = `${PROXY_URL}/weather?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
 
                     // DEBUG pour Pic de Lurtet
                     const isPicLurtet = resort.name
@@ -1835,10 +1840,7 @@
                         console.log("   Latitude:", resort.lat);
                         console.log("   Longitude:", resort.lon);
                         console.log("   Altitude:", resort.altitude);
-                        console.log(
-                            "🔗 URL API (sans clé):",
-                            url.replace(API_KEY, "XXX"),
-                        );
+                        console.log("🔗 URL proxy:", url);
                     }
 
                     try {
@@ -2465,12 +2467,16 @@
                                         ))}
                                     </div>
                                 )}
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => setIsModalOpen(true)}
-                                >
-                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
-                                </button>
+                                {resorts.length < MAX_RESORTS ? (
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setIsModalOpen(true)}
+                                    >
+                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
+                                    </button>
+                                ) : (
+                                    <p className="subtitle" style={{margin:0}}>Limite de {MAX_RESORTS} secteurs atteinte — retire un secteur pour en ajouter un autre.</p>
+                                )}
                             </div>
 
                             {resorts.length > 0 ? (

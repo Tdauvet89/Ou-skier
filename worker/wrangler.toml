@@ -1,0 +1,10 @@
+name = "ou-skier-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Décommente pour restreindre aux requêtes venant uniquement de ton domaine
+# [vars]
+# ALLOWED_ORIGIN = "https://ton-domaine.com"
+
+[dev]
+port = 8787
