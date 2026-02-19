@@ -524,6 +524,9 @@
     /* Size to content so min-width on cells is respected and triggers horizontal scroll */
     width: max-content;
     min-width: 100%;
+    /* La règle générique `table { overflow: hidden }` du style local bloque
+       position:sticky sur th/td — on l'annule ici (border-radius: 0 de toute façon) */
+    overflow: visible;
 }
 
 .comparison-card .snow-table thead tr {
