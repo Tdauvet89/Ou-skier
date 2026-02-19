@@ -1633,6 +1633,7 @@
 
             function MountainWeatherApp() {
                 const [resorts, setResorts] = useState(() => {
+                    if (USE_MOCK_DATA) return DEFAULT_RESORTS;
                     const saved = localStorage.getItem("skiResorts");
                     return saved ? JSON.parse(saved) : DEFAULT_RESORTS;
                 });
@@ -2558,6 +2559,7 @@
                         <header>
                             <h1>
                                 <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                {USE_MOCK_DATA && <span className="tag" style={{fontSize:"10px",letterSpacing:"0.08em",verticalAlign:"middle",marginLeft:"8px"}}>MOCK</span>}
                             </h1>
                             <div className="header-controls">
                                 <a
