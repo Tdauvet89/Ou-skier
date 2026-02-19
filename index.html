@@ -919,7 +919,7 @@
             const MAX_RESORTS = 5;
 
             // === MODE MOCK (fausses données pour itérer sur le design) ===
-            const USE_MOCK_DATA = true;
+            const USE_MOCK_DATA = false;
 
             // Générer les dates dynamiquement (aujourd'hui + 6 jours)
             const _mockDays = [];
@@ -1983,14 +1983,21 @@
                         const data = await response.json();
                         logApiCall(resort.name, true);
 
-                        if (isPicLurtet) {
-                            console.log(
-                                "✅ Réponse API reçue pour Pic de Lurtet",
-                            );
-                            console.log(
-                                "🌐 ========== FIN APPEL API ==========",
-                            );
-                        }
+                        // --- LOGS METEOBLUE (toutes stations) ---
+                        console.group(`📡 [${resort.name}] Meteoblue — données brutes`);
+                        console.log("🔗 URL :", url);
+                        console.log("📅 Jours (data_day.time) :", data.data_day?.time);
+                        console.log("🌡️ Temp min (°C)         :", data.data_day?.temperature_min);
+                        console.log("🌡️ Temp max (°C)         :", data.data_day?.temperature_max);
+                        console.log("❄️ Neige (cm)            :", data.data_day?.snowfall);
+                        console.log("💧 Précipitations (mm)   :", data.data_day?.precipitation);
+                        console.log("💨 Vent max (km/h)       :", data.data_day?.windspeed_max);
+                        console.log("🌤️ Pictocode             :", data.data_day?.pictocode);
+                        console.log("📊 data_day complet      :", data.data_day);
+                        console.log("⏰ Nb points data_1h     :", data.data_1h?.time?.length);
+                        console.log("⏰ Plage horaire         :", data.data_1h?.time?.[0], "→", data.data_1h?.time?.at?.(-1));
+                        console.groupEnd();
+                        // --- FIN LOGS ---
 
                         return { ...resort, data };
                     } catch (err) {
