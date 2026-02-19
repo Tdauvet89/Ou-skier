@@ -286,6 +286,9 @@
     text-align: left;
     padding-left: 24px;
     min-width: 277px;
+    position: sticky;
+    left: 0;
+    z-index: 3;
 }
 
 .snow-table .day-abbr {
@@ -316,6 +319,9 @@
     min-width: 277px;
     background: #FFF;
     padding: 16px 24px;
+    position: sticky;
+    left: 0;
+    z-index: 2;
 }
 
 .snow-table tbody td:not(:first-child) {
