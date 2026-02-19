@@ -16,16 +16,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.9.0"></script>
-        <script src="weatherCodes.js?v=7.9.0"></script>
-        <script src="massifMapping.js?v=7.9.0"></script>
+        <script src="icons.js?v=7.10.0"></script>
+        <script src="weatherCodes.js?v=7.10.0"></script>
+        <script src="massifMapping.js?v=7.10.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.9.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.10.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -308,10 +308,11 @@
             }
 
             .day-cell {
-                padding: 16px 12px;
+                padding: 38px 16px;
                 min-width: 240px;
                 min-height: 237px;
                 vertical-align: middle;
+                background: #f9fafc;
             }
 
             .day-cell-inner {
@@ -347,51 +348,74 @@
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 8px;
                 align-items: flex-start;
             }
 
-            .day-cell-info .info-row {
+            /* Ligne température : -4° + (-7° / -3°) sur la même ligne */
+            .cell-temp-line {
                 display: flex;
-                align-items: center;
+                align-items: baseline;
                 gap: 4px;
-                font-family: "Inter", sans-serif;
-                font-size: 14px;
-                font-weight: 400;
-                color: #314158;
-                line-height: 20px;
+                line-height: 32px;
             }
-
-            .day-cell-temp {
+            .cell-temp-main {
                 font-family: "Inter", sans-serif;
                 font-size: 24px;
                 font-weight: 700;
                 color: #0F172B;
                 line-height: 32px;
             }
+            .cell-temp-range {
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                color: #62748E;
+                line-height: 20px;
+            }
 
-            .day-cell-temp-range {
+            /* Lignes vent & rafales */
+            .day-cell-info .info-row {
+                display: flex;
+                align-items: center;
+                gap: 6px;
                 font-family: "Inter", sans-serif;
                 font-size: 14px;
                 font-weight: 400;
                 color: #314158;
                 line-height: 20px;
-                margin-left: 4px;
+            }
+            .day-cell-info .info-row svg {
+                width: 16px;
+                height: 16px;
+                flex-shrink: 0;
             }
 
-            /* Liens cliquables BERA */
-            table a,
-            .info-row a {
-                color: #155DFC;
-                text-decoration: none;
+            /* Badge BERA */
+            .bera-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 8px;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #ffffff;
+                line-height: 20px;
+                cursor: default;
+            }
+
+            /* Lien "Voir le BERA" */
+            .bera-link {
                 font-family: "Inter", sans-serif;
                 font-size: 14px;
                 font-weight: 500;
+                color: #155DFC;
                 line-height: 20px;
-            }
-            table a:hover,
-            .info-row a:hover {
                 text-decoration: underline;
+                cursor: pointer;
+            }
+            .bera-link:hover {
+                color: #0f3fa0;
             }
 
             .hourly-cell {
@@ -2807,162 +2831,70 @@
                                                                                               className="day-cell"
                                                                                           >
                                                                                               <div className="day-cell-inner">
-                                                                                                  {/* Colonne gauche : icone + description */}
-                                                                                                  <div
-                                                                                                      className="day-cell-icon"
-                                                                                                      title={dayWeather.condition}
-                                                                                                  >
+                                                                                                  {/* Colonne gauche : icône + label */}
+                                                                                                  <div className="day-cell-icon" title={dayWeather.condition}>
                                                                                                       <span dangerouslySetInnerHTML={{__html: dayWeather.icon}}></span>
-                                                                                                      <div className="day-cell-condition">
-                                                                                                          {dayWeather.condition}
-                                                                                                      </div>
+                                                                                                      <div className="day-cell-condition">{dayWeather.condition}</div>
                                                                                                   </div>
-                                                                                                  {/* Colonne droite : infos */}
+                                                                                                  {/* Colonne droite : données */}
                                                                                                   <div className="day-cell-info">
-                                                                                                      {/* Température moy + min/max */}
-                                                                                                      <div className="info-row">
-                                                                                                          <span className="day-cell-temp">{avgTemp}°</span>
-                                                                                                          <span className="day-cell-temp-range">
-                                                                                                              ({Math.round(dayWeather.temp_min)}°/{Math.round(dayWeather.temp_max)}°)
-                                                                                                          </span>
+                                                                                                      {/* -4° (−7° / −3°) sur la même ligne, mixed styles */}
+                                                                                                      <div className="cell-temp-line">
+                                                                                                          <span className="cell-temp-main">{avgTemp}°</span>
+                                                                                                          <span className="cell-temp-range">({Math.round(dayWeather.temp_min)}° / {Math.round(dayWeather.temp_max)}°)</span>
                                                                                                       </div>
-                                                                                                      {/* Vent moyen + direction */}
+                                                                                                      {/* ↓ Vent 12 km/h */}
                                                                                                       <div className="info-row">
                                                                                                           {windDir && (
-                                                                                                              <span style={{display:"inline-flex",alignItems:"center",gap:"2px",marginRight:"2px"}}>
-                                                                                                                  <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(dayWeather.windDirection, 14)}}></span>
-                                                                                                                  <span className="wind-cardinal">{windDir.cardinal}</span>
-                                                                                                              </span>
+                                                                                                              <span dangerouslySetInnerHTML={{__html: windArrowSvg(dayWeather.windDirection, 16)}}></span>
                                                                                                           )}
                                                                                                           <span>Vent {windMean} km/h</span>
                                                                                                       </div>
-                                                                                                      {/* Rafales min-max */}
+                                                                                                      {/* Raf. 15-25 km/h */}
                                                                                                       <div className="info-row">
-                                                                                                          <span style={{
-                                                                                                              color: gustColor !== "inherit" ? "white" : "inherit",
-                                                                                                              backgroundColor: gustColor !== "inherit" ? gustColor : "transparent",
-                                                                                                              padding: gustColor !== "inherit" ? "1px 6px" : "0",
-                                                                                                              borderRadius: "4px",
-                                                                                                              fontWeight: gustColor !== "inherit" ? 700 : 400,
-                                                                                                          }}>
-                                                                                                              Raf. {gustMin}-{gustMax} km/h
-                                                                                                          </span>
+                                                                                                          <span>Raf. {gustMin}-{gustMax} km/h</span>
                                                                                                       </div>
                                                                                                       {/* Précipitations — masque si ≤ 0 */}
                                                                                                       {dayWeather.snowCm > 0 && (
                                                                                                           <div className="info-row" style={{color:"#3498db",fontWeight:600}}>
-                                                                                                              <span className="icon" style={{marginRight:"3px"}} dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
+                                                                                                              <span dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
                                                                                                               {dayWeather.snowCm} cm
                                                                                                           </div>
                                                                                                       )}
                                                                                                       {dayWeather.rainMm > 0 && dayWeather.snowCm <= 0 && (
                                                                                                           <div className="info-row" style={{color:"#2980b9"}}>
-                                                                                                              <span className="icon" style={{marginRight:"3px"}} dangerouslySetInnerHTML={{__html: uiSvg.droplet}}></span>
+                                                                                                              <span dangerouslySetInnerHTML={{__html: uiSvg.droplet}}></span>
                                                                                                               {dayWeather.rainMm} mm
                                                                                                           </div>
                                                                                                       )}
-                                                                                                      {/* BERA risque */}
+                                                                                                      {/* Badge BERA */}
                                                                                                       {braEcheance && braEcheance.haut > 0 && (
-                                                                                                          <div className="info-row">
-                                                                                                              <span style={{
-                                                                                                                  backgroundColor: getBRAColor(braEcheance.haut),
-                                                                                                                  color: "white",
-                                                                                                                  padding: "2px 8px",
-                                                                                                                  borderRadius: "4px",
-                                                                                                                  fontWeight: 600,
-                                                                                                                  fontSize: "14px",
-                                                                                                              }}>
-                                                                                                                  BERA : {braEcheance.haut}/5
-                                                                                                              </span>
+                                                                                                          <div className="bera-badge" style={{backgroundColor: getBRAColor(braEcheance.haut)}}>
+                                                                                                              BERA {braEcheance.haut}/5
                                                                                                           </div>
                                                                                                       )}
-                                                                                                      {/* Lien BERA (uniquement si données disponibles) */}
-                                                                                                      {braDataForResort?._detail &&
-                                                                                                          (offset ===
-                                                                                                              0 ||
-                                                                                                              offset ===
-                                                                                                                  1) && (
-                                                                                                              <div className="info-row">
-                                                                                                                  <a
-                                                                                                                      href="#"
-                                                                                                                      onClick={(
-                                                                                                                          e,
-                                                                                                                      ) => {
-                                                                                                                          e.preventDefault();
-                                                                                                                          const detail =
-                                                                                                                              braDataForResort._detail;
-                                                                                                                          setBeraModal(
-                                                                                                                              {
-                                                                                                                                  resortName:
-                                                                                                                                      resort.name,
-                                                                                                                                  detail,
-                                                                                                                                  loading: true,
-                                                                                                                              },
-                                                                                                                          );
-                                                                                                                          fetch(
-                                                                                                                              `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
-                                                                                                                              {
-                                                                                                                                  headers:
-                                                                                                                                      {
-                                                                                                                                          apikey: MF_API_KEY,
-                                                                                                                                      },
-                                                                                                                              },
-                                                                                                                          )
-                                                                                                                              .then(
-                                                                                                                                  (
-                                                                                                                                      r,
-                                                                                                                                  ) =>
-                                                                                                                                      r.blob(),
-                                                                                                                              )
-                                                                                                                              .then(
-                                                                                                                                  (
-                                                                                                                                      blob,
-                                                                                                                                  ) => {
-                                                                                                                                      const url =
-                                                                                                                                          URL.createObjectURL(
-                                                                                                                                              blob,
-                                                                                                                                          );
-                                                                                                                                      setBeraModal(
-                                                                                                                                          (
-                                                                                                                                              prev,
-                                                                                                                                          ) =>
-                                                                                                                                              prev
-                                                                                                                                                  ? {
-                                                                                                                                                        ...prev,
-                                                                                                                                                        pdfUrl: url,
-                                                                                                                                                        loading: false,
-                                                                                                                                                    }
-                                                                                                                                                  : null,
-                                                                                                                                      );
-                                                                                                                                  },
-                                                                                                                              )
-                                                                                                                              .catch(
-                                                                                                                                  () => {
-                                                                                                                                      setBeraModal(
-                                                                                                                                          (
-                                                                                                                                              prev,
-                                                                                                                                          ) =>
-                                                                                                                                              prev
-                                                                                                                                                  ? {
-                                                                                                                                                        ...prev,
-                                                                                                                                                        loading: false,
-                                                                                                                                                        pdfError: true,
-                                                                                                                                                    }
-                                                                                                                                                  : null,
-                                                                                                                                      );
-                                                                                                                                  },
-                                                                                                                              );
-                                                                                                                      }}
-                                                                                                                      style={{
-                                                                                                                          cursor: "pointer",
-                                                                                                                      }}
-                                                                                                                  >
-                                                                                                                      Voir
-                                                                                                                      le
-                                                                                                                      BERA
-                                                                                                                  </a>
-                                                                                                              </div>
-                                                                                                          )}
+                                                                                                      {/* Lien "Voir le BERA" */}
+                                                                                                      {braDataForResort?._detail && (offset === 0 || offset === 1) && (
+                                                                                                          <a className="bera-link" href="#" onClick={(e) => {
+                                                                                                              e.preventDefault();
+                                                                                                              const detail = braDataForResort._detail;
+                                                                                                              setBeraModal({ resortName: resort.name, detail, loading: true });
+                                                                                                              fetch(
+                                                                                                                  `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
+                                                                                                                  { headers: { apikey: MF_API_KEY } }
+                                                                                                              )
+                                                                                                                  .then(r => r.blob())
+                                                                                                                  .then(blob => {
+                                                                                                                      const url = URL.createObjectURL(blob);
+                                                                                                                      setBeraModal(prev => prev ? { ...prev, pdfUrl: url, loading: false } : null);
+                                                                                                                  })
+                                                                                                                  .catch(() => {
+                                                                                                                      setBeraModal(prev => prev ? { ...prev, loading: false, pdfError: true } : null);
+                                                                                                                  });
+                                                                                                          }}>
+                                                                                                              Voir le BERA
+                                                                                                          </a>
+                                                                                                      )}
                                                                                                   </div>
                                                                                               </div>
                                                                                           </td>
