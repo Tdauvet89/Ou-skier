@@ -1646,7 +1646,7 @@
                     const saved = localStorage.getItem("apiCallsLog");
                     return saved ? JSON.parse(saved) : [];
                 });
-                const [viewMode, setViewMode] = useState("day"); // 'day' ou 'hourly'
+
                 const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, _detail: {...} } }
                 const [beraModal, setBeraModal] = useState(null); // { resortName, detail } ou null
                 const [loadedFromCache, setLoadedFromCache] = useState(false);
@@ -1992,8 +1992,7 @@
                         console.log("💨 Vent max (km/h)       :", data.data_day?.windspeed_max);
                         console.log("🌤️ Pictocode             :", data.data_day?.pictocode);
                         console.log("📊 data_day complet      :", data.data_day);
-                        console.log("⏰ Nb points data_1h     :", data.data_1h?.time?.length);
-                        console.log("⏰ Plage horaire         :", data.data_1h?.time?.[0], "→", data.data_1h?.time?.at?.(-1));
+
                         console.groupEnd();
                         // --- FIN LOGS ---
 
@@ -2114,7 +2113,6 @@
                     }
 
                     const dayData = resort.data.data_day;
-                    const hourData = resort.data.data_1h; // Données horaires
                     const days = {};
 
                     // DEBUG APPROFONDI pour Pic de Lurtet
@@ -2146,21 +2144,6 @@
                             "🌡️ Températures max:",
                             dayData.temperature_max,
                         );
-
-                        if (hourData && hourData.time) {
-                            console.log(
-                                "⏰ Premier timestamp horaire:",
-                                hourData.time[0],
-                            );
-                            console.log(
-                                "⏰ Dernier timestamp horaire:",
-                                hourData.time[hourData.time.length - 1],
-                            );
-                            console.log(
-                                "📊 Nombre total d'heures:",
-                                hourData.time.length,
-                            );
-                        }
                     }
 
                     // ✅ CORRECTION FINALE : Trouver dynamiquement l'index qui correspond à aujourd'hui
@@ -2205,10 +2188,7 @@
                         "- Données journalières (data_day):",
                         dayData ? "OK" : "Manquant",
                     );
-                    console.log(
-                        "- Données horaires (data_1h):",
-                        hourData ? "OK" : "Manquant",
-                    );
+
                     console.log(
                         "- Index aujourd'hui:",
                         todayIndex,
@@ -2235,22 +2215,6 @@
                                 );
                                 console.log(
                                     `   Temp min/max: ${dayData.temperature_min[dataIndex]}° / ${dayData.temperature_max[dataIndex]}°`,
-                                );
-                            }
-
-                            // Extraire les données horaires pour ce jour
-                            let hourlyData = null;
-                            if (hourData && hourData.time) {
-                                const targetDate = dayData.time[dataIndex];
-                                if (isPicLurtet) {
-                                    console.log(
-                                        `   🔍 Extraction horaire pour: ${targetDate}`,
-                                    );
-                                }
-                                hourlyData = extractHourlyData(
-                                    hourData,
-                                    targetDate,
-                                    isPicLurtet,
                                 );
                             }
 
@@ -2284,7 +2248,6 @@
                                 precipitation: precip,
                                 snowCm,
                                 rainMm,
-                                hourly: hourlyData,
                             };
                         }
                     }
@@ -2299,166 +2262,6 @@
                         name: resort.name,
                         days,
                     };
-                };
-
-                const extractHourlyData = (
-                    hourData,
-                    targetDate,
-                    debugMode = false,
-                ) => {
-                    if (!hourData || !hourData.time) {
-                        if (debugMode)
-                            console.log(
-                                "   ⚠️ Pas de données horaires disponibles",
-                            );
-                        return null;
-                    }
-
-                    // DEBUG : Afficher toutes les clés disponibles dans hourData
-                    if (debugMode) {
-                        console.log(
-                            "   📋 Variables disponibles dans data_1h:",
-                            Object.keys(hourData).join(", "),
-                        );
-                    }
-
-                    // NOUVEAU : Toutes les heures de 1h à 23h (comme Meteoblue)
-                    const requestedHours = [
-                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                        17, 18, 19, 20, 21, 22, 23,
-                    ];
-                    const result = {};
-
-                    if (debugMode) {
-                        console.log(
-                            "   🔎 Recherche horaires pour:",
-                            targetDate,
-                        );
-                        console.log(
-                            "   📊 Exemples de timestamps:",
-                            hourData.time.slice(0, 5),
-                        );
-                    }
-
-                    // Vérifier si les timestamps sont en UTC
-                    const firstTimestamp = hourData.time[0] || "";
-                    const isUTC =
-                        firstTimestamp.includes("Z") ||
-                        !firstTimestamp.includes(" ");
-
-                    if (debugMode && isUTC) {
-                        console.log(
-                            "   ⚠️ Timestamps en UTC détectés - ajustement UTC+1 appliqué",
-                        );
-                    }
-
-                    for (let i = 0; i < hourData.time.length; i++) {
-                        const timeStr = hourData.time[i];
-
-                        if (!timeStr.startsWith(targetDate)) continue;
-
-                        // Extraire l'heure du timestamp
-                        let hour;
-                        if (timeStr.includes("T")) {
-                            const timePart = timeStr.split("T")[1];
-                            hour = parseInt(timePart.substring(0, 2));
-                        } else if (timeStr.includes(" ")) {
-                            const timePart = timeStr.split(" ")[1];
-                            hour = parseInt(timePart.substring(0, 2));
-                        } else {
-                            continue;
-                        }
-
-                        // Conversion UTC → Local si nécessaire
-                        let localHour = hour;
-                        if (isUTC) {
-                            localHour = hour + 1;
-                            if (localHour >= 24) localHour -= 24;
-                        }
-
-                        if (requestedHours.includes(localHour)) {
-                            const weatherCode = hourData.pictocode?.[i] || 1;
-
-                            // CORRECTION : Remplacer les codes NUIT par codes JOUR si l'heure est en journée
-                            let adjustedCode = weatherCode;
-                            if (localHour >= 6 && localHour <= 20) {
-                                // C'est le jour, convertir les codes nuit en codes jour
-                                if (weatherCode === 31) adjustedCode = 1; // Nuit claire → Ensoleillé
-                                if (weatherCode === 32) adjustedCode = 2; // Nuit peu nuageuse → Peu nuageux
-                                if (weatherCode === 33) adjustedCode = 4; // Nuit nuageuse → Nuageux
-                            }
-
-                            const weatherInfo = getWeatherInfo(
-                                adjustedCode,
-                                localHour,
-                            );
-                            const temp = Math.round(
-                                hourData.temperature?.[i] || 0,
-                            );
-
-                            // Vent : windspeed et gust séparés
-                            const wind = Math.round(
-                                hourData.windspeed?.[i] || 0,
-                            );
-                            const gust = Math.round(
-                                hourData.windgust?.[i] ||
-                                    hourData.windspeed?.[i] ||
-                                    0,
-                            );
-
-                            // NOUVEAU : Direction du vent
-                            const windDirection =
-                                hourData.winddirection?.[i] || null;
-                            let windDirCard = "";
-                            if (windDirection !== null) {
-                                // Convertir degrés en points cardinaux
-                                const dirs = [
-                                    "N",
-                                    "NE",
-                                    "E",
-                                    "SE",
-                                    "S",
-                                    "SW",
-                                    "W",
-                                    "NW",
-                                ];
-                                const index =
-                                    Math.round((windDirection % 360) / 45) % 8;
-                                windDirCard = dirs[index];
-                            }
-
-                            result[localHour] = {
-                                temp,
-                                wind,
-                                gust,
-                                windDirection,
-                                windDirectionCardinal: windDirCard,
-                                icon: weatherInfo.icon,
-                                condition: weatherInfo.desc,
-                                timestamp: timeStr,
-                                weatherCode: adjustedCode,
-                                originalCode: weatherCode,
-                            };
-
-                            if (debugMode) {
-                                console.log(
-                                    `   ✓ ${localHour}h (${isUTC ? hour + "h UTC" : "locale"}): temp=${temp}°, vent=${wind}km/h, raf=${gust}km/h ${windDirCard}, code=${weatherCode}${weatherCode !== adjustedCode ? "→" + adjustedCode : ""}, icône=${weatherInfo.icon} [${timeStr}]`,
-                                );
-                            }
-                        }
-                    }
-
-                    if (Object.keys(result).length === 0) {
-                        if (debugMode) {
-                            console.log(
-                                "   ⚠️ Aucune donnée horaire trouvée pour",
-                                targetDate,
-                            );
-                        }
-                        return null;
-                    }
-
-                    return result;
                 };
 
                 const getTempTrend = (temp1, temp2) => {
@@ -2690,119 +2493,20 @@
                                                             <th>
                                                                 Secteur
                                                             </th>
-                                                            {viewMode === "day"
-                                                                ? // Vue par jour
-                                                                  [
-                                                                      0, 1, 2,
-                                                                      3, 4,
-                                                                  ].map(
-                                                                      (
-                                                                          offset,
-                                                                      ) => {
-                                                                          const date = new Date();
-                                                                          date.setDate(date.getDate() + offset);
-                                                                          const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
-                                                                          const dayNum = date.getDate();
-                                                                          return (
-                                                                              <th key={offset}>
-                                                                                  <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
-                                                                                  <span className="day-num">{dayNum}</span>
-                                                                              </th>
-                                                                          );
-                                                                      },
-                                                                  )
-                                                                : // Vue horaire (23 heures par jour : 1h-23h)
-                                                                  [
-                                                                      0, 1, 2,
-                                                                      3, 4,
-                                                                  ].map(
-                                                                      (
-                                                                          offset,
-                                                                      ) => {
-                                                                          const date = new Date();
-                                                                          date.setDate(date.getDate() + offset);
-                                                                          const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
-                                                                          const dayNum = date.getDate();
-                                                                          return (
-                                                                              <th
-                                                                                  key={offset}
-                                                                                  colSpan={23}
-                                                                              >
-                                                                                  <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
-                                                                                  <span className="day-num">{dayNum}</span>
-                                                                              </th>
-                                                                          );
-                                                                      },
-                                                                  )}
+                                                            {[0, 1, 2, 3, 4].map((offset) => {
+                                                                const date = new Date();
+                                                                date.setDate(date.getDate() + offset);
+                                                                const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
+                                                                const dayNum = date.getDate();
+                                                                return (
+                                                                    <th key={offset}>
+                                                                        <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
+                                                                        <span className="day-num">{dayNum}</span>
+                                                                    </th>
+                                                                );
+                                                            })}
                                                         </tr>
-                                                        {viewMode ===
-                                                            "hourly" && (
-                                                            <tr>
-                                                                <th
-                                                                    style={{
-                                                                        fontSize:
-                                                                            "0.7rem",
-                                                                    }}
-                                                                ></th>
-                                                                {[
-                                                                    0, 1, 2, 3,
-                                                                    4,
-                                                                ].map(
-                                                                    (
-                                                                        offset,
-                                                                    ) => (
-                                                                        <React.Fragment
-                                                                            key={
-                                                                                offset
-                                                                            }
-                                                                        >
-                                                                            {[
-                                                                                1,
-                                                                                2,
-                                                                                3,
-                                                                                4,
-                                                                                5,
-                                                                                6,
-                                                                                7,
-                                                                                8,
-                                                                                9,
-                                                                                10,
-                                                                                11,
-                                                                                12,
-                                                                                13,
-                                                                                14,
-                                                                                15,
-                                                                                16,
-                                                                                17,
-                                                                                18,
-                                                                                19,
-                                                                                20,
-                                                                                21,
-                                                                                22,
-                                                                                23,
-                                                                            ].map(
-                                                                                (
-                                                                                    h,
-                                                                                ) => (
-                                                                                    <th
-                                                                                        key={
-                                                                                            h
-                                                                                        }
-                                                                                        className="hourly-col-header"
-                                                                                    >
-                                                                                        {
-                                                                                            h
-                                                                                        }
 
-                                                                                        h
-                                                                                    </th>
-                                                                                ),
-                                                                            )}
-                                                                        </React.Fragment>
-                                                                    ),
-                                                                )}
-                                                            </tr>
-                                                        )}
                                                     </thead>
                                                     <tbody>
                                                         {weatherData.map(
@@ -2835,16 +2539,7 @@
                                                                             <span className="sector-altitude"> ({resortInfo?.altitude || "?"}m)</span>
                                                                         </td>
 
-                                                                        {viewMode ===
-                                                                        "day"
-                                                                            ? // Vue par jour
-                                                                              [
-                                                                                  0,
-                                                                                  1,
-                                                                                  2,
-                                                                                  3,
-                                                                                  4,
-                                                                              ].map(
+                                                                        {[0, 1, 2, 3, 4].map(
                                                                                   (
                                                                                       offset,
                                                                                   ) => {
@@ -3010,192 +2705,6 @@
                                                                                                   </div>
                                                                                               </div>
                                                                                           </td>
-                                                                                      );
-                                                                                  },
-                                                                              )
-                                                                            : // Vue horaire (1h-23h)
-                                                                              [
-                                                                                  0,
-                                                                                  1,
-                                                                                  2,
-                                                                                  3,
-                                                                                  4,
-                                                                              ].map(
-                                                                                  (
-                                                                                      offset,
-                                                                                  ) => {
-                                                                                      const dayWeather =
-                                                                                          resort
-                                                                                              .days[
-                                                                                              offset
-                                                                                          ];
-                                                                                      if (
-                                                                                          !dayWeather ||
-                                                                                          !dayWeather.hourly
-                                                                                      ) {
-                                                                                          return (
-                                                                                              <React.Fragment
-                                                                                                  key={
-                                                                                                      offset
-                                                                                                  }
-                                                                                              >
-                                                                                                  {[
-                                                                                                      1,
-                                                                                                      2,
-                                                                                                      3,
-                                                                                                      4,
-                                                                                                      5,
-                                                                                                      6,
-                                                                                                      7,
-                                                                                                      8,
-                                                                                                      9,
-                                                                                                      10,
-                                                                                                      11,
-                                                                                                      12,
-                                                                                                      13,
-                                                                                                      14,
-                                                                                                      15,
-                                                                                                      16,
-                                                                                                      17,
-                                                                                                      18,
-                                                                                                      19,
-                                                                                                      20,
-                                                                                                      21,
-                                                                                                      22,
-                                                                                                      23,
-                                                                                                  ].map(
-                                                                                                      (
-                                                                                                          h,
-                                                                                                      ) => (
-                                                                                                          <td
-                                                                                                              key={
-                                                                                                                  h
-                                                                                                              }
-                                                                                                              className="hourly-cell"
-                                                                                                              style={{
-                                                                                                                  fontSize:
-                                                                                                                      "0.65rem",
-                                                                                                                  color: "#95a5a6",
-                                                                                                              }}
-                                                                                                          >
-                                                                                                              -
-                                                                                                          </td>
-                                                                                                      ),
-                                                                                                  )}
-                                                                                              </React.Fragment>
-                                                                                          );
-                                                                                      }
-
-                                                                                      return (
-                                                                                          <React.Fragment
-                                                                                              key={
-                                                                                                  offset
-                                                                                              }
-                                                                                          >
-                                                                                              {[
-                                                                                                  1,
-                                                                                                  2,
-                                                                                                  3,
-                                                                                                  4,
-                                                                                                  5,
-                                                                                                  6,
-                                                                                                  7,
-                                                                                                  8,
-                                                                                                  9,
-                                                                                                  10,
-                                                                                                  11,
-                                                                                                  12,
-                                                                                                  13,
-                                                                                                  14,
-                                                                                                  15,
-                                                                                                  16,
-                                                                                                  17,
-                                                                                                  18,
-                                                                                                  19,
-                                                                                                  20,
-                                                                                                  21,
-                                                                                                  22,
-                                                                                                  23,
-                                                                                              ].map(
-                                                                                                  (
-                                                                                                      hour,
-                                                                                                  ) => {
-                                                                                                      const hourData =
-                                                                                                          dayWeather
-                                                                                                              .hourly[
-                                                                                                              hour
-                                                                                                          ];
-                                                                                                      if (
-                                                                                                          !hourData
-                                                                                                      ) {
-                                                                                                          return (
-                                                                                                              <td
-                                                                                                                  key={
-                                                                                                                      hour
-                                                                                                                  }
-                                                                                                                  className="hourly-cell"
-                                                                                                                  style={{
-                                                                                                                      fontSize:
-                                                                                                                          "0.65rem",
-                                                                                                                      color: "#95a5a6",
-                                                                                                                  }}
-                                                                                                              >
-                                                                                                                  -
-                                                                                                              </td>
-                                                                                                          );
-                                                                                                      }
-
-                                                                                                      return (
-                                                                                                          <td
-                                                                                                              key={
-                                                                                                                  hour
-                                                                                                              }
-                                                                                                              className="hourly-cell"
-                                                                                                          >
-                                                                                                              <div
-                                                                                                                  className="cell-icon"
-                                                                                                                  title={
-                                                                                                                      hourData.condition
-                                                                                                                  }
-                                                                                                                  dangerouslySetInnerHTML={{__html: hourData.icon}}
-                                                                                                              ></div>
-                                                                                                              <div className="cell-temp">
-                                                                                                                  {
-                                                                                                                      hourData.temp
-                                                                                                                  }
-
-                                                                                                                  °
-                                                                                                              </div>
-                                                                                                              <div className="cell-wind">
-                                                                                                                  <span>
-                                                                                                                      {
-                                                                                                                          hourData.wind
-                                                                                                                      }
-                                                                                                                  </span>
-                                                                                                                  {hourData.windDirection !==
-                                                                                                                      null &&
-                                                                                                                      (() => {
-                                                                                                                          const windDir =
-                                                                                                                              getWindDirectionDisplay(
-                                                                                                                                  hourData.windDirection,
-                                                                                                                              );
-                                                                                                                          return (
-                                                                                                                              <>
-                                                                                                                                  <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(hourData.windDirection, 12)}}></span>
-                                                                                                                                  <span className="wind-cardinal">
-                                                                                                                                      {
-                                                                                                                                          windDir.cardinal
-                                                                                                                                      }
-                                                                                                                                  </span>
-                                                                                                                              </>
-                                                                                                                          );
-                                                                                                                      })()}
-                                                                                                              </div>
-                                                                                                          </td>
-                                                                                                      );
-                                                                                                  },
-                                                                                              )}
-                                                                                          </React.Fragment>
                                                                                       );
                                                                                   },
                                                                               )}

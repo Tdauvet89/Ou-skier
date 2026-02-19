@@ -53,7 +53,7 @@ async function handleWeather(url, env, ctx) {
 
     // URL upstream avec la clé API (jamais exposée au client)
     const upstream = new URL(
-        "https://my.meteoblue.com/packages/basic-1h_basic-day_snowice-day_wind-1h_wind-day"
+        "https://my.meteoblue.com/packages/basic-day_snowice-day_wind-day"
     );
     upstream.searchParams.set("apikey", env.METEOBLUE_API_KEY);
     upstream.searchParams.set("lat", lat);
