@@ -135,7 +135,6 @@ Les tailles SVG sont contrôlées par CSS selon le contexte :
 | `.title-xl` | Titre hero / CTA | Garnett Medium | 500 | 36px | `#1F2023` |
 | `.title` | Titre de composant | Garnett Medium | 500 | 24px | `#1F2023` |
 | `.subtitle` | Sous-titre / légende | Inter | 400 | 14px / lh 20px / ls -0.15px | `#5E7690` |
-| `.section-title` | Titre de section (app) | Garnett | 500 | 24px | `#1F2023` |
 
 ### Usage
 
@@ -153,16 +152,30 @@ Les tailles SVG sont contrôlées par CSS selon le contexte :
 
 **RÈGLE OBLIGATOIRE** : Tout tableau avec scroll horizontal DOIT avoir une première colonne sticky.
 
+La colonne sticky est déclarée dans `design-system.css` directement sur les sélecteurs de la première cellule :
+
 ```css
-.sticky-first-col {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    left: 0 !important;
-    z-index: 10 !important;
-    background: rgba(212, 233, 247, 0.98) !important;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+/* Colonne Secteur — sticky horizontalement */
+.snow-table thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;  /* passe au-dessus des body cells */
+    /* background déjà défini : #F9FAFC */
+}
+
+.snow-table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    /* background déjà défini : #FFF */
 }
 ```
+
+**Prérequis pour que sticky fonctionne dans un tableau :**
+- Le scroll container (`.comparison-card-body`) doit avoir `overflow: auto`
+- `.comparison-card` doit avoir `overflow: clip` (pas `hidden` — `hidden` bloque sticky)
+- Le `<table>` ne doit pas avoir `overflow: hidden` (annuler avec `overflow: visible`)
+- `.snow-table` doit avoir `overflow: visible` quand il est dans une `.comparison-card`
 
 ---
 
@@ -273,13 +286,36 @@ Gradient : `radial-gradient(95.04% 241.97% at 50% -76.74%, #FFF 54.74%, #FFE7E3 
 ### Modals
 
 ```jsx
-<div className="modal-overlay">
-    <div className="modal">
-        <div className="modal-header">Titre</div>
+<div className="modal-overlay" onClick={onClose}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="title" style={{marginBottom:'16px'}}>Titre de la modale</h2>
+        <p className="subtitle" style={{marginBottom:'20px'}}>Description optionnelle.</p>
         {/* contenu */}
+        <div className="modal-buttons">
+            <button className="btn btn-primary">Action principale</button>
+            <button className="btn btn-secondary" onClick={onClose}>Annuler</button>
+        </div>
     </div>
 </div>
 ```
+
+**Vue "limite atteinte"** (pattern `AddResortModal`) : quand une condition bloque l'action, la modale s'ouvre quand même mais affiche `.modal-limit-alert` à la place du contenu interactif, avec des boutons de redirection :
+
+```jsx
+{isAtLimit ? (
+    <>
+        <div className="modal-limit-alert">
+            <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span>
+            <p>Message d'alerte expliquant la contrainte.</p>
+        </div>
+        <div className="modal-buttons">
+            <a className="btn btn-primary" href="..." target="_blank">Action alternative</a>
+            <button className="btn btn-secondary" onClick={onClose}>Annuler</button>
+        </div>
+    </>
+) : (
+    /* contenu normal */
+)}
 
 ### Weather Data Cell
 
@@ -340,5 +376,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 3.3 — Snow-table appliqué au tableau météo + nouveau toggle Inter + footer CTA fixé
-**Dernière mise à jour** : 15 février 2026
+**Version** : 3.4 — Suppression `.section-title`, sticky colonne correcte, pattern modal mis à jour
+**Dernière mise à jour** : 19 février 2026

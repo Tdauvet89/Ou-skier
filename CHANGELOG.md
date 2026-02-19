@@ -2,6 +2,33 @@
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
+## [7.0.0] - 2026-02-19
+
+### Ajouté
+- **Cloudflare Worker proxy** (`worker/`) : la clé API Meteoblue n'est plus exposée dans le HTML public
+  - Route `GET /weather?lat&lon&asl` → `my.meteoblue.com` avec cache Cloudflare partagé 2h
+  - Route `GET /search?query` → recherche Meteoblue (pas de cache)
+  - Cache partagé entre tous les utilisateurs : N stations × 1 appel / 2h quelle que soit la fréquentation
+  - Clé stockée en variable d'environnement Cloudflare (`wrangler secret put METEOBLUE_API_KEY`)
+- **Limite de 5 secteurs** (`MAX_RESORTS = 5`) : constante centrale, guard dans `addResort`
+- **Vue "limite atteinte" dans la modale** : le bouton "Ajouter un Secteur" s'ouvre toujours mais affiche une alerte orange (`.modal-limit-alert`) avec boutons "Proposer une amélioration" (primaire) et "Annuler" (secondaire)
+- **Liens Meteoblue dans les tableaux** : chaque nom de secteur est un lien `<a class="resort-link">` vers la page Meteoblue dédiée (`getMeteoblueUrl`), avec soulignement au hover ; "Meteobleu" dans les sous-titres est également un lien
+
+### Corrigé
+- **Scroll horizontal** des deux tableaux ("Chutes de Neige" et "Prévisions météo 5 jours") : `.snow-table` n'était pas contraint à `width: 100%`, le `<table>` interne aussi → ajout de `width: max-content; min-width: 100%` sur les deux
+- **Colonne "Secteur" sticky** : `position: sticky; left: 0` ajouté sur `th:first-child` et `td:first-child`
+  - Racine du problème : `.comparison-card { overflow: hidden }` bloquait sticky → remplacé par `overflow: clip`
+  - Second blocage : règle locale `table { overflow: hidden }` → annulée par `overflow: visible` sur `.comparison-card .snow-table table`
+
+### Modifié
+- **Modale "Ajouter un Secteur"** :
+  - Icône `mountain` retirée, `div.modal-header` → `h2.title` (Garnett 24px)
+  - Sous-titre ajouté : "Entrer le nom d'une station, d'un pic..."
+  - Icône `mapPin` supprimée des résultats de recherche
+  - Bouton Annuler : `btn btn-secondary` pur (classe locale `.modal-btn` supprimée)
+- **Design system** : classe `.section-title` supprimée de `design-system.css` (doublon de `.title`) ; `.comparison-card-header .section-title` → `.comparison-card-header .title` ; `design-system.html` mis à jour
+- **`index.html`** : `API_KEY` remplacée par `PROXY_URL` (pointe vers le Cloudflare Worker)
+
 ## [6.8.0] - 2026-02-12
 
 ### Modifie

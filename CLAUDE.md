@@ -26,7 +26,6 @@ Avant de créer ou modifier un composant UI (bouton, toggle, tag, modal, input, 
 | Inputs | `.input` | design-system.css |
 | Icônes | `.icon` | design-system.css |
 | Snow Table | `.snow-table`, `.sector-name`, `.sector-altitude`, `.snow-value`, `.snow-unit`, `.day-abbr`, `.day-num` | design-system.css |
-| Section Title | `.section-title` | design-system.css |
 | Comparison Card | `.comparison-card`, `.comparison-card-header`, `.comparison-card-body` | design-system.css |
 | Footer CTA | `.footer-cta`, `.footer-cta-title`, `.footer-cta-buttons` | design-system.css |
 | Animations | `fadeIn`, `fadeInOverlay`, `slideInModal`, `slideDown` | design-system.css |
@@ -80,3 +79,7 @@ Quand tu modifies `design-system.css`, `icons.js`, `weatherCodes.js` ou `massifM
 - **icons.js** — Icônes SVG exportées sur `window`
 - **weatherCodes.js** — Mapping codes météo → icônes SVG
 - **massifMapping.js** — Mapping communes → massifs
+- **worker/** — Cloudflare Worker proxy (clé API cachée côté serveur, cache partagé 2h)
+  - `worker.js` — routes `/weather` et `/search`
+  - `wrangler.toml` — config déploiement
+  - `package.json` — dépendance Wrangler CLI
