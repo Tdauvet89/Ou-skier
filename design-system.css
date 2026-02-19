@@ -451,33 +451,14 @@
 
 
 /* === LOGO === */
+/* Wordmark SVG 165×54px — stocké dans icons.js (logoSvg) */
 .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.logo-icon {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
 }
-
-.logo-text-primary {
-    font-family: "Garnett", sans-serif;
-    font-weight: 500;
-    font-size: 1.85rem;
-    color: #1e293b;
-    line-height: 1.1;
-    letter-spacing: -0.3px;
-}
-
-.logo-text-secondary {
-    font-family: "Garnett", sans-serif;
-    font-weight: 400;
-    font-size: 1.25rem;
-    color: #3b82f6;
-    line-height: 1.1;
+.logo svg {
+    display: block;
 }
 
 /* === COMPARISON CARD === */

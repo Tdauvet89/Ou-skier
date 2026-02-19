@@ -16,16 +16,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.12.0"></script>
-        <script src="weatherCodes.js?v=7.12.0"></script>
-        <script src="massifMapping.js?v=7.12.0"></script>
+        <script src="icons.js?v=7.13.0"></script>
+        <script src="weatherCodes.js?v=7.13.0"></script>
+        <script src="massifMapping.js?v=7.13.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.12.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.13.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -2409,12 +2409,7 @@
                         <div className="container">
                             <header>
                                 <h1>
-                                    <div className="logo">
-                                        <div>
-                                            <div className="logo-text-primary">Ski rando</div>
-                                            <div className="logo-text-secondary">météo</div>
-                                        </div>
-                                    </div>
+                                    <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
                                 </h1>
                             </header>
                             <div className="main-content">
@@ -2432,12 +2427,7 @@
                     <div className="container">
                         <header>
                             <h1>
-                                <div className="logo">
-                                    <div>
-                                        <div className="logo-text-primary">Ski rando</div>
-                                        <div className="logo-text-secondary">météo</div>
-                                    </div>
-                                </div>
+                                <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
                             </h1>
                             <div className="header-controls">
                                 <a
