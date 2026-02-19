@@ -130,12 +130,22 @@ Les tailles SVG sont contrôlées par CSS selon le contexte :
 
 ## Typographie
 
-| Rôle | Police | Poids | Taille |
-|---|---|---|---|
-| H1 titre principal | Barlow Condensed | 800 | 2.8rem |
-| H2 section | Barlow Condensed | 700 | 1.6rem |
-| Corps / données | JetBrains Mono | 400 | 0.9rem |
-| Détails secondaires | JetBrains Mono | 400 | 0.65-0.7rem |
+| Classe CSS | Rôle | Police | Poids | Taille | Couleur |
+|---|---|---|---|---|---|
+| `.title` | Titre de composant | Garnett Medium | 500 | 24px | `#1F2023` |
+| `.subtitle` | Sous-titre / légende | Inter | 400 | 14px / lh 20px / ls -0.15px | `#5E7690` |
+| `.section-title` | Titre de section (app) | Garnett | 500 | 24px | `#1F2023` |
+| _(sans classe)_ | H1 titre principal | Barlow Condensed | 800 | 2.8rem | `var(--deep-blue)` |
+| _(sans classe)_ | H2 section | Barlow Condensed | 700 | 1.6rem | `var(--deep-blue)` |
+| _(sans classe)_ | Corps / données | JetBrains Mono | 400 | 0.9rem | — |
+| _(sans classe)_ | Détails secondaires | JetBrains Mono | 400 | 0.65-0.7rem | — |
+
+### Usage
+
+```html
+<h2 class="title">Météo Comparative (5 jours)</h2>
+<p class="subtitle">Les données viennent de Meteoblue et France Météo</p>
+```
 
 ---
 
@@ -232,12 +242,14 @@ Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleCloc
 | Classe | Rôle | Styles |
 |--------|------|--------|
 | `.snow-table` | Conteneur flex | max-width: 1290px, border-radius: 15px |
-| `.sector-name` | Nom du secteur | Garnett 16px 500, #1F2023 |
+| `.snow-table th:first-child` | Colonne secteur (header) | min-width: 277px |
+| `.snow-table td:first-child` | Colonne secteur (body) | min-width: 277px |
+| `.sector-name` | Nom du secteur | Inter 16px 600, #0F172B |
 | `.sector-altitude` | Altitude | Garnett 13px 500, #5E7690 |
 | `.snow-value` | Valeur neige | Garnett 16px 500, #1F2023 |
 | `.snow-unit` | Unité "cm" | Garnett 13px 500, #5E7690 |
-| `.day-abbr` | Jour abrégé | Garnett 13px 500, #5E7690 |
-| `.day-num` | Numéro du jour | Garnett 16px 500, #1F2023 |
+| `.day-abbr` | Jour abrégé | Garnett 14px **600**, #5E7690 |
+| `.day-num` | Numéro du jour | Garnett 16px **600**, #1F2023 |
 
 ### Footer CTA
 
