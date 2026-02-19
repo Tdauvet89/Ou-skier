@@ -894,6 +894,21 @@
                     altitude: 1700,
                     mbUrl: "saint-lary-soulan_france_2978975",
                 },
+                // --- MOCK ONLY : secteurs de test pour atteindre MAX_RESORTS ---
+                {
+                    name: "La Mongie",
+                    lat: 42.9133,
+                    lon: 0.1436,
+                    altitude: 1800,
+                    mbUrl: "la-mongie_france_2997600",
+                },
+                {
+                    name: "Cauterets",
+                    lat: 42.8922,
+                    lon: -0.1106,
+                    altitude: 1450,
+                    mbUrl: "cauterets_france_3027283",
+                },
             ];
 
             // URL du proxy Cloudflare Worker
@@ -1083,6 +1098,41 @@
                     _detail: {
                         massifName: "Aure-Louron",
                         massifId: 67,
+                        dateBulletin: _mockDays[0] + "T16:00:00",
+                        risqueMaxi: 2,
+                        evoluRisque1: 0,
+                        risqueMaxiJ2: 2,
+                    },
+                },
+                // --- MOCK ONLY ---
+                "La Mongie": {
+                    "aujourd'hui": {
+                        bas: 4,
+                        haut: 4,
+                        evolution: -1,
+                        date: _mockDays[0],
+                    },
+                    demain: { bas: 3, haut: 3, date: _mockDays[1] },
+                    _detail: {
+                        massifName: "Haute-Bigorre",
+                        massifId: 66,
+                        dateBulletin: _mockDays[0] + "T16:00:00",
+                        risqueMaxi: 4,
+                        evoluRisque1: -1,
+                        risqueMaxiJ2: 3,
+                    },
+                },
+                "Cauterets": {
+                    "aujourd'hui": {
+                        bas: 1,
+                        haut: 2,
+                        evolution: 0,
+                        date: _mockDays[0],
+                    },
+                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
+                    _detail: {
+                        massifName: "Haute-Bigorre",
+                        massifId: 66,
                         dateBulletin: _mockDays[0] + "T16:00:00",
                         risqueMaxi: 2,
                         evoluRisque1: 0,
