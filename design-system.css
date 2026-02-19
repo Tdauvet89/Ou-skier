@@ -268,7 +268,7 @@
 }
 
 .snow-table thead tr {
-    height: 82px;
+    height: 84px;
     border-radius: 15px 15px 0 0;
     border: 1px solid #E1E8F2;
     background: #F9FAFC;
@@ -295,8 +295,8 @@
     display: block;
     color: #5E7690;
     font-family: "Garnett", sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     line-height: normal;
 }
 
@@ -305,7 +305,7 @@
     color: #1F2023;
     font-family: "Garnett", sans-serif;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     line-height: normal;
 }
 
@@ -328,11 +328,11 @@
 }
 
 .snow-table .sector-name {
-    color: #1F2023;
-    font-family: "Garnett", sans-serif;
+    color: #0F172B;
+    font-family: "Inter", sans-serif;
     font-size: 16px;
-    font-weight: 500;
-    line-height: normal;
+    font-weight: 600;
+    line-height: 24px;
 }
 
 .snow-table .sector-altitude {

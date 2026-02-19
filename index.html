@@ -16,16 +16,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.8.0"></script>
-        <script src="weatherCodes.js?v=7.8.0"></script>
-        <script src="massifMapping.js?v=7.8.0"></script>
+        <script src="icons.js?v=7.9.0"></script>
+        <script src="weatherCodes.js?v=7.9.0"></script>
+        <script src="massifMapping.js?v=7.9.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.8.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.9.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -308,54 +308,90 @@
             }
 
             .day-cell {
-                padding: 10px 8px;
-                min-width: 200px;
+                padding: 16px 12px;
+                min-width: 240px;
+                min-height: 237px;
                 vertical-align: middle;
             }
 
             .day-cell-inner {
                 display: flex;
-                align-items: center;
-                gap: 6px;
+                align-items: flex-start;
+                gap: 16px;
             }
 
             .day-cell-icon {
-                flex: 0 0 30%;
+                flex: 0 0 100px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 text-align: center;
+                gap: 4px;
             }
             .day-cell-icon svg {
-                width: 32px;
-                height: 32px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .day-cell-condition {
+                font-family: "Inter", sans-serif;
+                font-size: 12px;
+                font-weight: 400;
+                color: #45556C;
+                line-height: 15px;
+                text-align: center;
             }
 
             .day-cell-info {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                gap: 2px;
+                gap: 4px;
                 align-items: flex-start;
-                font-size: 0.75rem;
             }
 
             .day-cell-info .info-row {
                 display: flex;
                 align-items: center;
                 gap: 4px;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                color: #314158;
+                line-height: 20px;
             }
 
-            /* Liens cliquables - bleu visible */
+            .day-cell-temp {
+                font-family: "Inter", sans-serif;
+                font-size: 24px;
+                font-weight: 700;
+                color: #0F172B;
+                line-height: 32px;
+            }
+
+            .day-cell-temp-range {
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                color: #314158;
+                line-height: 20px;
+                margin-left: 4px;
+            }
+
+            /* Liens cliquables BERA */
             table a,
             .info-row a {
-                color: #2980b9;
-                text-decoration: underline;
+                color: #155DFC;
+                text-decoration: none;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                line-height: 20px;
             }
             table a:hover,
             .info-row a:hover {
-                color: #1a5276;
+                text-decoration: underline;
             }
 
             .hourly-cell {
@@ -2774,199 +2810,72 @@
                                                                                                   {/* Colonne gauche : icone + description */}
                                                                                                   <div
                                                                                                       className="day-cell-icon"
-                                                                                                      title={
-                                                                                                          dayWeather.condition
-                                                                                                      }
+                                                                                                      title={dayWeather.condition}
                                                                                                   >
                                                                                                       <span dangerouslySetInnerHTML={{__html: dayWeather.icon}}></span>
-                                                                                                      <div
-                                                                                                          style={{
-                                                                                                              fontSize:
-                                                                                                                  "0.6rem",
-                                                                                                              marginTop:
-                                                                                                                  "2px",
-                                                                                                              color: "#555",
-                                                                                                          }}
-                                                                                                      >
-                                                                                                          {
-                                                                                                              dayWeather.condition
-                                                                                                          }
+                                                                                                      <div className="day-cell-condition">
+                                                                                                          {dayWeather.condition}
                                                                                                       </div>
                                                                                                   </div>
                                                                                                   {/* Colonne droite : infos */}
                                                                                                   <div className="day-cell-info">
-                                                                                                      {/* Temperature moyenne */}
+                                                                                                      {/* Température moy + min/max */}
                                                                                                       <div className="info-row">
-                                                                                                          <span
-                                                                                                              style={{
-                                                                                                                  fontSize:
-                                                                                                                      "1.1rem",
-                                                                                                                  fontWeight: 700,
-                                                                                                                  color: "var(--deep-blue)",
-                                                                                                              }}
-                                                                                                          >
-                                                                                                              {
-                                                                                                                  avgTemp
-                                                                                                              }
-
-                                                                                                              °
-                                                                                                          </span>
-                                                                                                          <span
-                                                                                                              style={{
-                                                                                                                  fontSize:
-                                                                                                                      "0.65rem",
-                                                                                                                  color: "#888",
-                                                                                                                  marginLeft:
-                                                                                                                      "4px",
-                                                                                                              }}
-                                                                                                          >
-                                                                                                              (
-                                                                                                              {Math.round(
-                                                                                                                  dayWeather.temp_min,
-                                                                                                              )}
-
-                                                                                                              °
-                                                                                                              /{" "}
-                                                                                                              {Math.round(
-                                                                                                                  dayWeather.temp_max,
-                                                                                                              )}
-                                                                                                              °)
+                                                                                                          <span className="day-cell-temp">{avgTemp}°</span>
+                                                                                                          <span className="day-cell-temp-range">
+                                                                                                              ({Math.round(dayWeather.temp_min)}°/{Math.round(dayWeather.temp_max)}°)
                                                                                                           </span>
                                                                                                       </div>
                                                                                                       {/* Vent moyen + direction */}
                                                                                                       <div className="info-row">
                                                                                                           {windDir && (
-                                                                                                              <span
-                                                                                                                  style={{
-                                                                                                                      marginRight:
-                                                                                                                          "3px",
-                                                                                                                      display: "inline-flex",
-                                                                                                                      alignItems: "center",
-                                                                                                                      gap: "2px",
-                                                                                                                  }}
-                                                                                                              >
+                                                                                                              <span style={{display:"inline-flex",alignItems:"center",gap:"2px",marginRight:"2px"}}>
                                                                                                                   <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(dayWeather.windDirection, 14)}}></span>
-                                                                                                                  <span className="wind-cardinal">
-                                                                                                                      {
-                                                                                                                          windDir.cardinal
-                                                                                                                      }
-                                                                                                                  </span>
+                                                                                                                  <span className="wind-cardinal">{windDir.cardinal}</span>
                                                                                                               </span>
                                                                                                           )}
-                                                                                                          <span>
-                                                                                                              Vent{" "}
-                                                                                                              {
-                                                                                                                  windMean
-                                                                                                              }{" "}
-                                                                                                              km/h
-                                                                                                          </span>
+                                                                                                          <span>Vent {windMean} km/h</span>
                                                                                                       </div>
                                                                                                       {/* Rafales min-max */}
                                                                                                       <div className="info-row">
-                                                                                                          <span
-                                                                                                              style={{
-                                                                                                                  color:
-                                                                                                                      gustColor !==
-                                                                                                                      "inherit"
-                                                                                                                          ? "white"
-                                                                                                                          : "inherit",
-                                                                                                                  backgroundColor:
-                                                                                                                      gustColor !==
-                                                                                                                      "inherit"
-                                                                                                                          ? gustColor
-                                                                                                                          : "transparent",
-                                                                                                                  padding:
-                                                                                                                      gustColor !==
-                                                                                                                      "inherit"
-                                                                                                                          ? "1px 6px"
-                                                                                                                          : "0",
-                                                                                                                  borderRadius:
-                                                                                                                      "3px",
-                                                                                                                  fontWeight:
-                                                                                                                      gustColor !==
-                                                                                                                      "inherit"
-                                                                                                                          ? 700
-                                                                                                                          : 400,
-                                                                                                              }}
-                                                                                                          >
-                                                                                                              Raf.{" "}
-                                                                                                              {
-                                                                                                                  gustMin
-                                                                                                              }
-
-                                                                                                              -
-                                                                                                              {
-                                                                                                                  gustMax
-                                                                                                              }{" "}
-                                                                                                              km/h
+                                                                                                          <span style={{
+                                                                                                              color: gustColor !== "inherit" ? "white" : "inherit",
+                                                                                                              backgroundColor: gustColor !== "inherit" ? gustColor : "transparent",
+                                                                                                              padding: gustColor !== "inherit" ? "1px 6px" : "0",
+                                                                                                              borderRadius: "4px",
+                                                                                                              fontWeight: gustColor !== "inherit" ? 700 : 400,
+                                                                                                          }}>
+                                                                                                              Raf. {gustMin}-{gustMax} km/h
                                                                                                           </span>
                                                                                                       </div>
-                                                                                                      {/* Precipitations (neige ou pluie) — masque si ≤ 0 */}
-                                                                                                      {dayWeather.snowCm >
-                                                                                                          0 && (
+                                                                                                      {/* Précipitations — masque si ≤ 0 */}
+                                                                                                      {dayWeather.snowCm > 0 && (
+                                                                                                          <div className="info-row" style={{color:"#3498db",fontWeight:600}}>
+                                                                                                              <span className="icon" style={{marginRight:"3px"}} dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
+                                                                                                              {dayWeather.snowCm} cm
+                                                                                                          </div>
+                                                                                                      )}
+                                                                                                      {dayWeather.rainMm > 0 && dayWeather.snowCm <= 0 && (
+                                                                                                          <div className="info-row" style={{color:"#2980b9"}}>
+                                                                                                              <span className="icon" style={{marginRight:"3px"}} dangerouslySetInnerHTML={{__html: uiSvg.droplet}}></span>
+                                                                                                              {dayWeather.rainMm} mm
+                                                                                                          </div>
+                                                                                                      )}
+                                                                                                      {/* BERA risque */}
+                                                                                                      {braEcheance && braEcheance.haut > 0 && (
                                                                                                           <div className="info-row">
-                                                                                                              <span
-                                                                                                                  style={{
-                                                                                                                      fontWeight: 600,
-                                                                                                                      color: "#3498db",
-                                                                                                                  }}
-                                                                                                              >
-                                                                                                                  <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.snowflake}}></span>
-                                                                                                                  {
-                                                                                                                      dayWeather.snowCm
-                                                                                                                  }{" "}
-                                                                                                                  cm
+                                                                                                              <span style={{
+                                                                                                                  backgroundColor: getBRAColor(braEcheance.haut),
+                                                                                                                  color: "white",
+                                                                                                                  padding: "2px 8px",
+                                                                                                                  borderRadius: "4px",
+                                                                                                                  fontWeight: 600,
+                                                                                                                  fontSize: "14px",
+                                                                                                              }}>
+                                                                                                                  BERA : {braEcheance.haut}/5
                                                                                                               </span>
                                                                                                           </div>
                                                                                                       )}
-                                                                                                      {dayWeather.rainMm >
-                                                                                                          0 &&
-                                                                                                          dayWeather.snowCm <=
-                                                                                                              0 && (
-                                                                                                              <div className="info-row">
-                                                                                                                  <span
-                                                                                                                      style={{
-                                                                                                                          color: "#2980b9",
-                                                                                                                      }}
-                                                                                                                  >
-                                                                                                                      <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.droplet}}></span>
-                                                                                                                      {
-                                                                                                                          dayWeather.rainMm
-                                                                                                                      }{" "}
-                                                                                                                      mm
-                                                                                                                  </span>
-                                                                                                              </div>
-                                                                                                          )}
-                                                                                                      {/* BERA risque */}
-                                                                                                      {braEcheance &&
-                                                                                                          braEcheance.haut >
-                                                                                                              0 && (
-                                                                                                              <div className="info-row">
-                                                                                                                  <span
-                                                                                                                      style={{
-                                                                                                                          backgroundColor:
-                                                                                                                              getBRAColor(
-                                                                                                                                  braEcheance.haut,
-                                                                                                                              ),
-                                                                                                                          color: "white",
-                                                                                                                          padding:
-                                                                                                                              "1px 6px",
-                                                                                                                          borderRadius:
-                                                                                                                              "3px",
-                                                                                                                          fontWeight: 700,
-                                                                                                                          boxShadow:
-                                                                                                                              "0 1px 2px rgba(0,0,0,0.15)",
-                                                                                                                      }}
-                                                                                                                  >
-                                                                                                                      BERA
-                                                                                                                      :{" "}
-                                                                                                                      {
-                                                                                                                          braEcheance.haut
-                                                                                                                      }
-                                                                                                                      /5
-                                                                                                                  </span>
-                                                                                                              </div>
-                                                                                                          )}
                                                                                                       {/* Lien BERA (uniquement si données disponibles) */}
                                                                                                       {braDataForResort?._detail &&
                                                                                                           (offset ===
