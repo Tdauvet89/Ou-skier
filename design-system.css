@@ -505,6 +505,16 @@
 /* Override snow-table inside a comparison-card: no outer radius/shadow (card handles it) */
 .comparison-card .snow-table {
     border-radius: 0;
+    /* Allow table to exceed card width so .comparison-card-body overflow:auto can scroll */
+    width: max-content;
+    min-width: 100%;
+    overflow: visible;
+}
+
+.comparison-card .snow-table table {
+    /* Size to content so min-width on cells is respected and triggers horizontal scroll */
+    width: max-content;
+    min-width: 100%;
 }
 
 .comparison-card .snow-table thead tr {
