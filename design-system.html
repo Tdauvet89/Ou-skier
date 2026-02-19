@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.11.0"></script>
+        <script src="icons.js?v=7.12.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.11.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.12.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -328,6 +328,11 @@
             </div>
 
             <div class="type-sample">
+                <div class="title-xl">Ajoute tes stations préférées pour voir d'un coup d'œil où sont les meilleures conditions de ski.</div>
+                <div class="meta"><code>.title-xl</code> — Garnett Medium 500 — 36px — color #1F2023</div>
+            </div>
+
+            <div class="type-sample">
                 <div class="title">Météo Comparative (5 jours)</div>
                 <div class="meta"><code>.title</code> — Garnett Medium 500 — 24px — color #1F2023</div>
             </div>
@@ -381,17 +386,14 @@
 
             <h3>Boutons</h3>
             <div class="component-row">
-                <button class="btn btn-primary">Actualiser</button>
-                <button class="btn btn-success">Ajouter un Secteur</button>
-                <button class="btn btn-secondary">Annuler</button>
-                <button class="btn btn-dark">Proposer une amélioration</button>
-                <button class="btn btn-ghost">Faire un don</button>
+                <button class="btn btn-primary">Proposer une amélioration</button>
+                <button class="btn btn-secondary">Faire un don</button>
             </div>
 
             <h3>Tags secteur</h3>
             <div class="component-row">
-                <span class="tag">Guzet <button style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--deep-blue)">&times;</button></span>
-                <span class="tag">Piau-Engaly <button style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--deep-blue)">&times;</button></span>
+                <span class="tag">Guzet <button style="background:none;border:none;cursor:pointer;font-size:1rem;color:#1F2023">&times;</button></span>
+                <span class="tag">Piau-Engaly <button style="background:none;border:none;cursor:pointer;font-size:1rem;color:#1F2023">&times;</button></span>
             </div>
 
             <h3>Toggle vue</h3>
@@ -510,10 +512,10 @@
                         Trouves le bon spot pour ta rando
                     </div>
                     <div class="footer-cta-buttons">
-                        <a class="btn btn-dark" href="#" style="text-decoration:none">
+                        <a class="btn btn-primary" href="#" style="text-decoration:none">
                             Proposer une amélioration
                         </a>
-                        <a class="btn btn-ghost" href="#" style="text-decoration:none">
+                        <a class="btn btn-secondary" href="#" style="text-decoration:none">
                             Faire un don
                         </a>
                     </div>

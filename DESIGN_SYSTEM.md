@@ -132,19 +132,17 @@ Les tailles SVG sont contrôlées par CSS selon le contexte :
 
 | Classe CSS | Rôle | Police | Poids | Taille | Couleur |
 |---|---|---|---|---|---|
+| `.title-xl` | Titre hero / CTA | Garnett Medium | 500 | 36px | `#1F2023` |
 | `.title` | Titre de composant | Garnett Medium | 500 | 24px | `#1F2023` |
 | `.subtitle` | Sous-titre / légende | Inter | 400 | 14px / lh 20px / ls -0.15px | `#5E7690` |
 | `.section-title` | Titre de section (app) | Garnett | 500 | 24px | `#1F2023` |
-| _(sans classe)_ | H1 titre principal | Barlow Condensed | 800 | 2.8rem | `var(--deep-blue)` |
-| _(sans classe)_ | H2 section | Barlow Condensed | 700 | 1.6rem | `var(--deep-blue)` |
-| _(sans classe)_ | Corps / données | JetBrains Mono | 400 | 0.9rem | — |
-| _(sans classe)_ | Détails secondaires | JetBrains Mono | 400 | 0.65-0.7rem | — |
 
 ### Usage
 
 ```html
-<h2 class="title">Météo Comparative (5 jours)</h2>
-<p class="subtitle">Les données viennent de Meteoblue et France Météo</p>
+<h2 class="title-xl">Ajoute tes stations préférées…</h2>
+<h2 class="title">Chutes de Neige (7 jours)</h2>
+<p class="subtitle">Les données viennent de Meteobleu</p>
 ```
 
 ---
@@ -174,12 +172,17 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 
 ### Boutons
 
+2 variantes uniquement — fond noir ou fond gris, pill (border-radius 50px), Inter 14px 500.
+
 ```jsx
-<button className="btn btn-primary">Actualiser</button>
-<button className="btn btn-success">Ajouter un Secteur</button>
-<button className="btn btn-secondary">Annuler</button>
-<a className="btn btn-light" href="#">Lien sur fond coloré</a>
+<button className="btn btn-primary">Proposer une amélioration</button>
+<button className="btn btn-secondary">Faire un don</button>
 ```
+
+| Classe | Style |
+|--------|-------|
+| `.btn-primary` | bg `#1F2023`, texte blanc |
+| `.btn-secondary` | bg `#F0F0F0`, texte `#1F2023`, bordure `#E0E0E0` |
 
 ### Toggle Buttons
 
@@ -259,8 +262,8 @@ Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleCloc
         Trouves le bon spot pour ta rando
     </div>
     <div className="footer-cta-buttons">
-        <a className="btn btn-dark" href="...">Proposer une amélioration</a>
-        <a className="btn btn-ghost" href="...">Faire un don</a>
+        <a className="btn btn-primary" href="...">Proposer une amélioration</a>
+        <a className="btn btn-secondary" href="...">Faire un don</a>
     </div>
 </div>
 ```

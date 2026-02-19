@@ -16,16 +16,16 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.11.0"></script>
-        <script src="weatherCodes.js?v=7.11.0"></script>
-        <script src="massifMapping.js?v=7.11.0"></script>
+        <script src="icons.js?v=7.12.0"></script>
+        <script src="weatherCodes.js?v=7.12.0"></script>
+        <script src="massifMapping.js?v=7.12.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.11.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.12.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -2441,7 +2441,7 @@
                             </h1>
                             <div className="header-controls">
                                 <a
-                                    className="btn btn-dark"
+                                    className="btn btn-primary"
                                     href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -2455,57 +2455,25 @@
                         <div className="main-content">
                             {error && <div className="error"><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span> {error}</div>}
 
-                            <div style={{ marginBottom: "30px" }}>
-                                <h3
-                                    style={{
-                                        fontFamily:
-                                            "Barlow Condensed, sans-serif",
-                                        fontSize: "1.3rem",
-                                        color: "var(--deep-blue)",
-                                        marginBottom: "15px",
-                                    }}
-                                >
-                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mapPin}}></span> Mes Secteurs
-                                </h3>
-                                {resorts.length > 0 ? (
+                            <div className="sectors-block">
+                                <p className="title-xl" style={{textAlign:"center",margin:0}}>Ajoute tes stations préférées pour voir d'un coup d'œil où sont les meilleures conditions de ski.</p>
+                                {resorts.length > 0 && (
                                     <div className="resort-list">
                                         {resorts.map((resort, index) => (
-                                            <div
-                                                key={index}
-                                                className="tag"
-                                            >
+                                            <div key={index} className="tag">
                                                 {resort.name}
                                                 <button
                                                     className="remove-resort"
-                                                    onClick={() =>
-                                                        removeResort(index)
-                                                    }
+                                                    onClick={() => removeResort(index)}
                                                     title="Retirer ce secteur"
-                                                >
-                                                    ×
-                                                </button>
+                                                >×</button>
                                             </div>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div
-                                        style={{
-                                            padding: "20px",
-                                            background: "var(--powder)",
-                                            borderRadius: "8px",
-                                            textAlign: "center",
-                                            color: "var(--storm-gray)",
-                                            fontSize: "0.95rem",
-                                        }}
-                                    >
-                                        Aucun secteur ajouté. Cliquez sur
-                                        "Ajouter un Secteur" pour commencer.
-                                    </div>
                                 )}
                                 <button
-                                    className="btn btn-success add-resort-btn"
+                                    className="btn btn-primary"
                                     onClick={() => setIsModalOpen(true)}
-                                    style={{ marginTop: "15px" }}
                                 >
                                     <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
                                 </button>
@@ -2516,6 +2484,12 @@
                                     {snowData.length > 0 && (
                                         <section className="section">
                                             <div className="comparison-card">
+                                                <div className="comparison-card-header">
+                                                    <div>
+                                                        <h2 className="title" style={{margin:0}}>Chutes de Neige (7 jours)</h2>
+                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de Meteobleu</p>
+                                                    </div>
+                                                </div>
                                                 <div className="comparison-card-body">
                                             <div className="snow-table">
                                                 <table>
@@ -2572,6 +2546,12 @@
                                     {weatherData.length > 0 && (
                                         <section className="section">
                                             <div className="comparison-card">
+                                                <div className="comparison-card-header">
+                                                    <div>
+                                                        <h2 className="title" style={{margin:0}}>Prévisions météo 5 jours</h2>
+                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de Meteobleu et France Météo. Contrairement aux chutes de neige, il n'est pas possible d'afficher la météo des jours précédents.</p>
+                                                    </div>
+                                                </div>
                                                 <div className="comparison-card-body">
                                             <div className="snow-table">
                                                 <table>
@@ -3300,7 +3280,7 @@
                             </div>
                             <div className="footer-cta-buttons">
                                 <a
-                                    className="btn btn-dark"
+                                    className="btn btn-primary"
                                     href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -3309,7 +3289,7 @@
                                     Proposer une amélioration
                                 </a>
                                 <a
-                                    className="btn btn-ghost"
+                                    className="btn btn-secondary"
                                     href="https://charmed-origami-8bf.notion.site/3039717d683f807a91d5e7864b74b5cc"
                                     target="_blank"
                                     rel="noopener noreferrer"

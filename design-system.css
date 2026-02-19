@@ -66,50 +66,46 @@
 }
 
 /* === BOUTONS === */
+/*
+ * 2 boutons uniquement :
+ *   .btn .btn-primary  — fond noir #1F2023, texte blanc
+ *   .btn .btn-secondary — fond gris #F0F0F0, texte foncé
+ */
 .btn {
     padding: 10px 22px;
     border: none;
-    border-radius: 8px;
-    font-family: "Barlow Condensed", sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    border-radius: 50px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    text-decoration: none;
+    line-height: normal;
 }
 
 .btn-primary {
-    background: var(--deep-blue);
+    background: #1F2023;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #2874a6;
-    box-shadow: 0 2px 8px rgba(26, 82, 118, 0.25);
-}
-
-.btn-success {
-    background: var(--fresh-green);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #219a52;
-    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.25);
+    background: #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary {
-    background: #f1f5f9;
-    color: var(--storm-gray);
-    border: 1px solid #e2e8f0;
+    background: #F0F0F0;
+    color: #1F2023;
+    border: 1px solid #E0E0E0;
 }
 
 .btn-secondary:hover {
-    background: #e2e8f0;
+    background: #E5E5E5;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btn:disabled {
@@ -169,11 +165,11 @@
     align-items: center;
     gap: 8px;
     padding: 6px 14px;
-    background: #edf5fd;
-    color: var(--deep-blue);
-    border: 1px solid #c8dff5;
+    background: #E5E7EF;
+    color: #1F2023;
     border-radius: 20px;
-    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
     font-size: 0.85rem;
 }
 
@@ -363,6 +359,16 @@
 
 /* === TYPOGRAPHIES GLOBALES === */
 
+/* Titre XL — Garnett Medium 36px/500 #1F2023 */
+.title-xl {
+    color: #1F2023;
+    font-family: "Garnett", sans-serif;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
 /* Titre — Garnett Medium 24px/500 #1F2023 */
 .title {
     color: #1F2023;
@@ -410,6 +416,7 @@
     border-radius: 0 0 12px 12px;
 }
 
+/* .footer-cta-title extends .title-xl */
 .footer-cta-title {
     font-family: "Garnett", sans-serif;
     font-size: 36px;
@@ -417,6 +424,22 @@
     color: #1F2023;
     line-height: normal;
     margin-bottom: 28px;
+    max-width: 780px;
+}
+
+/* === SECTORS BLOCK === */
+.sectors-block {
+    width: 100%;
+    max-width: 1440px;
+    min-height: 257px;
+    background: #F9FAFC;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 24px;
+    margin: 0 auto 30px;
 }
 
 .footer-cta-buttons {
@@ -426,42 +449,6 @@
     flex-wrap: wrap;
 }
 
-.btn-dark {
-    background: #1F2023;
-    color: white;
-    border-radius: 50px;
-    text-transform: none;
-    font-weight: 500;
-}
-
-.btn-dark:hover {
-    background: #333;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.btn-ghost {
-    background: #F0F0F0;
-    color: #1F2023;
-    border: 1px solid #E0E0E0;
-    border-radius: 50px;
-    text-transform: none;
-    font-weight: 500;
-}
-
-.btn-ghost:hover {
-    background: #E5E5E5;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.btn-light {
-    background: white;
-    color: var(--deep-blue);
-}
-
-.btn-light:hover {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
 
 /* === LOGO === */
 .logo {
