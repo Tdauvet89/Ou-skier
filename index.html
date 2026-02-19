@@ -25,7 +25,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.18.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.19.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -416,6 +416,15 @@
             }
             .bera-link:hover {
                 color: #0f3fa0;
+            }
+
+            /* Lien vers la page Meteoblue du secteur */
+            .resort-link {
+                text-decoration: none;
+                color: inherit;
+            }
+            .resort-link:hover .sector-name {
+                text-decoration: underline;
             }
 
             .hourly-cell {
@@ -2472,7 +2481,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Chutes de Neige (7 jours)</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de Meteobleu</p>
+                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteobleu</a></p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
@@ -2502,10 +2511,13 @@
                                                         {snowData.map(
                                                             (resort, index) => {
                                                                 const resortInfo = resorts[index];
+                                                                const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
                                                                 return (
                                                                     <tr key={index}>
                                                                         <td>
-                                                                            <span className="sector-name">{resort.name}</span>
+                                                                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                                <span className="sector-name">{resort.name}</span>
+                                                                            </a>
                                                                             <span className="sector-altitude"> ({resortInfo?.altitude}m)</span>
                                                                         </td>
                                                                         {resort.snowByDay.map(
@@ -2534,7 +2546,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Prévisions météo 5 jours</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de Meteobleu et France Météo. Contrairement aux chutes de neige, il n'est pas possible d'afficher la météo des jours précédents.</p>
+                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteobleu</a> et France Météo. Contrairement aux chutes de neige, il n'est pas possible d'afficher la météo des jours précédents.</p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
@@ -2684,7 +2696,9 @@
                                                                         }
                                                                     >
                                                                         <td>
-                                                                            <span className="sector-name">{resort.name}</span>
+                                                                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                                <span className="sector-name">{resort.name}</span>
+                                                                            </a>
                                                                             <span className="sector-altitude"> ({resortInfo?.altitude || "?"}m)</span>
                                                                         </td>
 
