@@ -1401,6 +1401,18 @@
                     }
 
                     setIsSearching(true);
+
+                    // Mode mock : filtrer DEFAULT_RESORTS sans appel API
+                    if (USE_MOCK_DATA) {
+                        const q = query.toLowerCase();
+                        const mockRes = DEFAULT_RESORTS
+                            .filter(r => r.name.toLowerCase().includes(q))
+                            .map(r => ({ name: r.name, lat: r.lat, lon: r.lon, asl: r.altitude, admin1: "Pyrénées", url: r.mbUrl }));
+                        setSearchResults(mockRes);
+                        setIsSearching(false);
+                        return;
+                    }
+
                     try {
                         const url = `${PROXY_URL}/search?query=${encodeURIComponent(query)}`;
                         const response = await fetch(url);
