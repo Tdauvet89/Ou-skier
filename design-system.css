@@ -396,15 +396,6 @@
     letter-spacing: -0.15px;
 }
 
-/* === SECTION TITLE === */
-.section-title {
-    font-family: "Garnett", sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-    color: #1F2023;
-    line-height: normal;
-    margin-bottom: 20px;
-}
 
 /* === FOOTER CTA === */
 .footer-cta {
@@ -501,7 +492,7 @@
     flex-shrink: 0;
 }
 
-.comparison-card-header .section-title {
+.comparison-card-header .title {
     margin-bottom: 0;
 }
 

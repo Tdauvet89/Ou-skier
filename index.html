@@ -25,7 +25,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.17.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.18.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -710,10 +710,6 @@
                 margin-top: 25px;
             }
 
-            .modal-btn {
-                flex: 1;
-                padding: 14px;
-            }
 
             .loading-search {
                 text-align: center;
@@ -1424,9 +1420,8 @@
                             className="modal"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="modal-header">
-                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span> Ajouter un Secteur
-                            </div>
+                            <h2 className="title" style={{marginBottom:'4px'}}>Ajouter un Secteur</h2>
+                            <p className="subtitle" style={{marginBottom:'20px'}}>Entrer le nom d'une station, d'un pic pour l'ajouter. Les données sont fournis par meteoblue.</p>
 
                             <input
                                 type="text"
@@ -1473,7 +1468,7 @@
                                                 {result.name}
                                             </div>
                                             <div className="result-info">
-                                                <span className="icon" style={{marginRight:'3px'}} dangerouslySetInnerHTML={{__html: uiSvg.mapPin}}></span>{result.country || ""}{" "}
+                                                {result.country || ""}{" "}
                                                 {result.admin1
                                                     ? `• ${result.admin1}`
                                                     : ""}{" "}
@@ -1487,7 +1482,7 @@
 
                             <div className="modal-buttons">
                                 <button
-                                    className="btn btn-secondary modal-btn"
+                                    className="btn btn-secondary"
                                     onClick={onClose}
                                 >
                                     Annuler
