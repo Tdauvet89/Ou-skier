@@ -495,23 +495,35 @@
                 color: #2980b9;
             }
 
-            /* Colonne secteur sticky — vue horaire uniquement */
-            .hourly-view th:first-child,
-            .hourly-view td:first-child {
-                position: sticky;
-                left: 0;
-                z-index: 2;
-                background: white;
-                box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+            /* ---- Vue horaire : sticky column + en-têtes ----
+             *
+             * POURQUOI inline styles sur les th plutôt que ces classes :
+             *   Le design-system a des règles `.snow-table thead th` et
+             *   `.snow-table thead th:first-child` avec la même spécificité
+             *   que `.hourly-view thead th:first-child`. Pour garantir
+             *   l'application sans !important, les overrides critiques
+             *   sont posés en inline style directement dans le JSX.
+             *
+             * Ce CSS gère uniquement les règles sans conflit de spécificité.
+             * ---------------------------------------------------------------- */
+
+            /* Hauteur auto pour le thead horaire (design-system impose 84px) */
+            .hourly-view .snow-table thead tr {
+                height: auto;
             }
-            .hourly-view thead th:first-child {
-                background: var(--deep-blue);
-                z-index: 3;
+
+            /* Séparateur visuel entre colonne sticky et colonnes scrollables */
+            .hourly-view .snow-table th:first-child,
+            .hourly-view .snow-table td:first-child {
+                border-right: 2px solid #C8D6E5 !important;
+                box-shadow: 3px 0 6px rgba(0, 0, 0, 0.07);
             }
-            .hourly-view tbody tr:nth-child(even) td:first-child {
+
+            /* Alternance légère sur les lignes du tbody */
+            .hourly-view .snow-table tbody tr:nth-child(even) td:first-child {
                 background: #f8fafc;
             }
-            .hourly-view tbody tr:hover td:first-child {
+            .hourly-view .snow-table tbody tr:hover td:first-child {
                 background: #f0f7ff;
             }
 
@@ -2260,77 +2272,154 @@
                                             )}
 
                                             {/* ==================== VUE PAR HEURE (3h) ====================
-                                              * Tableau comparatif : 1 ligne par secteur, 1 colonne par créneau 3h
-                                              * Chaque cellule affiche : icône + temp + vent + précipitations
-                                              * La colonne "Secteur" est sticky (scroll horizontal)
+                                              * Tableau comparatif : 1 ligne par secteur, 1 colonne par créneau 3h.
+                                              *
+                                              * Règles clés :
+                                              *  • On itère sur `resorts` (pas `hourlyData`) → le secteur s'affiche
+                                              *    TOUJOURS, même si data_3h n'est pas encore chargé.
+                                              *  • Les inline styles sur les <th> garantissent le visuel sans
+                                              *    combat de spécificité CSS avec le design-system.
+                                              *  • Double ligne d'en-tête : jour (rowSpan=2 sur Secteur) + créneaux.
                                               * ============================================================ */}
-                                            {weatherView === 'hour' && (
-                                            <div className="snow-table">
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Secteur</th>
-                                                            {/* En-têtes horaires : 8 créneaux de 3h (00h, 03h, ..., 21h) */}
-                                                            {(hourlyData.length > 0 ? hourlyData[0].hours : [
-                                                                {label:'00h'},{label:'03h'},{label:'06h'},{label:'09h'},
-                                                                {label:'12h'},{label:'15h'},{label:'18h'},{label:'21h'}
-                                                            ]).map((slot, i) => (
-                                                                <th key={i} style={{textAlign:'center', minWidth:'80px'}}>
-                                                                    {slot.label}
-                                                                </th>
-                                                            ))}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {hourlyData.length > 0 ? hourlyData.map((resort, rIdx) => {
-                                                            const resortInfo = resorts.find(r => r.name === resort.name);
-                                                            const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
-                                                            return (
-                                                                <tr key={rIdx}>
-                                                                    {/* Colonne secteur (sticky) */}
-                                                                    <td>
-                                                                        <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
-                                                                            <span className="sector-name">{resort.name}</span>
-                                                                        </a>
-                                                                        <span className="sector-altitude"> ({resortInfo?.altitude || '?'}m)</span>
-                                                                    </td>
-                                                                    {/* Cellules horaires — données empilées verticalement */}
-                                                                    {resort.hours.map((h, hIdx) => (
-                                                                        <td key={hIdx} className="hourly-cell" title={h.desc}>
-                                                                            {/* Icône météo (pictocode adapté jour/nuit) */}
-                                                                            <div className="cell-icon">
-                                                                                <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
-                                                                            </div>
-                                                                            {/* Température */}
-                                                                            <div className="cell-temp">{h.temp}°</div>
-                                                                            {/* Vent : flèche direction + vitesse */}
-                                                                            <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
-                                                                                {h.windDir !== null && (
-                                                                                    <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
-                                                                                )}
-                                                                                <span>{h.windSpeed}</span>
-                                                                            </div>
-                                                                            {/* Précipitations — neige ou pluie, masqué si 0 */}
-                                                                            {h.precip > 0 ? (
-                                                                                <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
-                                                                                    {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="cell-precip" style={{color:'#ccc'}}>-</div>
-                                                                            )}
-                                                                        </td>
-                                                                    ))}
-                                                                </tr>
-                                                            );
-                                                        }) : (
+                                            {weatherView === 'hour' && (() => {
+                                                /* Créneaux du 1er secteur chargé, fallback 8 slots si data pas encore là */
+                                                const slots = hourlyData[0]?.hours || [
+                                                    {label:'00h'},{label:'03h'},{label:'06h'},{label:'09h'},
+                                                    {label:'12h'},{label:'15h'},{label:'18h'},{label:'21h'}
+                                                ];
+                                                /* Libellé du jour en français : "Vendredi 20 février" */
+                                                const rawDay = new Date().toLocaleDateString('fr-FR', {
+                                                    weekday: 'long', day: 'numeric', month: 'long'
+                                                });
+                                                const dayLabel = rawDay.charAt(0).toUpperCase() + rawDay.slice(1);
+
+                                                /* Styles inline pour la colonne Secteur
+                                                 * (bypass spécificité design-system sur snow-table thead th:first-child) */
+                                                const sectorThStyle = {
+                                                    textAlign: 'left',
+                                                    paddingLeft: '24px',
+                                                    minWidth: '200px',
+                                                    background: '#F9FAFC',
+                                                    fontFamily: '"Garnett", sans-serif',
+                                                    fontSize: '16px',
+                                                    fontWeight: 600,
+                                                    color: '#1F2023',
+                                                    position: 'sticky',
+                                                    left: 0,
+                                                    zIndex: 3,
+                                                    verticalAlign: 'middle',
+                                                };
+
+                                                return (
+                                                <div className="snow-table">
+                                                    <table>
+                                                        <thead>
+                                                            {/* Ligne 1 : nom du jour au-dessus des créneaux */}
                                                             <tr>
-                                                                <td className="table-blank-state" colSpan={9}>Aucun secteur à afficher</td>
+                                                                {/* "Secteur" s'étend sur les 2 lignes d'en-tête */}
+                                                                <th rowSpan={2} style={sectorThStyle}>
+                                                                    Secteur
+                                                                </th>
+                                                                <th
+                                                                    colSpan={slots.length}
+                                                                    style={{
+                                                                        textAlign: 'center',
+                                                                        fontSize: '13px',
+                                                                        fontWeight: 600,
+                                                                        color: '#5E7690',
+                                                                        background: '#F9FAFC',
+                                                                        padding: '10px 16px 4px',
+                                                                        fontFamily: '"Inter", sans-serif',
+                                                                        letterSpacing: '0.01em',
+                                                                    }}
+                                                                >
+                                                                    {dayLabel}
+                                                                </th>
                                                             </tr>
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            )}
+                                                            {/* Ligne 2 : créneaux 3h (00h → 21h) */}
+                                                            <tr>
+                                                                {slots.map((slot, i) => (
+                                                                    <th
+                                                                        key={i}
+                                                                        style={{
+                                                                            textAlign: 'center',
+                                                                            minWidth: '80px',
+                                                                            fontSize: '13px',
+                                                                            fontWeight: 600,
+                                                                            color: '#1F2023',
+                                                                            padding: '4px 8px 10px',
+                                                                            background: '#F9FAFC',
+                                                                            fontFamily: '"Inter", sans-serif',
+                                                                        }}
+                                                                    >
+                                                                        {slot.label}
+                                                                    </th>
+                                                                ))}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {/* Itération sur `resorts` (source de vérité) — garantit
+                                                              * que le secteur s'affiche même sans données horaires */}
+                                                            {resorts.length > 0 ? resorts.map((resort, idx) => {
+                                                                /* Cherche les données horaires par index (alignement garanti)
+                                                                 * puis par nom en fallback */
+                                                                const hourlyResort =
+                                                                    (hourlyData[idx]?.name === resort.name
+                                                                        ? hourlyData[idx]
+                                                                        : hourlyData.find(h => h.name === resort.name));
+                                                                const meteoblueUrl = getMeteoblueUrl(resort);
+                                                                return (
+                                                                    <tr key={idx}>
+                                                                        {/* Colonne secteur — toujours rendu depuis `resorts` */}
+                                                                        <td>
+                                                                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                                <span className="sector-name">{resort.name}</span>
+                                                                            </a>
+                                                                            <span className="sector-altitude"> ({resort.altitude}m)</span>
+                                                                        </td>
+                                                                        {/* Données horaires si disponibles, sinon état vide */}
+                                                                        {hourlyResort ? hourlyResort.hours.map((h, hIdx) => (
+                                                                            <td key={hIdx} className="hourly-cell" title={h.desc}>
+                                                                                {/* Icône météo (pictocode adapté jour/nuit) */}
+                                                                                <div className="cell-icon">
+                                                                                    <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
+                                                                                </div>
+                                                                                {/* Température */}
+                                                                                <div className="cell-temp">{h.temp}°</div>
+                                                                                {/* Vent : flèche de direction + vitesse km/h */}
+                                                                                <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
+                                                                                    {h.windDir !== null && (
+                                                                                        <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
+                                                                                    )}
+                                                                                    <span>{h.windSpeed}</span>
+                                                                                </div>
+                                                                                {/* Précipitations — affiche neige ou pluie, "-" si 0 */}
+                                                                                {h.precip > 0 ? (
+                                                                                    <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
+                                                                                        {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <div className="cell-precip" style={{color:'#ccc'}}>-</div>
+                                                                                )}
+                                                                            </td>
+                                                                        )) : (
+                                                                            /* Pas encore de données 3h — inviter à actualiser */
+                                                                            <td colSpan={slots.length} style={{textAlign:'center', color:'#aaa', fontSize:'12px', padding:'16px'}}>
+                                                                                Actualiser la page pour charger les données horaires
+                                                                            </td>
+                                                                        )}
+                                                                    </tr>
+                                                                );
+                                                            }) : (
+                                                                <tr>
+                                                                    <td className="table-blank-state" colSpan={slots.length + 1}>Aucun secteur à afficher</td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                );
+                                            })()}
                                                 </div>
                                             </div>
                                         </section>
