@@ -54,16 +54,6 @@ var weatherCodeToFile = {
     35: { day: '17_iday_simple.svg',  night: '17_inight_simple.svg', desc: 'Pluie et neige' }
 };
 
-// Alias pour compatibilité avec le code existant (svgKey non utilisé mais préservé)
-var weatherCodeToIcon = (function() {
-    var out = {};
-    for (var code in weatherCodeToFile) {
-        var entry = weatherCodeToFile[code];
-        out[code] = { icon: entry.day, desc: entry.desc };
-    }
-    return out;
-}());
-
 /**
  * Retourne true si l'heure est de nuit (avant 7h ou après 20h)
  */
@@ -103,10 +93,8 @@ function getWeatherInfo(code, hour) {
 
 // Export
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { weatherCodeToIcon, weatherCodeToFile, adjustWeatherCodeForDaylight, getWeatherInfo };
+    module.exports = { weatherCodeToFile, getWeatherInfo };
 } else {
-    window.weatherCodeToIcon = weatherCodeToIcon;
     window.weatherCodeToFile = weatherCodeToFile;
-    window.adjustWeatherCodeForDaylight = adjustWeatherCodeForDaylight;
     window.getWeatherInfo = getWeatherInfo;
 }
