@@ -25,7 +25,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.19.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.20.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -873,44 +873,7 @@
             const { useState, useEffect } = React;
 
             // Configuration des secteurs de ski avec coordonnées
-            const DEFAULT_RESORTS = [
-                {
-                    name: "Guzet",
-                    lat: 42.7857,
-                    lon: 1.2261,
-                    altitude: 1400,
-                    mbUrl: "guzet-neige_france_7580803",
-                },
-                {
-                    name: "Piau-Engaly",
-                    lat: 42.7833,
-                    lon: 0.1667,
-                    altitude: 1850,
-                    mbUrl: "piau-engaly_france_8426488",
-                },
-                {
-                    name: "Saint-Lary",
-                    lat: 42.8167,
-                    lon: 0.3167,
-                    altitude: 1700,
-                    mbUrl: "saint-lary-soulan_france_2978975",
-                },
-                // --- MOCK ONLY : secteurs de test pour atteindre MAX_RESORTS ---
-                {
-                    name: "La Mongie",
-                    lat: 42.9133,
-                    lon: 0.1436,
-                    altitude: 1800,
-                    mbUrl: "la-mongie_france_2997600",
-                },
-                {
-                    name: "Cauterets",
-                    lat: 42.8922,
-                    lon: -0.1106,
-                    altitude: 1450,
-                    mbUrl: "cauterets_france_3027283",
-                },
-            ];
+            const DEFAULT_RESORTS = [];
 
             // URL du proxy Cloudflare Worker
             const PROXY_URL = "https://ou-skier-proxy.tdauvet.workers.dev";
@@ -1855,10 +1818,8 @@
                                 </button>
                             </div>
 
-                            {resorts.length > 0 ? (
-                                <>
-                                    {snowData.length > 0 && (
-                                        <section className="section">
+                            <>
+                                    <section className="section">
                                             <div className="comparison-card">
                                                 <div className="comparison-card-header">
                                                     <div>
@@ -1890,7 +1851,7 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {snowData.map(
+                                                        {snowData.length > 0 ? snowData.map(
                                                             (resort, index) => {
                                                                 const resortInfo = resorts[index];
                                                                 const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
@@ -1913,6 +1874,10 @@
                                                                     </tr>
                                                                 );
                                                             },
+                                                        ) : (
+                                                            <tr>
+                                                                <td className="table-blank-state" colSpan={8}>Aucun secteur à afficher</td>
+                                                            </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
@@ -1920,10 +1885,8 @@
                                                 </div>
                                             </div>
                                         </section>
-                                    )}
 
-                                    {weatherData.length > 0 && (
-                                        <section className="section">
+                                    <section className="section">
                                             <div className="comparison-card">
                                                 <div className="comparison-card-header">
                                                     <div>
@@ -1955,7 +1918,7 @@
 
                                                     </thead>
                                                     <tbody>
-                                                        {weatherData.map(
+                                                        {weatherData.length > 0 ? weatherData.map(
                                                             (
                                                                 resort,
                                                                 resortIndex,
@@ -2157,6 +2120,10 @@
                                                                     </tr>
                                                                 );
                                                             },
+                                                        ) : (
+                                                            <tr>
+                                                                <td className="table-blank-state" colSpan={6}>Aucun secteur à afficher</td>
+                                                            </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
@@ -2164,9 +2131,7 @@
                                                 </div>
                                             </div>
                                         </section>
-                                    )}
-                                </>
-                            ) : null}
+                                    </>
                         </div>
 
                         <AddResortModal
