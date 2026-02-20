@@ -1,114 +1,112 @@
 /**
  * WEATHER CODE MAPPING - Meteoblue API
  *
- * Correspondance complète des pictocodes Meteoblue (1-35) vers icônes SVG et descriptions
- * Source: https://content.meteoblue.com/en/help/standards/symbols-and-pictograms
+ * Correspondance des pictocodes Meteoblue (1-35) vers les pictogrammes SVG officiels
+ * Source pictogrammes : https://docs.meteoblue.com/en/meteo/variables/pictograms
+ * Style : simple (coloré épuré), dossier /pictograms/
  *
- * Dépend de icons.js (doit être chargé avant ce fichier)
+ * Codes 1-17 : pictocodes journaliers (data_day.pictocode)
+ * Codes 18-35 : pictocodes horaires (data_1h.pictocode) → fallback vers codes 1-17
  *
  * @module weatherCodes
  */
 
-var weatherCodeToIcon = {
-    // ========== CODES DE BASE (1-10) ==========
-    1: { icon: 'sun', desc: 'Ensoleillé' },
-    2: { icon: 'partlyCloudy', desc: 'Peu nuageux' },
-    3: { icon: 'partlyCloudy', desc: 'Partiellement nuageux' },
-    4: { icon: 'overcast', desc: 'Nuageux' },
-    5: { icon: 'lightRain', desc: 'Pluie légère' },
-    6: { icon: 'rain', desc: 'Pluie modérée' },
-    7: { icon: 'heavyRain', desc: 'Pluie forte' },
-    8: { icon: 'lightSnow', desc: 'Neige légère' },
-    9: { icon: 'snow', desc: 'Neige modérée' },
-    10: { icon: 'heavySnow', desc: 'Neige forte' },
+// Mapping pictocode → { fichier jour, fichier nuit, description }
+// Les codes 18-35 n'ont pas de version simple_daily, ils sont redirigés vers un code de base
+var weatherCodeToFile = {
+    // ========== CODES JOURNALIERS (1-17) ==========
+    1:  { day: '01_iday_simple.svg',  night: '01_inight_simple.svg', desc: 'Ensoleillé' },
+    2:  { day: '02_iday_simple.svg',  night: '02_inight_simple.svg', desc: 'Peu nuageux' },
+    3:  { day: '03_iday_simple.svg',  night: '03_inight_simple.svg', desc: 'Partiellement nuageux' },
+    4:  { day: '04_iday_simple.svg',  night: '04_inight_simple.svg', desc: 'Nuageux' },
+    5:  { day: '05_iday_simple.svg',  night: '05_inight_simple.svg', desc: 'Pluie légère' },
+    6:  { day: '06_iday_simple.svg',  night: '06_inight_simple.svg', desc: 'Pluie modérée' },
+    7:  { day: '07_iday_simple.svg',  night: '07_inight_simple.svg', desc: 'Pluie forte' },
+    8:  { day: '08_iday_simple.svg',  night: '08_inight_simple.svg', desc: 'Neige légère' },
+    9:  { day: '09_iday_simple.svg',  night: '09_inight_simple.svg', desc: 'Neige modérée' },
+    10: { day: '10_iday_simple.svg',  night: '10_inight_simple.svg', desc: 'Neige forte' },
+    11: { day: '11_iday_simple.svg',  night: '11_inight_simple.svg', desc: 'Brouillard' },
+    12: { day: '12_iday_simple.svg',  night: '12_inight_simple.svg', desc: 'Averses légères' },
+    13: { day: '13_iday_simple.svg',  night: '13_inight_simple.svg', desc: 'Averses' },
+    14: { day: '14_iday_simple.svg',  night: '14_inight_simple.svg', desc: 'Orages' },
+    15: { day: '15_iday_simple.svg',  night: '15_inight_simple.svg', desc: 'Averses de neige légères' },
+    16: { day: '16_iday_simple.svg',  night: '16_inight_simple.svg', desc: 'Averses de neige' },
+    17: { day: '17_iday_simple.svg',  night: '17_inight_simple.svg', desc: 'Pluie et neige mêlées' },
 
-    // ========== CONDITIONS SPÉCIALES (11-20) ==========
-    11: { icon: 'fog', desc: 'Brouillard' },
-    12: { icon: 'showers', desc: 'Averses légères' },
-    13: { icon: 'showers', desc: 'Averses' },
-    14: { icon: 'thunder', desc: 'Orages' },
-    15: { icon: 'snowShowers', desc: 'Averses de neige légères' },
-    16: { icon: 'snowShowers', desc: 'Averses de neige' },
-    17: { icon: 'sleet', desc: 'Pluie et neige mêlées' },
-    18: { icon: 'freezingRain', desc: 'Pluie verglaçante' },
-    19: { icon: 'hail', desc: 'Grêle' },
-    20: { icon: 'thunderRain', desc: 'Orages avec pluie légère' },
-
-    // ========== CODES JOUR SPÉCIFIQUES (21-30) ==========
-    21: { icon: 'sun', desc: 'Ensoleillé clair' },
-    22: { icon: 'sun', desc: 'Partiellement ensoleillé' },
-    23: { icon: 'partlyCloudy', desc: 'Peu nuageux (jour)' },
-    24: { icon: 'mostlyCloudy', desc: 'Nuageux (jour)' },
-    25: { icon: 'rain', desc: 'Pluie (jour)' },
-    26: { icon: 'showers', desc: 'Averses (jour)' },
-    27: { icon: 'snow', desc: 'Neige (jour)' },
-    28: { icon: 'snowShowers', desc: 'Averses de neige (jour)' },
-    29: { icon: 'thunder', desc: 'Orage (jour)' },
-    30: { icon: 'fog', desc: 'Brouillard (jour)' },
-
-    // ========== CODES NUIT (31-33) ==========
-    // Note: Ces codes sont convertis en codes jour si utilisés entre 6h-20h
-    31: { icon: 'moon', desc: 'Nuit claire' },
-    32: { icon: 'moonCloud', desc: 'Nuit peu nuageuse' },
-    33: { icon: 'moonOvercast', desc: 'Nuit nuageuse' },
-
-    // ========== CODES SPÉCIAUX (34-35) ==========
-    34: { icon: 'partlyCloudy', desc: 'Ensoleillé avec nuages épars' },
-    35: { icon: 'sleet', desc: 'Pluie et neige' }
+    // ========== CODES HORAIRES (18-35) — fallback vers codes de base ==========
+    18: { day: '05_iday_simple.svg',  night: '05_inight_simple.svg', desc: 'Pluie verglaçante' },
+    19: { day: '07_iday_simple.svg',  night: '07_inight_simple.svg', desc: 'Grêle' },
+    20: { day: '14_iday_simple.svg',  night: '14_inight_simple.svg', desc: 'Orages avec pluie' },
+    21: { day: '01_iday_simple.svg',  night: '01_inight_simple.svg', desc: 'Ensoleillé clair' },
+    22: { day: '01_iday_simple.svg',  night: '02_inight_simple.svg', desc: 'Partiellement ensoleillé' },
+    23: { day: '02_iday_simple.svg',  night: '02_inight_simple.svg', desc: 'Peu nuageux' },
+    24: { day: '04_iday_simple.svg',  night: '04_inight_simple.svg', desc: 'Nuageux' },
+    25: { day: '06_iday_simple.svg',  night: '06_inight_simple.svg', desc: 'Pluie' },
+    26: { day: '12_iday_simple.svg',  night: '12_inight_simple.svg', desc: 'Averses' },
+    27: { day: '09_iday_simple.svg',  night: '09_inight_simple.svg', desc: 'Neige' },
+    28: { day: '15_iday_simple.svg',  night: '15_inight_simple.svg', desc: 'Averses de neige' },
+    29: { day: '14_iday_simple.svg',  night: '14_inight_simple.svg', desc: 'Orage' },
+    30: { day: '11_iday_simple.svg',  night: '11_inight_simple.svg', desc: 'Brouillard' },
+    31: { day: '01_iday_simple.svg',  night: '01_inight_simple.svg', desc: 'Nuit claire' },
+    32: { day: '02_iday_simple.svg',  night: '02_inight_simple.svg', desc: 'Nuit peu nuageuse' },
+    33: { day: '04_iday_simple.svg',  night: '04_inight_simple.svg', desc: 'Nuit nuageuse' },
+    34: { day: '02_iday_simple.svg',  night: '02_inight_simple.svg', desc: 'Ensoleillé avec nuages épars' },
+    35: { day: '17_iday_simple.svg',  night: '17_inight_simple.svg', desc: 'Pluie et neige' }
 };
+
+// Alias pour compatibilité avec le code existant (svgKey non utilisé mais préservé)
+var weatherCodeToIcon = (function() {
+    var out = {};
+    for (var code in weatherCodeToFile) {
+        var entry = weatherCodeToFile[code];
+        out[code] = { icon: entry.day, desc: entry.desc };
+    }
+    return out;
+}());
+
+/**
+ * Retourne true si l'heure est de nuit (avant 7h ou après 20h)
+ */
+function _isNight(hour) {
+    return hour < 7 || hour > 20;
+}
 
 /**
  * Convertit un code météo nuit en code jour
- * Utilisé automatiquement pour les heures de 6h à 20h
+ * Utilisé automatiquement pour les heures de 7h à 20h
  *
  * @param {number} code - Code météo Meteoblue (pictocode)
  * @param {number} hour - Heure locale (0-23)
- * @returns {number} Code ajusté (codes nuit convertis en codes jour si nécessaire)
+ * @returns {number} Code ajusté
  */
 function adjustWeatherCodeForDaylight(code, hour) {
-    // Si c'est la nuit (avant 6h ou après 20h), garder le code tel quel
-    if (hour < 6 || hour > 20) {
-        return code;
-    }
-
-    // C'est le jour : convertir les codes nuit en codes jour équivalents
-    var nightToDayMapping = {
-        31: 1,   // Nuit claire → Ensoleillé
-        32: 2,   // Nuit peu nuageuse → Peu nuageux
-        33: 4    // Nuit nuageuse → Nuageux
-    };
-
+    if (hour < 7 || hour > 20) return code;
+    var nightToDayMapping = { 31: 1, 32: 2, 33: 4 };
     return nightToDayMapping[code] || code;
 }
 
 /**
- * Récupère l'icône SVG et la description pour un code météo donné
+ * Récupère le HTML <img> et la description pour un code météo donné
  *
- * @param {number} code - Code météo Meteoblue (pictocode)
- * @param {number} hour - Heure locale (0-23), optionnel
- * @returns {Object} { icon: string (SVG HTML), desc: string }
+ * @param {number} code  - Code météo Meteoblue (pictocode 1-35)
+ * @param {number} hour  - Heure locale (0-23), optionnel (défaut : 12)
+ * @returns {Object} { icon: string (HTML <img>), desc: string, svgKey: string }
  */
 function getWeatherInfo(code, hour) {
     if (hour === undefined) hour = 12;
     var adjustedCode = adjustWeatherCodeForDaylight(code, hour);
-    var entry = weatherCodeToIcon[adjustedCode] || weatherCodeToIcon[1];
-    var svgKey = entry.icon;
-    // Résoudre la clé SVG en markup HTML
-    var svgHtml = (typeof weatherSvg !== 'undefined' && weatherSvg[svgKey]) ? weatherSvg[svgKey] : svgKey;
-    return { icon: svgHtml, desc: entry.desc, svgKey: svgKey };
+    var entry = weatherCodeToFile[adjustedCode] || weatherCodeToFile[1];
+    var filename = _isNight(hour) ? entry.night : entry.day;
+    var imgHtml = '<img src="pictograms/' + filename + '" width="40" height="40" alt="' + entry.desc + '" loading="lazy">';
+    return { icon: imgHtml, desc: entry.desc, svgKey: filename };
 }
 
-// Export pour utilisation dans l'application
+// Export
 if (typeof module !== 'undefined' && module.exports) {
-    // Node.js
-    module.exports = {
-        weatherCodeToIcon: weatherCodeToIcon,
-        adjustWeatherCodeForDaylight: adjustWeatherCodeForDaylight,
-        getWeatherInfo: getWeatherInfo
-    };
+    module.exports = { weatherCodeToIcon, weatherCodeToFile, adjustWeatherCodeForDaylight, getWeatherInfo };
 } else {
-    // Navigateur - rendre disponible globalement
     window.weatherCodeToIcon = weatherCodeToIcon;
+    window.weatherCodeToFile = weatherCodeToFile;
     window.adjustWeatherCodeForDaylight = adjustWeatherCodeForDaylight;
     window.getWeatherInfo = getWeatherInfo;
 }
