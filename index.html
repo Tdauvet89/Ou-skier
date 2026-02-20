@@ -428,49 +428,52 @@
                 text-decoration: underline;
             }
 
+            /* ================================================
+             * VUE HORAIRE (3h) — cellules compactes
+             * Chaque cellule affiche verticalement :
+             *   icône météo → température → vent (flèche + vitesse) → précipitations
+             * ================================================ */
             .hourly-cell {
                 text-align: center;
-                padding: 6px 2px;
-                min-width: 35px;
-                max-width: 35px;
+                padding: 8px 6px;
+                min-width: 80px;
                 border-right: 1px solid #E1E8F2;
-                vertical-align: middle;
-                font-size: 0.7rem;
+                vertical-align: top;
+                font-family: "Inter", sans-serif;
+                font-size: 12px;
             }
 
             .cell-icon {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 1px 0;
+                margin-bottom: 4px;
             }
-            .cell-icon svg {
-                width: 18px;
-                height: 18px;
+            .cell-icon img {
+                width: 28px;
+                height: 28px;
             }
 
             .cell-temp {
-                font-size: 0.7rem;
+                font-size: 13px;
                 font-weight: 600;
-                color: var(--storm-gray);
-                margin: 2px 0;
+                color: #1F2023;
+                margin-bottom: 2px;
             }
 
             .cell-wind {
-                font-size: 0.6rem;
-                color: #7f8c8d;
-                margin-top: 2px;
+                font-size: 11px;
+                color: #5E7690;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 2px;
-                flex-wrap: nowrap;
+                margin-bottom: 2px;
             }
 
             .wind-arrow {
                 display: inline-flex;
                 align-items: center;
-                color: #3498db;
                 line-height: 1;
             }
             .wind-arrow svg {
@@ -478,16 +481,38 @@
                 height: 14px;
             }
 
-            .wind-cardinal {
-                font-size: 0.55rem;
-                font-weight: 700;
-                color: #555;
+            /* Précipitations dans la cellule horaire */
+            .cell-precip {
+                font-size: 11px;
+                font-weight: 500;
+                color: #3498db;
+            }
+            .cell-precip.has-snow {
+                color: #3498db;
+                font-weight: 600;
+            }
+            .cell-precip.has-rain {
+                color: #2980b9;
             }
 
-            .cell-temp-range {
-                font-size: 0.7rem;
-                font-weight: 600;
-                color: var(--storm-gray);
+            /* Colonne secteur sticky — vue horaire uniquement */
+            .hourly-view th:first-child,
+            .hourly-view td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                background: white;
+                box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+            }
+            .hourly-view thead th:first-child {
+                background: var(--deep-blue);
+                z-index: 3;
+            }
+            .hourly-view tbody tr:nth-child(even) td:first-child {
+                background: #f8fafc;
+            }
+            .hourly-view tbody tr:hover td:first-child {
+                background: #f0f7ff;
             }
 
             /* Tableau horaire détaillé */
@@ -884,7 +909,8 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            const CACHE_VERSION = 8;
+            // v9 : ajout données horaires 3h (basic-3h package)
+            const CACHE_VERSION = 9;
 
             function getWeatherCache() {
                 try {
@@ -1376,6 +1402,12 @@
                 const [braData, setBraData] = useState({});
                 const [beraModal, setBeraModal] = useState(null);
 
+                // --- Vue horaire (3h) ---
+                // weatherView : 'day' = vue journalière (défaut), 'hour' = vue horaire 3h
+                const [weatherView, setWeatherView] = useState('day');
+                // hourlyData : tableau de { name, hours: [{ label, icon, desc, temp, windSpeed, windDir, windCardinal, precip, snowCm }] }
+                const [hourlyData, setHourlyData] = useState([]);
+
                 useEffect(() => {
                     const now = new Date();
                     setCurrentDate(
@@ -1411,6 +1443,7 @@
                     if (cache && isCacheValidForResorts(cache, resorts)) {
                         processWeatherData(cache.results);
                         processSnowData(cache.results);
+                        processHourlyData(cache.results);
                         if (cache.braData) setBraData(cache.braData);
 
                         const cachedDate = new Date(cache.timestamp);
@@ -1442,6 +1475,7 @@
 
                         processWeatherData(results);
                         processSnowData(results);
+                        processHourlyData(results);
 
                         // Charger les données BRA pour tous les secteurs
                         const braPromises = resorts.map(async (resort) => {
@@ -1521,6 +1555,8 @@
                                 processWeatherDataForResort(result);
                             const newSnowData =
                                 processSnowDataForResort(result);
+                            const newHourlyData =
+                                processHourlyDataForResort(result);
 
                             if (newWeatherData) {
                                 setWeatherData((prev) => [
@@ -1530,6 +1566,9 @@
                             }
                             if (newSnowData) {
                                 setSnowData((prev) => [...prev, newSnowData]);
+                            }
+                            if (newHourlyData) {
+                                setHourlyData((prev) => [...prev, newHourlyData]);
                             }
 
                             // Récupérer les données BRA pour ce secteur
@@ -1566,6 +1605,7 @@
                         prev.filter((_, i) => i !== index),
                     );
                     setSnowData((prev) => prev.filter((_, i) => i !== index));
+                    setHourlyData((prev) => prev.filter((_, i) => i !== index));
                     // Invalider le cache (la liste de stations a changé)
                     localStorage.removeItem(CACHE_KEY);
                 };
@@ -1597,6 +1637,7 @@
 
                         processWeatherData(results);
                         processSnowData(results);
+                        processHourlyData(results);
 
                         // Recharger les BRA aussi
                         const braPromises = resorts.map(async (resort) => {
@@ -1753,6 +1794,72 @@
                     setSnowData(processed);
                 };
 
+                /**
+                 * Traite les données horaires (3h) pour UN secteur.
+                 * Extrait les créneaux de AUJOURD'HUI depuis data_3h.
+                 *
+                 * Champs utilisés (package basic-3h Meteoblue) :
+                 *   - data_3h.time            → "YYYY-MM-DD HH:MM"
+                 *   - data_3h.pictocode       → code météo (1-35)
+                 *   - data_3h.temperature      → °C
+                 *   - data_3h.windspeed        → km/h
+                 *   - data_3h.winddirection    → degrés (0-360)
+                 *   - data_3h.precipitation    → mm total
+                 *   - data_3h.snowfraction     → fraction neige (0-1)
+                 *
+                 * @param {Object} resort - Données brutes { name, data: { data_3h: {...} } }
+                 * @returns {Object|null} { name, hours: [...] } ou null si pas de data_3h
+                 */
+                const processHourlyDataForResort = (resort) => {
+                    if (!resort.data || !resort.data.data_3h) return null;
+
+                    const d3h = resort.data.data_3h;
+                    const todayStr = getTodayStr(); // "YYYY-MM-DD"
+                    const hours = [];
+
+                    for (let i = 0; i < d3h.time.length; i++) {
+                        const timeStr = d3h.time[i]; // "YYYY-MM-DD HH:MM"
+                        const dateStr = timeStr.substring(0, 10);
+
+                        // On ne garde que les créneaux d'aujourd'hui
+                        if (dateStr !== todayStr) continue;
+
+                        const hour = parseInt(timeStr.substring(11, 13), 10);
+                        const weatherInfo = getWeatherInfo(d3h.pictocode?.[i] || 1, hour);
+                        const windDisplay = getWindDirectionDisplay(d3h.winddirection?.[i]);
+
+                        // Calcul précipitations neige vs pluie
+                        const totalPrecip = d3h.precipitation?.[i] || 0;
+                        const snowFraction = d3h.snowfraction?.[i] || 0;
+                        const snowMm = Math.round(totalPrecip * snowFraction * 10) / 10;
+                        const rainMm = Math.round(totalPrecip * (1 - snowFraction) * 10) / 10;
+
+                        hours.push({
+                            label: `${hour.toString().padStart(2, '0')}h`,
+                            hour,
+                            icon: weatherInfo.icon,
+                            desc: weatherInfo.desc,
+                            temp: Math.round(d3h.temperature?.[i] || 0),
+                            windSpeed: Math.round(d3h.windspeed?.[i] || 0),
+                            windDir: d3h.winddirection?.[i] ?? null,
+                            windCardinal: windDisplay.cardinal,
+                            precip: Math.round(totalPrecip * 10) / 10,
+                            snowMm,
+                            rainMm,
+                        });
+                    }
+
+                    return hours.length > 0 ? { name: resort.name, hours } : null;
+                };
+
+                /** Traite les données horaires pour TOUS les secteurs */
+                const processHourlyData = (results) => {
+                    const processed = results
+                        .map((resort) => processHourlyDataForResort(resort))
+                        .filter(Boolean);
+                    setHourlyData(processed);
+                };
+
                 if (loading) {
                     return (
                         <div className="container">
@@ -1890,11 +1997,33 @@
                                             <div className="comparison-card">
                                                 <div className="comparison-card-header">
                                                     <div>
-                                                        <h2 className="title" style={{margin:0}}>Prévisions météo 5 jours</h2>
+                                                        <h2 className="title" style={{margin:0}}>
+                                                            {weatherView === 'day' ? 'Prévisions météo 5 jours' : "Prévisions météo aujourd'hui (3h)"}
+                                                        </h2>
                                                         <p className="subtitle" style={{margin:0}}>Les données viennent de <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteobleu</a> et France Météo. Contrairement aux chutes de neige, il n'est pas possible d'afficher la météo des jours précédents.</p>
                                                     </div>
+                                                    {/* Toggle Par jour / Par heure — utilise .toggle / .toggle-btn du design-system */}
+                                                    <div className="toggle">
+                                                        <button
+                                                            className={`toggle-btn${weatherView === 'day' ? ' active' : ''}`}
+                                                            onClick={() => setWeatherView('day')}
+                                                        >
+                                                            Par jour
+                                                        </button>
+                                                        <button
+                                                            className={`toggle-btn${weatherView === 'hour' ? ' active' : ''}`}
+                                                            onClick={() => setWeatherView('hour')}
+                                                        >
+                                                            Par heure
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="comparison-card-body">
+                                                {/* ============================================================
+                                                  * CONTENU CONDITIONNEL : vue jour OU vue horaire
+                                                  * ============================================================ */}
+                                                <div className={`comparison-card-body${weatherView === 'hour' ? ' hourly-view' : ''}`}>
+                                            {/* ==================== VUE PAR JOUR ==================== */}
+                                            {weatherView === 'day' && (
                                             <div className="snow-table">
                                                 <table>
                                                     <thead>
@@ -2128,6 +2257,80 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            )}
+
+                                            {/* ==================== VUE PAR HEURE (3h) ====================
+                                              * Tableau comparatif : 1 ligne par secteur, 1 colonne par créneau 3h
+                                              * Chaque cellule affiche : icône + temp + vent + précipitations
+                                              * La colonne "Secteur" est sticky (scroll horizontal)
+                                              * ============================================================ */}
+                                            {weatherView === 'hour' && (
+                                            <div className="snow-table">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Secteur</th>
+                                                            {/* En-têtes horaires : 8 créneaux de 3h (00h, 03h, ..., 21h) */}
+                                                            {(hourlyData.length > 0 ? hourlyData[0].hours : [
+                                                                {label:'00h'},{label:'03h'},{label:'06h'},{label:'09h'},
+                                                                {label:'12h'},{label:'15h'},{label:'18h'},{label:'21h'}
+                                                            ]).map((slot, i) => (
+                                                                <th key={i} style={{textAlign:'center', minWidth:'80px'}}>
+                                                                    {slot.label}
+                                                                </th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {hourlyData.length > 0 ? hourlyData.map((resort, rIdx) => {
+                                                            const resortInfo = resorts.find(r => r.name === resort.name);
+                                                            const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
+                                                            return (
+                                                                <tr key={rIdx}>
+                                                                    {/* Colonne secteur (sticky) */}
+                                                                    <td>
+                                                                        <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                            <span className="sector-name">{resort.name}</span>
+                                                                        </a>
+                                                                        <span className="sector-altitude"> ({resortInfo?.altitude || '?'}m)</span>
+                                                                    </td>
+                                                                    {/* Cellules horaires — données empilées verticalement */}
+                                                                    {resort.hours.map((h, hIdx) => (
+                                                                        <td key={hIdx} className="hourly-cell" title={h.desc}>
+                                                                            {/* Icône météo (pictocode adapté jour/nuit) */}
+                                                                            <div className="cell-icon">
+                                                                                <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
+                                                                            </div>
+                                                                            {/* Température */}
+                                                                            <div className="cell-temp">{h.temp}°</div>
+                                                                            {/* Vent : flèche direction + vitesse */}
+                                                                            <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
+                                                                                {h.windDir !== null && (
+                                                                                    <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
+                                                                                )}
+                                                                                <span>{h.windSpeed}</span>
+                                                                            </div>
+                                                                            {/* Précipitations — neige ou pluie, masqué si 0 */}
+                                                                            {h.precip > 0 ? (
+                                                                                <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
+                                                                                    {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="cell-precip" style={{color:'#ccc'}}>-</div>
+                                                                            )}
+                                                                        </td>
+                                                                    ))}
+                                                                </tr>
+                                                            );
+                                                        }) : (
+                                                            <tr>
+                                                                <td className="table-blank-state" colSpan={9}>Aucun secteur à afficher</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            )}
                                                 </div>
                                             </div>
                                         </section>
