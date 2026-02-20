@@ -921,7 +921,7 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            const CACHE_VERSION = 7;
+            const CACHE_VERSION = 8;
 
             function getWeatherCache() {
                 try {
@@ -1725,8 +1725,8 @@
                             const weatherCode = dayData.pictocode?.[dataIndex] || 1;
                             const weatherInfo = getWeatherInfo(weatherCode);
 
-                            // snowfall (snowice-day) est en cm de neige fraîche
-                            const snowCm = Math.round(dayData.snowfall?.[dataIndex] || 0);
+                            // snowaccumulation (snowice-day) est en cm de neige fraîche
+                            const snowCm = Math.round(dayData.snowaccumulation?.[dataIndex] || 0);
                             const precip = dayData.precipitation?.[dataIndex] || 0;
                             const snowFraction = dayData.snowfraction?.[dataIndex] || 0;
                             const rainMm = Math.round((1 - snowFraction) * precip);
@@ -1752,22 +1752,6 @@
                     return { name: resort.name, days };
                 };
 
-                const getTempTrend = (temp1, temp2) => {
-                    const diff = temp2 - temp1;
-                    if (Math.abs(diff) < 1)
-                        return { symbol: "→", class: "trend-stable" };
-                    if (diff > 0) return { symbol: "↗", class: "trend-up" };
-                    return { symbol: "↘", class: "trend-down" };
-                };
-
-                const getWindTrend = (wind1, wind2) => {
-                    const diff = wind2 - wind1;
-                    if (Math.abs(diff) < 3)
-                        return { symbol: "→", class: "trend-stable" };
-                    if (diff > 0) return { symbol: "↗", class: "trend-up" };
-                    return { symbol: "↘", class: "trend-down" };
-                };
-
                 const processSnowDataForResort = (resort) => {
                     if (!resort.data || !resort.data.data_day) return null;
 
@@ -1782,8 +1766,8 @@
                     for (let offset = -2; offset <= 4; offset++) {
                         const dataIndex = todayIndex + offset;
                         if (dataIndex >= 0 && dataIndex < dayData.time.length) {
-                            // snowfall (snowice-day) est en cm de neige fraîche
-                            snowByDay.push(Math.round(dayData.snowfall?.[dataIndex] || 0));
+                            // snowaccumulation (snowice-day) est en cm de neige fraîche
+                            snowByDay.push(Math.round(dayData.snowaccumulation?.[dataIndex] || 0));
                         } else {
                             snowByDay.push(0);
                         }
