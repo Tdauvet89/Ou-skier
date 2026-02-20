@@ -17,7 +17,7 @@
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script src="icons.js?v=7.13.0"></script>
-        <script src="weatherCodes.js?v=7.14.0"></script>
+        <script src="weatherCodes.js?v=7.15.0"></script>
         <script src="massifMapping.js?v=7.13.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -917,233 +917,11 @@
 
             const MAX_RESORTS = 5;
 
-            // === MODE MOCK (fausses données pour itérer sur le design) ===
-            const USE_MOCK_DATA = false;
-
-            // Générer les dates dynamiquement (aujourd'hui + 6 jours)
-            const _mockDays = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date();
-                d.setDate(d.getDate() + i);
-                _mockDays.push(d.toISOString().split("T")[0]);
-            }
-
-            // Générer les timestamps horaires (7 jours × 24h, format UTC)
-            const _mockHours = [];
-            for (let i = 0; i < 7; i++) {
-                for (let h = 0; h < 24; h++) {
-                    _mockHours.push(
-                        `${_mockDays[i]}T${String(h).padStart(2, "0")}:00:00`,
-                    );
-                }
-            }
-
-            function _buildMockData(resortConfig) {
-                // Températures de base selon altitude
-                const altFactor = (resortConfig.altitude - 1400) / 400; // 0 pour 1400m, 1 pour 1800m
-                const baseTemps = [-4, -3, -2, -1, 0, 2, 1]; // moyennes par jour
-                const tempAmplitude = [3, 4, 5, 4, 3, 5, 4];
-
-                // Conditions variées : 1=soleil, 2=peu nuageux, 4=nuageux, 6=couvert, 9=pluie, 14=neige legere, 15=neige, 17=orage neige
-                const pictocodes = [2, 1, 6, 15, 14, 4, 1];
-                // Vent
-                const windMean = [12, 8, 25, 45, 35, 15, 10];
-                const gustMin = [15, 10, 35, 55, 45, 20, 12];
-                const gustMax = [25, 18, 55, 85, 65, 30, 20];
-                const windDir = [180, 200, 270, 300, 290, 220, 190];
-                // Precipitations
-                const precip = [0, 0, 2, 18, 8, 0.5, 0];
-                const snowFrac = [0, 0, 0.3, 0.9, 0.85, 0.5, 0];
-
-                // Données journalières
-                const data_day = {
-                    time: [..._mockDays],
-                    temperature_min: baseTemps.map(
-                        (t, i) =>
-                            Math.round(
-                                (t - tempAmplitude[i] - altFactor * 2) * 10,
-                            ) / 10,
-                    ),
-                    temperature_max: baseTemps.map(
-                        (t, i) =>
-                            Math.round(
-                                (t + tempAmplitude[i] - altFactor * 2) * 10,
-                            ) / 10,
-                    ),
-                    windspeed_mean: windMean.map(
-                        (w) => w + Math.round(altFactor * 5),
-                    ),
-                    windspeed_min: windMean.map((w) =>
-                        Math.max(2, w - 8 + Math.round(altFactor * 3)),
-                    ),
-                    windspeed_max: gustMax.map(
-                        (w) => w + Math.round(altFactor * 5),
-                    ),
-                    gust_min: gustMin.map((w) => w + Math.round(altFactor * 5)),
-                    gust_max: gustMax.map((w) => w + Math.round(altFactor * 5)),
-                    winddirection: [...windDir],
-                    precipitation: [...precip],
-                    snowfraction: [...snowFrac],
-                    pictocode: [...pictocodes],
-                };
-
-                // Données horaires (168 valeurs = 7 jours × 24h)
-                const hourlyTemp = [];
-                const hourlyWind = [];
-                const hourlyGust = [];
-                const hourlyDir = [];
-                const hourlyPicto = [];
-
-                for (let d = 0; d < 7; d++) {
-                    const dayBaseTemp = baseTemps[d] - altFactor * 2;
-                    const amp = tempAmplitude[d];
-                    const dayWind = windMean[d] + Math.round(altFactor * 5);
-                    const dayGust = gustMax[d] + Math.round(altFactor * 5);
-                    const dayDir = windDir[d];
-                    const dayPicto = pictocodes[d];
-
-                    for (let h = 0; h < 24; h++) {
-                        // Courbe de température : min à 5h, max à 14h
-                        const tempFrac =
-                            Math.sin(((h - 5) / 24) * Math.PI * 2) * 0.5 + 0.5;
-                        const temp =
-                            Math.round(
-                                (dayBaseTemp - amp + tempFrac * amp * 2) * 10,
-                            ) / 10;
-                        hourlyTemp.push(temp);
-
-                        // Vent : plus fort en journée
-                        const windFrac =
-                            h >= 10 && h <= 17 ? 1.2 : h >= 6 ? 0.9 : 0.6;
-                        hourlyWind.push(Math.round(dayWind * windFrac));
-                        hourlyGust.push(Math.round(dayGust * windFrac));
-                        hourlyDir.push(dayDir + (h % 3) * 5 - 5);
-
-                        // Pictocode : nuit (31-33) ou jour
-                        if (h < 7 || h > 20) {
-                            hourlyPicto.push(
-                                dayPicto <= 2
-                                    ? 31
-                                    : dayPicto <= 6
-                                      ? 33
-                                      : dayPicto,
-                            );
-                        } else {
-                            hourlyPicto.push(dayPicto);
-                        }
-                    }
-                }
-
-                const data_1h = {
-                    time: [..._mockHours],
-                    temperature: hourlyTemp,
-                    windspeed: hourlyWind,
-                    windgust: hourlyGust,
-                    winddirection: hourlyDir,
-                    pictocode: hourlyPicto,
-                };
-
-                return {
-                    ...resortConfig,
-                    data: { data_day, data_1h },
-                };
-            }
-
-            const MOCK_RESULTS = DEFAULT_RESORTS.map((r) => _buildMockData(r));
-
-            const MOCK_BRA_DATA = {
-                Guzet: {
-                    "aujourd'hui": {
-                        bas: 3,
-                        haut: 3,
-                        evolution: 0,
-                        date: _mockDays[0],
-                    },
-                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
-                    _detail: {
-                        massifName: "Couserans",
-                        massifId: 69,
-                        dateBulletin: _mockDays[0] + "T16:00:00",
-                        risqueMaxi: 3,
-                        evoluRisque1: 0,
-                        risqueMaxiJ2: 2,
-                    },
-                },
-                "Piau-Engaly": {
-                    "aujourd'hui": {
-                        bas: 2,
-                        haut: 3,
-                        evolution: 1,
-                        date: _mockDays[0],
-                    },
-                    demain: { bas: 3, haut: 3, date: _mockDays[1] },
-                    _detail: {
-                        massifName: "Aure-Louron",
-                        massifId: 67,
-                        dateBulletin: _mockDays[0] + "T16:00:00",
-                        risqueMaxi: 3,
-                        evoluRisque1: 1,
-                        risqueMaxiJ2: 3,
-                    },
-                },
-                "Saint-Lary": {
-                    "aujourd'hui": {
-                        bas: 2,
-                        haut: 2,
-                        evolution: 0,
-                        date: _mockDays[0],
-                    },
-                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
-                    _detail: {
-                        massifName: "Aure-Louron",
-                        massifId: 67,
-                        dateBulletin: _mockDays[0] + "T16:00:00",
-                        risqueMaxi: 2,
-                        evoluRisque1: 0,
-                        risqueMaxiJ2: 2,
-                    },
-                },
-                // --- MOCK ONLY ---
-                "La Mongie": {
-                    "aujourd'hui": {
-                        bas: 4,
-                        haut: 4,
-                        evolution: -1,
-                        date: _mockDays[0],
-                    },
-                    demain: { bas: 3, haut: 3, date: _mockDays[1] },
-                    _detail: {
-                        massifName: "Haute-Bigorre",
-                        massifId: 66,
-                        dateBulletin: _mockDays[0] + "T16:00:00",
-                        risqueMaxi: 4,
-                        evoluRisque1: -1,
-                        risqueMaxiJ2: 3,
-                    },
-                },
-                "Cauterets": {
-                    "aujourd'hui": {
-                        bas: 1,
-                        haut: 2,
-                        evolution: 0,
-                        date: _mockDays[0],
-                    },
-                    demain: { bas: 2, haut: 2, date: _mockDays[1] },
-                    _detail: {
-                        massifName: "Haute-Bigorre",
-                        massifId: 66,
-                        dateBulletin: _mockDays[0] + "T16:00:00",
-                        risqueMaxi: 2,
-                        evoluRisque1: 0,
-                        risqueMaxiJ2: 2,
-                    },
-                },
-            };
 
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            const CACHE_VERSION = 6; // Incrémenter pour invalider le cache après un changement de logique
+            const CACHE_VERSION = 7;
 
             function getWeatherCache() {
                 try {
@@ -1385,7 +1163,15 @@
             }
 
             // Weather codes importés depuis weatherCodes.js
-            // Fonctions disponibles: getWeatherInfo(code, hour), adjustWeatherCodeForDaylight(code, hour)
+            // Fonctions disponibles: getWeatherInfo(code, hour)
+
+            /**
+             * Retourne la date d'aujourd'hui au format YYYY-MM-DD en heure locale France (Europe/Paris).
+             * À utiliser pour comparer avec data_day.time retourné par Meteoblue (tz=Europe/Paris).
+             */
+            function getTodayStr() {
+                return new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Paris" });
+            }
 
             /**
              * Convertit une direction en degrés en flèche et point cardinal
@@ -1451,28 +1237,10 @@
 
                     setIsSearching(true);
 
-                    console.log(`🔍 searchLocation("${query}") — USE_MOCK_DATA=${USE_MOCK_DATA} — PROXY_URL="${PROXY_URL}"`);
-
-                    // Mode mock : filtrer DEFAULT_RESORTS sans appel API
-                    if (USE_MOCK_DATA) {
-                        const q = query.toLowerCase();
-                        console.log("🎭 Recherche mock dans DEFAULT_RESORTS :", DEFAULT_RESORTS.map(r => r.name));
-                        const mockRes = DEFAULT_RESORTS
-                            .filter(r => r.name.toLowerCase().includes(q))
-                            .map(r => ({ name: r.name, lat: r.lat, lon: r.lon, asl: r.altitude, admin1: "Pyrénées", url: r.mbUrl }));
-                        console.log(`🎭 Résultats mock pour "${query}" :`, mockRes.length, mockRes);
-                        setSearchResults(mockRes);
-                        setIsSearching(false);
-                        return;
-                    }
-
                     try {
                         const url = `${PROXY_URL}/search?query=${encodeURIComponent(query)}`;
-                        console.log("🌐 Appel proxy :", url);
                         const response = await fetch(url);
-                        console.log("🌐 Réponse HTTP :", response.status, response.ok);
                         const data = await response.json();
-                        console.log("🌐 Données reçues :", data);
 
                         if (data.results) {
                             setSearchResults(data.results.slice(0, 10));
@@ -1632,7 +1400,6 @@
 
             function MountainWeatherApp() {
                 const [resorts, setResorts] = useState(() => {
-                    if (USE_MOCK_DATA) return DEFAULT_RESORTS;
                     const saved = localStorage.getItem("skiResorts");
                     return saved ? JSON.parse(saved) : DEFAULT_RESORTS;
                 });
@@ -1643,80 +1410,8 @@
                 const [currentDate, setCurrentDate] = useState("");
                 const [isModalOpen, setIsModalOpen] = useState(false);
                 const [lastUpdate, setLastUpdate] = useState(null);
-                const [apiCallsLog, setApiCallsLog] = useState(() => {
-                    const saved = localStorage.getItem("apiCallsLog");
-                    return saved ? JSON.parse(saved) : [];
-                });
-
-                const [braData, setBraData] = useState({}); // { resortName: { aujourd'hui: {bas, haut}, demain: {bas, haut}, _detail: {...} } }
-                const [beraModal, setBeraModal] = useState(null); // { resortName, detail } ou null
-                const [loadedFromCache, setLoadedFromCache] = useState(false);
-
-
-                // Logger un appel API
-                const logApiCall = (
-                    resortName,
-                    success = true,
-                    errorMsg = null,
-                ) => {
-                    const logEntry = {
-                        timestamp: new Date().toISOString(),
-                        resort: resortName,
-                        success,
-                        error: errorMsg,
-                        dateFormatted: new Date().toLocaleString("fr-FR"),
-                    };
-
-                    const updatedLog = [...apiCallsLog, logEntry];
-                    setApiCallsLog(updatedLog);
-                    localStorage.setItem(
-                        "apiCallsLog",
-                        JSON.stringify(updatedLog),
-                    );
-
-                    console.log("📊 Appel API:", logEntry);
-                };
-
-                // Télécharger le fichier de log
-                const downloadLog = () => {
-                    const logText = apiCallsLog
-                        .map(
-                            (entry) =>
-                                `${entry.dateFormatted} | ${entry.resort} | ${entry.success ? "SUCCESS" : "FAILED"} ${entry.error ? `| Error: ${entry.error}` : ""}`,
-                        )
-                        .join("\n");
-
-                    const blob = new Blob([logText], { type: "text/plain" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `meteoblue-api-log-${new Date().toISOString().split("T")[0]}.txt`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                };
-
-                // Réinitialiser le log
-                const clearLog = () => {
-                    setApiCallsLog([]);
-                    localStorage.setItem("apiCallsLog", JSON.stringify([]));
-                    console.log("🗑️ Log des appels API réinitialisé");
-                };
-
-                // Calculer les statistiques
-                const getApiStats = () => {
-                    const today = new Date().toDateString();
-                    const todayCalls = apiCallsLog.filter(
-                        (log) =>
-                            new Date(log.timestamp).toDateString() === today,
-                    );
-
-                    return {
-                        total: apiCallsLog.length,
-                        today: todayCalls.length,
-                        failed: apiCallsLog.filter((log) => !log.success)
-                            .length,
-                    };
-                };
+                const [braData, setBraData] = useState({});
+                const [beraModal, setBeraModal] = useState(null);
 
                 useEffect(() => {
                     const now = new Date();
@@ -1748,44 +1443,12 @@
                 }, []);
 
                 const loadInitialWeatherData = async () => {
-                    // Mode mock : fausses données, aucun appel API
-                    if (USE_MOCK_DATA) {
-                        console.log("🎭 Mode MOCK actif — aucun appel API");
-                        processWeatherData(MOCK_RESULTS);
-                        processSnowData(MOCK_RESULTS);
-                        setBraData(MOCK_BRA_DATA);
-                        const now = new Date();
-                        setLastUpdate(now.toISOString());
-                        setCurrentDate(
-                            now.toLocaleDateString("fr-FR", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            }) +
-                                " à " +
-                                now.toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                }),
-                        );
-                        return;
-                    }
-
                     // Vérifier le cache avant d'appeler l'API
                     const cache = getWeatherCache();
                     if (cache && isCacheValidForResorts(cache, resorts)) {
-                        const cacheAgeMin = Math.round(
-                            (Date.now() - cache.timestamp) / 60000,
-                        );
-                        console.log(
-                            `📦 Cache valide (${cacheAgeMin} min) — aucun appel API`,
-                        );
-
                         processWeatherData(cache.results);
                         processSnowData(cache.results);
                         if (cache.braData) setBraData(cache.braData);
-                        setLoadedFromCache(true);
 
                         const cachedDate = new Date(cache.timestamp);
                         setLastUpdate(cachedDate.toISOString());
@@ -1805,8 +1468,6 @@
                         return;
                     }
 
-                    console.log("🌐 Pas de cache valide — appel API Meteoblue");
-                    setLoadedFromCache(false);
                     setLoading(true);
                     setError(null);
 
@@ -1915,9 +1576,6 @@
                                 newResort.name,
                             );
                             if (massif) {
-                                console.log(
-                                    `🏔️ Massif détecté pour ${newResort.name}: ${massif.name} (ID ${massif.id})`,
-                                );
                                 const data = await fetchBRAData(massif.id);
                                 if (data) {
                                     setBraData((prev) => ({
@@ -1951,74 +1609,20 @@
 
                 const fetchWeatherForResort = async (resort) => {
                     const url = `${PROXY_URL}/weather?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
-
-                    // DEBUG pour Pic de Lurtet
-                    const isPicLurtet = resort.name
-                        .toLowerCase()
-                        .includes("lurtet");
-                    if (isPicLurtet) {
-                        console.log(
-                            "🌐 ========== APPEL API PIC DE LURTET ==========",
-                        );
-                        console.log("📍 Coordonnées utilisées:");
-                        console.log("   Latitude:", resort.lat);
-                        console.log("   Longitude:", resort.lon);
-                        console.log("   Altitude:", resort.altitude);
-                        console.log("🔗 URL proxy:", url);
-                    }
-
                     try {
                         const response = await fetch(url);
                         if (!response.ok) {
-                            logApiCall(
-                                resort.name,
-                                false,
-                                `HTTP ${response.status}`,
-                            );
-                            throw new Error(
-                                `Erreur API pour ${resort.name}: ${response.status}`,
-                            );
+                            throw new Error(`HTTP ${response.status}`);
                         }
                         const data = await response.json();
-                        logApiCall(resort.name, true);
-
-                        // --- LOGS METEOBLUE (toutes stations) ---
-                        console.group(`📡 [${resort.name}] Meteoblue — données brutes`);
-                        console.log("🔗 URL :", url);
-                        console.log("📅 Jours (data_day.time) :", data.data_day?.time);
-                        console.log("🌡️ Temp min (°C)         :", data.data_day?.temperature_min);
-                        console.log("🌡️ Temp max (°C)         :", data.data_day?.temperature_max);
-                        console.log("❄️ Neige (cm)            :", data.data_day?.snowfall);
-                        console.log("💧 Précipitations (mm)   :", data.data_day?.precipitation);
-                        console.log("💨 Vent max (km/h)       :", data.data_day?.windspeed_max);
-                        console.log("🌤️ Pictocode             :", data.data_day?.pictocode);
-                        console.log("📊 data_day complet      :", data.data_day);
-
-                        console.groupEnd();
-                        // --- FIN LOGS ---
-
                         return { ...resort, data };
                     } catch (err) {
-                        console.error(`Erreur pour ${resort.name}:`, err);
-                        logApiCall(resort.name, false, err.message);
+                        console.error(`Erreur météo pour ${resort.name}:`, err);
                         return { ...resort, data: null, error: err.message };
                     }
                 };
 
                 const fetchAllWeatherData = async () => {
-                    // Mode mock : pas d'appel API
-                    if (USE_MOCK_DATA) {
-                        console.log("🎭 Mode MOCK — actualisation simulée");
-                        processWeatherData(MOCK_RESULTS);
-                        processSnowData(MOCK_RESULTS);
-                        setBraData(MOCK_BRA_DATA);
-                        return;
-                    }
-
-                    console.log(
-                        "🔄 Actualisation forcée — appel API Meteoblue",
-                    );
-                    setLoadedFromCache(false);
                     setLoading(true);
                     setError(null);
 
@@ -2105,147 +1709,39 @@
                 };
 
                 const processWeatherDataForResort = (resort) => {
-                    if (!resort.data || !resort.data.data_day) {
-                        console.log(
-                            "Pas de données journalières pour",
-                            resort.name,
-                        );
-                        return null;
-                    }
+                    if (!resort.data || !resort.data.data_day) return null;
 
                     const dayData = resort.data.data_day;
                     const days = {};
+                    const todayStr = getTodayStr();
 
-                    // DEBUG APPROFONDI pour Pic de Lurtet
-                    const isPicLurtet = resort.name
-                        .toLowerCase()
-                        .includes("lurtet");
-                    if (isPicLurtet) {
-                        console.log(
-                            "🔍 ========== DEBUG PIC DE LURTET ==========",
-                        );
-                        console.log("📍 Coordonnées:", {
-                            lat: resort.lat,
-                            lon: resort.lon,
-                            altitude: resort.altitude,
-                        });
-                        console.log(
-                            "📅 Date actuelle:",
-                            new Date().toISOString(),
-                        );
-                        console.log(
-                            "📊 Données journalières (data_day.time):",
-                            dayData.time,
-                        );
-                        console.log(
-                            "🌡️ Températures min:",
-                            dayData.temperature_min,
-                        );
-                        console.log(
-                            "🌡️ Températures max:",
-                            dayData.temperature_max,
-                        );
-                    }
-
-                    // ✅ CORRECTION FINALE : Trouver dynamiquement l'index qui correspond à aujourd'hui
-                    const today = new Date();
-                    const todayStr = today.toISOString().split("T")[0]; // "2026-02-09"
-
-                    let todayIndex = -1;
-                    for (let i = 0; i < dayData.time.length; i++) {
-                        if (dayData.time[i] === todayStr) {
-                            todayIndex = i;
-                            break;
-                        }
-                    }
-
-                    if (isPicLurtet) {
-                        console.log(
-                            "🎯 Recherche de la date d'aujourd'hui:",
-                            todayStr,
-                        );
-                        console.log(
-                            "📌 Index trouvé pour aujourd'hui:",
-                            todayIndex,
-                        );
-                    }
-
-                    // Si on ne trouve pas aujourd'hui, utiliser le premier jour disponible
-                    if (todayIndex === -1) {
-                        if (isPicLurtet) {
-                            console.log(
-                                "⚠️ Aujourd'hui non trouvé dans les données",
-                            );
-                            console.log(
-                                "   Les données commencent à:",
-                                dayData.time[0],
-                            );
-                        }
-                        todayIndex = 0;
-                    }
-
-                    console.log("Traitement des données pour", resort.name);
-                    console.log(
-                        "- Données journalières (data_day):",
-                        dayData ? "OK" : "Manquant",
-                    );
-
-                    console.log(
-                        "- Index aujourd'hui:",
-                        todayIndex,
-                        "→",
-                        dayData.time[todayIndex],
-                    );
+                    let todayIndex = dayData.time.findIndex(d => d === todayStr);
+                    if (todayIndex === -1) todayIndex = 0;
 
                     // On récupère 5 jours : aujourd'hui + 4 jours futurs
                     for (let offset = 0; offset <= 4; offset++) {
                         const dataIndex = todayIndex + offset;
-
                         if (dataIndex >= 0 && dataIndex < dayData.time.length) {
-                            const weatherCode =
-                                dayData.pictocode?.[dataIndex] || 1;
+                            const weatherCode = dayData.pictocode?.[dataIndex] || 1;
                             const weatherInfo = getWeatherInfo(weatherCode);
 
-                            // DEBUG pour Pic de Lurtet
-                            if (isPicLurtet) {
-                                console.log(
-                                    `📆 Offset ${offset} (${offset === 0 ? "AUJOURD'HUI" : offset > 0 ? "J+" + offset : "J" + offset}):`,
-                                );
-                                console.log(
-                                    `   Date: ${dayData.time[dataIndex]}`,
-                                );
-                                console.log(
-                                    `   Temp min/max: ${dayData.temperature_min[dataIndex]}° / ${dayData.temperature_max[dataIndex]}°`,
-                                );
-                            }
-
-                            // Neige en cm : snowfraction * precipitation
-                            const snowFraction =
-                                dayData.snowfraction?.[dataIndex] || 0;
-                            const precip =
-                                dayData.precipitation?.[dataIndex] || 0;
-                            const snowCm = Math.round(
-                                (snowFraction * precip) / 10,
-                            );
-                            const rainMm = Math.round(
-                                (1 - snowFraction) * precip,
-                            );
+                            // snowfall (snowice-day) est en cm de neige fraîche
+                            const snowCm = Math.round(dayData.snowfall?.[dataIndex] || 0);
+                            const precip = dayData.precipitation?.[dataIndex] || 0;
+                            const snowFraction = dayData.snowfraction?.[dataIndex] || 0;
+                            const rainMm = Math.round((1 - snowFraction) * precip);
 
                             days[offset] = {
                                 offset,
                                 date: dayData.time?.[dataIndex] || "",
                                 condition: weatherInfo.desc,
                                 icon: weatherInfo.icon,
-                                temp_max:
-                                    dayData.temperature_max?.[dataIndex] || 0,
-                                temp_min:
-                                    dayData.temperature_min?.[dataIndex] || 0,
-                                wind_mean:
-                                    dayData.windspeed_mean?.[dataIndex] || 0,
+                                temp_max: dayData.temperature_max?.[dataIndex] || 0,
+                                temp_min: dayData.temperature_min?.[dataIndex] || 0,
+                                wind_mean: dayData.windspeed_mean?.[dataIndex] || 0,
                                 gust_min: dayData.gust_min?.[dataIndex] || 0,
                                 gust_max: dayData.gust_max?.[dataIndex] || 0,
-                                windDirection:
-                                    dayData.winddirection?.[dataIndex] || null,
+                                windDirection: dayData.winddirection?.[dataIndex] || null,
                                 precipitation: precip,
                                 snowCm,
                                 rainMm,
@@ -2253,16 +1749,7 @@
                         }
                     }
 
-                    if (isPicLurtet) {
-                        console.log(
-                            "🔍 ========== FIN DEBUG PIC DE LURTET ==========",
-                        );
-                    }
-
-                    return {
-                        name: resort.name,
-                        days,
-                    };
+                    return { name: resort.name, days };
                 };
 
                 const getTempTrend = (temp1, temp2) => {
@@ -2282,52 +1769,27 @@
                 };
 
                 const processSnowDataForResort = (resort) => {
-                    if (!resort.data || !resort.data.data_day) {
-                        return null;
-                    }
+                    if (!resort.data || !resort.data.data_day) return null;
 
                     const dayData = resort.data.data_day;
                     const snowByDay = [];
+                    const todayStr = getTodayStr();
 
-                    // ✅ CORRECTION : Trouver dynamiquement l'index qui correspond à aujourd'hui
-                    const today = new Date();
-                    const todayStr = today.toISOString().split("T")[0];
+                    let todayIndex = dayData.time.findIndex(d => d === todayStr);
+                    if (todayIndex === -1) todayIndex = 0;
 
-                    let todayIndex = -1;
-                    for (let i = 0; i < dayData.time.length; i++) {
-                        if (dayData.time[i] === todayStr) {
-                            todayIndex = i;
-                            break;
-                        }
-                    }
-
-                    // Si on ne trouve pas aujourd'hui, utiliser le premier jour disponible
-                    if (todayIndex === -1) {
-                        todayIndex = 0;
-                    }
-
-                    // Calculer les chutes de neige pour 7 jours (de -2 à +4)
+                    // 7 jours : J-2 à J+4
                     for (let offset = -2; offset <= 4; offset++) {
-                        const dataIndex = todayIndex + offset; // ✅ Calculé depuis todayIndex
-
+                        const dataIndex = todayIndex + offset;
                         if (dataIndex >= 0 && dataIndex < dayData.time.length) {
-                            const snowFraction =
-                                dayData.snowfraction?.[dataIndex] || 0;
-                            const precipitation =
-                                dayData.precipitation?.[dataIndex] || 0;
-                            const snowCm = Math.round(
-                                (snowFraction * precipitation) / 10,
-                            );
-                            snowByDay.push(snowCm);
+                            // snowfall (snowice-day) est en cm de neige fraîche
+                            snowByDay.push(Math.round(dayData.snowfall?.[dataIndex] || 0));
                         } else {
                             snowByDay.push(0);
                         }
                     }
 
-                    return {
-                        name: resort.name,
-                        snowByDay,
-                    };
+                    return { name: resort.name, snowByDay };
                 };
 
                 const processWeatherData = (results) => {
@@ -2368,7 +1830,6 @@
                         <header>
                             <h1>
                                 <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
-                                {USE_MOCK_DATA && <span className="tag" style={{fontSize:"10px",letterSpacing:"0.08em",verticalAlign:"middle",marginLeft:"8px"}}>MOCK</span>}
                             </h1>
                             <div className="header-controls">
                                 <a

@@ -60,6 +60,7 @@ async function handleWeather(url, env, ctx) {
     upstream.searchParams.set("lon", lon);
     upstream.searchParams.set("asl", asl);
     upstream.searchParams.set("format", "json");
+    upstream.searchParams.set("tz", "Europe/Paris"); // dates en heure locale française
 
     // Clé de cache sans la clé API (sûr à logguer / inspecter)
     const cacheKey = new Request(
