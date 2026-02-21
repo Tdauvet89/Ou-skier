@@ -527,6 +527,12 @@
                 background: #f0f7ff;
             }
 
+            /* Séparateur vertical entre groupes de jours */
+            .hourly-view .snow-table td.hourly-day-sep,
+            .hourly-view .snow-table th.hourly-day-sep {
+                border-right: 2px solid #7B9EC0 !important;
+            }
+
             /* Tableau horaire détaillé */
             .hourly-table {
                 width: 100%;
@@ -1823,45 +1829,94 @@
                  * @returns {Object|null} { name, hours: [...] } ou null si pas de data_3h
                  */
                 const processHourlyDataForResort = (resort) => {
-                    if (!resort.data || !resort.data.data_3h) return null;
+                    // ─── LOGS DE DÉBOGAGE ────────────────────────────────────────
+                    // Permet de vérifier si data_3h arrive bien dans la réponse API.
+                    // À lire dans la console du navigateur (F12 → Console).
+                    if (!resort.data) {
+                        console.warn(`[Hourly] ❌ ${resort.name} : aucune data`);
+                        return null;
+                    }
+
+                    // Log 1 — clés présentes dans la réponse (data_day, data_3h, etc.)
+                    const apiKeys = Object.keys(resort.data).sort().join(', ');
+                    console.log(`[Hourly] ${resort.name} → clés API reçues : ${apiKeys}`);
+
+                    if (!resort.data.data_3h) {
+                        // Cause la plus probable : le worker Cloudflare n'est pas encore
+                        // redéployé avec le package basic-3h, OU le cache Cloudflare sert
+                        // l'ancienne réponse (sans data_3h). Vérifier le déploiement.
+                        console.warn(`[Hourly] ❌ ${resort.name} : data_3h ABSENT → worker non redéployé ou vieux cache CF (v=2)`);
+                        return null;
+                    }
 
                     const d3h = resort.data.data_3h;
-                    const todayStr = getTodayStr(); // "YYYY-MM-DD"
-                    const hours = [];
+                    const totalSlots = d3h.time?.length ?? 0;
+
+                    // Log 2 — nombre de créneaux et plage de dates
+                    console.log(`[Hourly] ✅ ${resort.name} : ${totalSlots} créneaux 3h`);
+                    if (totalSlots > 0) {
+                        console.log(`[Hourly]   plage : ${d3h.time[0]}  →  ${d3h.time[totalSlots - 1]}`);
+                    }
+
+                    // ─── REGROUPEMENT PAR JOUR (max 5 jours) ────────────────────
+                    // On groupe tous les créneaux 3h par date (YYYY-MM-DD).
+                    // On s'arrête à 5 jours pour garder le tableau lisible.
+                    const dayMap = new Map(); // date → slots[]
 
                     for (let i = 0; i < d3h.time.length; i++) {
-                        const timeStr = d3h.time[i]; // "YYYY-MM-DD HH:MM"
+                        const timeStr = d3h.time[i]; // format Meteoblue : "YYYY-MM-DD HH:MM"
                         const dateStr = timeStr.substring(0, 10);
 
-                        // On ne garde que les créneaux d'aujourd'hui
-                        if (dateStr !== todayStr) continue;
+                        if (!dayMap.has(dateStr)) {
+                            if (dayMap.size >= 5) continue; // ← limite à 5 jours
+                            dayMap.set(dateStr, []);
+                        }
 
                         const hour = parseInt(timeStr.substring(11, 13), 10);
                         const weatherInfo = getWeatherInfo(d3h.pictocode?.[i] || 1, hour);
                         const windDisplay = getWindDirectionDisplay(d3h.winddirection?.[i]);
 
-                        // Calcul précipitations neige vs pluie
                         const totalPrecip = d3h.precipitation?.[i] || 0;
                         const snowFraction = d3h.snowfraction?.[i] || 0;
-                        const snowMm = Math.round(totalPrecip * snowFraction * 10) / 10;
-                        const rainMm = Math.round(totalPrecip * (1 - snowFraction) * 10) / 10;
+                        const snowMm  = Math.round(totalPrecip * snowFraction * 10) / 10;
+                        const rainMm  = Math.round(totalPrecip * (1 - snowFraction) * 10) / 10;
 
-                        hours.push({
+                        dayMap.get(dateStr).push({
                             label: `${hour.toString().padStart(2, '0')}h`,
                             hour,
-                            icon: weatherInfo.icon,
-                            desc: weatherInfo.desc,
-                            temp: Math.round(d3h.temperature?.[i] || 0),
-                            windSpeed: Math.round(d3h.windspeed?.[i] || 0),
-                            windDir: d3h.winddirection?.[i] ?? null,
+                            icon:        weatherInfo.icon,
+                            desc:        weatherInfo.desc,
+                            temp:        Math.round(d3h.temperature?.[i] || 0),
+                            windSpeed:   Math.round(d3h.windspeed?.[i]   || 0),
+                            windDir:     d3h.winddirection?.[i] ?? null,
                             windCardinal: windDisplay.cardinal,
-                            precip: Math.round(totalPrecip * 10) / 10,
+                            precip:      Math.round(totalPrecip * 10) / 10,
                             snowMm,
                             rainMm,
                         });
                     }
 
-                    return hours.length > 0 ? { name: resort.name, hours } : null;
+                    // Construire le tableau de jours avec labels français
+                    const days = [];
+                    for (const [date, hours] of dayMap.entries()) {
+                        // Instancier à midi local pour éviter les glissements de timezone
+                        const dt = new Date(`${date}T12:00:00`);
+                        const dayLabel = dt.toLocaleDateString('fr-FR', {
+                            weekday: 'short', day: 'numeric', month: 'short',
+                        });
+                        const dayLabelLong = dt.toLocaleDateString('fr-FR', {
+                            weekday: 'long', day: 'numeric', month: 'long',
+                        });
+                        days.push({ date, dayLabel, dayLabelLong, hours });
+                    }
+
+                    // Log 3 — récapitulatif par jour
+                    console.log(
+                        `[Hourly] ${resort.name} → ${days.length} jours :`,
+                        days.map(d => `${d.date}(${d.hours.length} créneaux)`).join(', ')
+                    );
+
+                    return days.length > 0 ? { name: resort.name, days } : null;
                 };
 
                 /** Traite les données horaires pour TOUS les secteurs */
@@ -2272,101 +2327,98 @@
                                             )}
 
                                             {/* ==================== VUE PAR HEURE (3h) ====================
-                                              * Tableau comparatif : 1 ligne par secteur, 1 colonne par créneau 3h.
+                                              * Tableau comparatif : 1 ligne par secteur, 5 jours × 8 créneaux.
                                               *
                                               * Règles clés :
-                                              *  • On itère sur `resorts` (pas `hourlyData`) → le secteur s'affiche
-                                              *    TOUJOURS, même si data_3h n'est pas encore chargé.
-                                              *  • Les inline styles sur les <th> garantissent le visuel sans
-                                              *    combat de spécificité CSS avec le design-system.
-                                              *  • Double ligne d'en-tête : jour (rowSpan=2 sur Secteur) + créneaux.
+                                              *  • On itère sur `resorts` (source de vérité) → secteur toujours visible.
+                                              *  • hourlyData[i].days[] contient les créneaux groupés par jour (max 5).
+                                              *  • En-tête double ligne : Secteur (rowSpan=2) | jour1 | jour2 | ...
+                                              *                                                  | 00h 03h ... | 00h 03h ...
+                                              *  • .hourly-day-sep marque la dernière colonne de chaque jour.
+                                              *  • Inline styles sur les <th> bypasse la spécificité design-system.
+                                              *  • Les logs [Hourly] dans la console permettent de diagnostiquer
+                                              *    si data_3h arrive bien de l'API (worker redéployé ?).
                                               * ============================================================ */}
                                             {weatherView === 'hour' && (() => {
-                                                /* Créneaux du 1er secteur chargé, fallback 8 slots si data pas encore là */
-                                                const slots = hourlyData[0]?.hours || [
-                                                    {label:'00h'},{label:'03h'},{label:'06h'},{label:'09h'},
-                                                    {label:'12h'},{label:'15h'},{label:'18h'},{label:'21h'}
-                                                ];
-                                                /* Libellé du jour en français : "Vendredi 20 février" */
-                                                const rawDay = new Date().toLocaleDateString('fr-FR', {
-                                                    weekday: 'long', day: 'numeric', month: 'long'
+                                                /* Jours de référence : vient du 1er secteur chargé.
+                                                 * Fallback : 5 jours fictifs si data_3h pas encore disponible. */
+                                                const refDays = hourlyData[0]?.days || Array.from({length: 5}, (_, i) => {
+                                                    const dt = new Date();
+                                                    dt.setDate(dt.getDate() + i);
+                                                    const dayLabelLong = dt.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+                                                    return {
+                                                        date: dt.toLocaleDateString('en-CA'),
+                                                        dayLabel: dt.toLocaleDateString('fr-FR', {weekday:'short', day:'numeric', month:'short'}),
+                                                        dayLabelLong,
+                                                        hours: Array.from({length:8}, (_, j) => ({label:`${(j*3).toString().padStart(2,'0')}h`})),
+                                                    };
                                                 });
-                                                const dayLabel = rawDay.charAt(0).toUpperCase() + rawDay.slice(1);
+                                                const totalCols = refDays.reduce((sum, d) => sum + d.hours.length, 0);
 
                                                 /* Styles inline pour la colonne Secteur
-                                                 * (bypass spécificité design-system sur snow-table thead th:first-child) */
+                                                 * (bypass spécificité design-system snow-table thead th:first-child) */
                                                 const sectorThStyle = {
-                                                    textAlign: 'left',
-                                                    paddingLeft: '24px',
-                                                    minWidth: '200px',
-                                                    background: '#F9FAFC',
-                                                    fontFamily: '"Garnett", sans-serif',
-                                                    fontSize: '16px',
-                                                    fontWeight: 600,
-                                                    color: '#1F2023',
-                                                    position: 'sticky',
-                                                    left: 0,
-                                                    zIndex: 3,
-                                                    verticalAlign: 'middle',
+                                                    textAlign: 'left', paddingLeft: '24px', minWidth: '200px',
+                                                    background: '#F9FAFC', fontFamily: '"Garnett", sans-serif',
+                                                    fontSize: '16px', fontWeight: 600, color: '#1F2023',
+                                                    position: 'sticky', left: 0, zIndex: 3, verticalAlign: 'middle',
+                                                };
+                                                const dayThStyle = {
+                                                    textAlign: 'center', fontSize: '13px', fontWeight: 600,
+                                                    color: '#5E7690', background: '#F9FAFC',
+                                                    padding: '10px 16px 4px', fontFamily: '"Inter", sans-serif',
+                                                };
+                                                const hourThStyle = {
+                                                    textAlign: 'center', minWidth: '80px', fontSize: '13px',
+                                                    fontWeight: 600, color: '#1F2023', padding: '4px 8px 10px',
+                                                    background: '#F9FAFC', fontFamily: '"Inter", sans-serif',
                                                 };
 
                                                 return (
                                                 <div className="snow-table">
                                                     <table>
                                                         <thead>
-                                                            {/* Ligne 1 : nom du jour au-dessus des créneaux */}
+                                                            {/* Ligne 1 : "Secteur" (rowSpan=2) + 1 th par jour */}
                                                             <tr>
-                                                                {/* "Secteur" s'étend sur les 2 lignes d'en-tête */}
-                                                                <th rowSpan={2} style={sectorThStyle}>
-                                                                    Secteur
-                                                                </th>
-                                                                <th
-                                                                    colSpan={slots.length}
-                                                                    style={{
-                                                                        textAlign: 'center',
-                                                                        fontSize: '13px',
-                                                                        fontWeight: 600,
-                                                                        color: '#5E7690',
-                                                                        background: '#F9FAFC',
-                                                                        padding: '10px 16px 4px',
-                                                                        fontFamily: '"Inter", sans-serif',
-                                                                        letterSpacing: '0.01em',
-                                                                    }}
-                                                                >
-                                                                    {dayLabel}
-                                                                </th>
+                                                                <th rowSpan={2} style={sectorThStyle}>Secteur</th>
+                                                                {refDays.map((day, dIdx) => {
+                                                                    const sep = dIdx < refDays.length - 1;
+                                                                    const cap = day.dayLabelLong.charAt(0).toUpperCase() + day.dayLabelLong.slice(1);
+                                                                    return (
+                                                                        <th key={dIdx} colSpan={day.hours.length}
+                                                                            className={sep ? 'hourly-day-sep' : ''}
+                                                                            style={dayThStyle}>
+                                                                            {cap}
+                                                                        </th>
+                                                                    );
+                                                                })}
                                                             </tr>
-                                                            {/* Ligne 2 : créneaux 3h (00h → 21h) */}
+                                                            {/* Ligne 2 : créneaux 3h (00h → 21h) pour chaque jour */}
                                                             <tr>
-                                                                {slots.map((slot, i) => (
-                                                                    <th
-                                                                        key={i}
-                                                                        style={{
-                                                                            textAlign: 'center',
-                                                                            minWidth: '80px',
-                                                                            fontSize: '13px',
-                                                                            fontWeight: 600,
-                                                                            color: '#1F2023',
-                                                                            padding: '4px 8px 10px',
-                                                                            background: '#F9FAFC',
-                                                                            fontFamily: '"Inter", sans-serif',
-                                                                        }}
-                                                                    >
-                                                                        {slot.label}
-                                                                    </th>
-                                                                ))}
+                                                                {refDays.flatMap((day, dIdx) =>
+                                                                    day.hours.map((slot, hIdx) => {
+                                                                        const sep = hIdx === day.hours.length - 1 && dIdx < refDays.length - 1;
+                                                                        return (
+                                                                            <th key={`${dIdx}-${hIdx}`}
+                                                                                className={sep ? 'hourly-day-sep' : ''}
+                                                                                style={hourThStyle}>
+                                                                                {slot.label}
+                                                                            </th>
+                                                                        );
+                                                                    })
+                                                                )}
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {/* Itération sur `resorts` (source de vérité) — garantit
-                                                              * que le secteur s'affiche même sans données horaires */}
+                                                            {/* Source de vérité : `resorts` → le secteur s'affiche même
+                                                              * si data_3h n'est pas encore chargé (voir logs F12) */}
                                                             {resorts.length > 0 ? resorts.map((resort, idx) => {
-                                                                /* Cherche les données horaires par index (alignement garanti)
-                                                                 * puis par nom en fallback */
+                                                                /* Lookup par index (alignement garanti après load initial)
+                                                                 * puis par nom en fallback (addResort / removeResort) */
                                                                 const hourlyResort =
-                                                                    (hourlyData[idx]?.name === resort.name
+                                                                    hourlyData[idx]?.name === resort.name
                                                                         ? hourlyData[idx]
-                                                                        : hourlyData.find(h => h.name === resort.name));
+                                                                        : hourlyData.find(h => h.name === resort.name);
                                                                 const meteoblueUrl = getMeteoblueUrl(resort);
                                                                 return (
                                                                     <tr key={idx}>
@@ -2377,42 +2429,49 @@
                                                                             </a>
                                                                             <span className="sector-altitude"> ({resort.altitude}m)</span>
                                                                         </td>
-                                                                        {/* Données horaires si disponibles, sinon état vide */}
-                                                                        {hourlyResort ? hourlyResort.hours.map((h, hIdx) => (
-                                                                            <td key={hIdx} className="hourly-cell" title={h.desc}>
-                                                                                {/* Icône météo (pictocode adapté jour/nuit) */}
-                                                                                <div className="cell-icon">
-                                                                                    <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
-                                                                                </div>
-                                                                                {/* Température */}
-                                                                                <div className="cell-temp">{h.temp}°</div>
-                                                                                {/* Vent : flèche de direction + vitesse km/h */}
-                                                                                <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
-                                                                                    {h.windDir !== null && (
-                                                                                        <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
-                                                                                    )}
-                                                                                    <span>{h.windSpeed}</span>
-                                                                                </div>
-                                                                                {/* Précipitations — affiche neige ou pluie, "-" si 0 */}
-                                                                                {h.precip > 0 ? (
-                                                                                    <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
-                                                                                        {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="cell-precip" style={{color:'#ccc'}}>-</div>
-                                                                                )}
-                                                                            </td>
-                                                                        )) : (
-                                                                            /* Pas encore de données 3h — inviter à actualiser */
-                                                                            <td colSpan={slots.length} style={{textAlign:'center', color:'#aaa', fontSize:'12px', padding:'16px'}}>
-                                                                                Actualiser la page pour charger les données horaires
+                                                                        {/* Données 3h : 1 td par créneau, .hourly-day-sep en fin de journée */}
+                                                                        {hourlyResort ? hourlyResort.days.flatMap((day, dIdx) =>
+                                                                            day.hours.map((h, hIdx) => {
+                                                                                const sep = hIdx === day.hours.length - 1 && dIdx < hourlyResort.days.length - 1;
+                                                                                return (
+                                                                                    <td key={`${dIdx}-${hIdx}`}
+                                                                                        className={`hourly-cell${sep ? ' hourly-day-sep' : ''}`}
+                                                                                        title={h.desc}>
+                                                                                        {/* Icône météo (pictocode adapté jour/nuit) */}
+                                                                                        <div className="cell-icon">
+                                                                                            <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
+                                                                                        </div>
+                                                                                        {/* Température */}
+                                                                                        <div className="cell-temp">{h.temp}°</div>
+                                                                                        {/* Vent : flèche direction + vitesse km/h */}
+                                                                                        <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
+                                                                                            {h.windDir !== null && (
+                                                                                                <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
+                                                                                            )}
+                                                                                            <span>{h.windSpeed}</span>
+                                                                                        </div>
+                                                                                        {/* Précipitations — neige ou pluie, tiret si 0 */}
+                                                                                        {h.precip > 0 ? (
+                                                                                            <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
+                                                                                                {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <div className="cell-precip" style={{color:'#ccc'}}>-</div>
+                                                                                        )}
+                                                                                    </td>
+                                                                                );
+                                                                            })
+                                                                        ) : (
+                                                                            /* data_3h absent — voir logs [Hourly] dans la console F12 */
+                                                                            <td colSpan={totalCols} style={{textAlign:'center', color:'#aaa', fontSize:'12px', padding:'16px'}}>
+                                                                                Données horaires non disponibles — voir console (F12) pour diagnostic
                                                                             </td>
                                                                         )}
                                                                     </tr>
                                                                 );
                                                             }) : (
                                                                 <tr>
-                                                                    <td className="table-blank-state" colSpan={slots.length + 1}>Aucun secteur à afficher</td>
+                                                                    <td className="table-blank-state" colSpan={totalCols + 1}>Aucun secteur à afficher</td>
                                                                 </tr>
                                                             )}
                                                         </tbody>
