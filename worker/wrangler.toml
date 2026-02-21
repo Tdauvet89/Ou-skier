@@ -17,7 +17,7 @@ crons = ["0 7 * * *"]
 # Puis remplacer REMPLACER_PAR_ID_KV par l'ID retourné
 [[kv_namespaces]]
 binding = "ALERTS_KV"
-id = "REMPLACER_PAR_ID_KV"
+id = "472efd69ec6f4cf99017c8dd9ad9ac43"
 
 [dev]
 port = 8787
