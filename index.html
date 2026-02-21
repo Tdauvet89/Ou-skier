@@ -2099,13 +2099,19 @@
                                                     <div className="toggle">
                                                         <button
                                                             className={`toggle-btn${weatherView === 'day' ? ' active' : ''}`}
-                                                            onClick={() => setWeatherView('day')}
+                                                            onClick={() => {
+                                                                setWeatherView('day');
+                                                                if (typeof gtag === 'function') gtag('event', 'vue_meteo_switch', { vue: 'jour' });
+                                                            }}
                                                         >
                                                             Par jour
                                                         </button>
                                                         <button
                                                             className={`toggle-btn${weatherView === 'hour' ? ' active' : ''}`}
-                                                            onClick={() => setWeatherView('hour')}
+                                                            onClick={() => {
+                                                                setWeatherView('hour');
+                                                                if (typeof gtag === 'function') gtag('event', 'vue_meteo_switch', { vue: 'heure' });
+                                                            }}
                                                         >
                                                             Par heure
                                                         </button>

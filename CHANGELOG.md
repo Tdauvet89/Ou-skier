@@ -5,6 +5,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.10.0] - 2026-02-21
+
+### Ajouté
+- **Google Analytics — tracking toggle vue météo** (`index.html`) : événement `vue_meteo_switch` envoyé à GA4 (G-CB6G3EL32M) à chaque clic sur "Par jour" ou "Par heure"
+  - Paramètre `vue` : `"jour"` ou `"heure"`
+  - Permet de mesurer dans GA4 : **quelle vue est la plus utilisée** (Événements → `vue_meteo_switch` → détail par paramètre `vue`)
+
+---
+
 ## [7.9.0] - 2026-02-21
 
 ### Ajouté
