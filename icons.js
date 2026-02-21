@@ -220,7 +220,9 @@ var weatherSvg = {
  */
 function windArrowSvg(degrees, size) {
     size = size || 14;
-    var rot = (degrees !== null && degrees !== undefined) ? degrees : 0;
+    // +180° : l'API donne la direction d'où vient le vent (convention météo),
+    // on affiche où il va (convention Météoblue UI).
+    var rot = (degrees !== null && degrees !== undefined) ? (degrees + 180) % 360 : 0;
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" style="transform:rotate(' + rot + 'deg);display:inline-block;vertical-align:middle">' +
         '<path d="M12 2 L12 22 M12 2 L7 8 M12 2 L17 8" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
         '</svg>';
