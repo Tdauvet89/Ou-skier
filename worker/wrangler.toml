@@ -1,6 +1,7 @@
 name = "ou-skier-proxy"
 main = "worker.js"
 compatibility_date = "2025-01-01"
+account_id = "REMPLACE_PAR_TON_ACCOUNT_ID"  # Dashboard CF → barre droite ou URL dash.cloudflare.com/[id]
 
 # Décommente pour restreindre aux requêtes venant uniquement de ton domaine
 # [vars]
