@@ -1,6 +1,54 @@
 # Changelog
 
 Tous les changements notables de ce projet seront documentés dans ce fichier.
+Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEUR.MINEUR.PATCH`
+
+---
+
+## [7.5.0] - 2026-02-21
+
+### Corrigé
+- **Direction des flèches vent inversée** (`icons.js`) : `windArrowSvg` appliquait `rotate(degrees)` directement, affichant d'où vient le vent alors que Météoblue UI affiche où il va. Correctif : `rot = (degrees + 180) % 360`. Affecte vue journalière ET vue horaire.
+- **Colonne Secteur non-sticky au scroll horizontal** (vue horaire) : les `<td>` du tbody n'avaient pas `position: sticky`, seul le `<th>` l'avait via inline style. Les créneaux 3h (00h, 03h…) passaient sous l'en-tête "Secteur" lors du scroll.
+- **Conflit wrangler.toml** : résolution du conflit de merge entre notre branch et main sur `account_id` (ligne modifiée des deux côtés depuis `50cbac5`).
+
+### Technique
+- `CACHE_VERSION` 9 → 10 : invalide le cache localStorage v9 stocké sans `data_3h` (avant redéploiement worker avec `basic-3h`)
+- `icons.js` v7.13.0 → v7.14.0 (cache bust dans `index.html` et `design-system.html`)
+
+---
+
+## [7.4.0] - 2026-02-21
+
+### Ajouté
+- **Package `basic-3h`** ajouté au worker (`worker.js`) : l'API Météoblue retourne maintenant `data_3h` en plus de `data_day`
+- **Cache Cloudflare** : clé de cache passée de `v=2` à `v=3` pour invalider l'ancienne réponse sans `data_3h`
+
+### Corrigé
+- **`account_id` manquant** dans `wrangler.toml` : le placeholder `REMPLACE_PAR_TON_ACCOUNT_ID` remplacé par le vrai ID pour permettre le déploiement via `CLOUDFLARE_API_TOKEN`
+
+---
+
+## [7.3.0] - 2026-02-21
+
+### Ajouté
+- **Vue horaire 3h complète** (5 jours) : tableau scrollable avec icône météo, température, flèche vent + vitesse, précipitations (neige/pluie) par créneau de 3h
+- **Toggle "Par jour / Par heure"** : bascule entre vue journalière et vue horaire avec icônes calendrier/horloge
+- **Logs de diagnostic** `[Hourly]` dans la console pour vérifier la présence de `data_3h`
+
+### Corrigé
+- Secteur manquant en vue horaire lors d'un premier chargement
+- Design header jour + typographie 13px sur les créneaux horaires
+
+---
+
+## [7.2.0] - 2026-02-21
+
+### Modifié
+- **0 secteurs par défaut** (`DEFAULT_RESORTS = []`) : l'app démarre vide, l'utilisateur ajoute ses propres secteurs
+- **Blank state** dans les deux tableaux quand aucun secteur n'est chargé
+
+---
 
 ## [7.0.0] - 2026-02-19
 

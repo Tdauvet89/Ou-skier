@@ -83,3 +83,47 @@ Quand tu modifies `design-system.css`, `icons.js`, `weatherCodes.js` ou `massifM
   - `worker.js` — routes `/weather` et `/search`
   - `wrangler.toml` — config déploiement
   - `package.json` — dépendance Wrangler CLI
+
+## Documentation & Changelog (OBLIGATOIRE)
+
+### Règle absolue
+
+**Avant chaque commit**, tu **DOIS** mettre à jour `CHANGELOG.md` :
+
+1. **Identifier la version** selon le type de changement :
+   - `PATCH` (x.x.+1) — Bugfix sans impact UX (ex: 7.4.0 → 7.4.1)
+   - `MINOR` (x.+1.0) — Nouvelle fonctionnalité rétrocompatible (ex: 7.4.0 → 7.5.0)
+   - `MAJOR` (+1.0.0) — Changement architectural ou rupture (ex: 7.x.x → 8.0.0)
+2. **Créer une section** en haut du fichier avec la date du jour
+3. **Remplir les rubriques** pertinentes parmi : `### Ajouté`, `### Modifié`, `### Corrigé`, `### Supprimé`, `### Technique`
+
+### Format de section
+
+```markdown
+## [X.Y.Z] - AAAA-MM-JJ
+
+### Ajouté
+- **Nom de la feature** (`fichier.js`) : description courte — impact utilisateur
+
+### Corrigé
+- **Nom du bug** : cause racine → correctif appliqué
+
+### Technique
+- `CACHE_VERSION` X → Y (raison)
+- `fichier.js` vX → vY (cache bust)
+```
+
+### Checklist avant chaque commit (en plus du design system)
+
+- [ ] `CHANGELOG.md` contient une section pour cette version
+- [ ] La version dans le CHANGELOG correspond au type de changement (patch/minor/major)
+- [ ] Les fichiers modifiés sont listés avec leur impact
+
+### Workflow Git
+
+```
+[feature/fix] → branch claude/* → push → auto-merge dans main → Cloudflare Pages deploy
+```
+
+- **Ne jamais commiter directement sur `main`** : risque de conflit avec les merges automatiques
+- **Si conflit** : merger `origin/main` dans la branch claude, résoudre, puis push
