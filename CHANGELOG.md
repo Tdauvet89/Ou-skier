@@ -5,6 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.10.1] - 2026-02-21
+
+### Sécurité
+- **Clé API Météo France retirée du JS client** : le JWT `MF_API_KEY` (qui contenait l'identifiant `tdauvet@carbon.super` décodable en base64) était visible dans le source de la page. Il est maintenant stocké exclusivement en secret Cloudflare (`wrangler secret put MF_API_KEY`).
+- **Nouveau proxy Worker `/bra`** (`worker/worker.js`) : les deux appels DPBRA (XML bulletin + PDF) passent désormais par `PROXY_URL/bra?massif-id=X&format=xml|pdf` — la clé est injectée côté serveur via `env.MF_API_KEY` et jamais transmise au navigateur.
+
+### Technique
+- `index.html` : suppression de la constante `MF_API_KEY`, mise à jour de `fetchBRAData()` et du fetch PDF inline
+- `worker.js` : ajout route `case "/bra"` + fonction `handleBRA()` — valide `massif-id`, `format` (xml|pdf), retourne le Content-Type adapté
+- **Setup ops requis** : `wrangler secret put MF_API_KEY` puis `wrangler deploy`
+
+---
+
 ## [7.10.0] - 2026-02-21
 
 ### Ajouté

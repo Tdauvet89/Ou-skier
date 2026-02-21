@@ -11,6 +11,8 @@
  *
  * Variables d'environnement requises :
  *   METEOBLUE_API_KEY  (wrangler secret put METEOBLUE_API_KEY)
+ *   MF_API_KEY         (wrangler secret put MF_API_KEY)
+ *                       → token JWT Météo France DPBRA (portail-api.meteofrance.fr)
  *   RESEND_API_KEY     (wrangler secret put RESEND_API_KEY)
  *                       → compte gratuit sur resend.com (3 000 emails/mois)
  *
@@ -51,6 +53,8 @@ export default {
                 return handleWeather(url, env, ctx);
             case "/search":
                 return handleSearch(url, env);
+            case "/bra":
+                return handleBRA(url, env);
             default:
                 return jsonError("Not Found", 404);
         }
@@ -148,6 +152,41 @@ async function handleSearch(url, env) {
     return new Response(text, {
         status: resp.status,
         headers: { "Content-Type": "application/json", ...CORS },
+    });
+}
+
+// ---------------------------------------------------------------------------
+// /bra?massif-id=X&format=xml|pdf
+// Proxy vers l'API publique Météo France DPBRA — clé jamais exposée au client
+// ---------------------------------------------------------------------------
+async function handleBRA(url, env) {
+    const massifId = url.searchParams.get("massif-id");
+    const format   = url.searchParams.get("format") ?? "xml";
+
+    if (!massifId) {
+        return jsonError("Paramètre massif-id requis", 400);
+    }
+    if (!["xml", "pdf"].includes(format)) {
+        return jsonError("format doit être xml ou pdf", 400);
+    }
+
+    if (!env.MF_API_KEY) {
+        console.error("[BRA] MF_API_KEY non configurée");
+        return jsonError("Configuration serveur incomplète", 503);
+    }
+
+    const upstream = `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${encodeURIComponent(massifId)}&format=${format}`;
+
+    const resp = await fetch(upstream, {
+        headers: { apikey: env.MF_API_KEY },
+    });
+
+    const body = await resp.arrayBuffer();
+    const contentType = format === "pdf" ? "application/pdf" : "text/xml; charset=utf-8";
+
+    return new Response(body, {
+        status: resp.status,
+        headers: { "Content-Type": contentType, ...CORS },
     });
 }
 

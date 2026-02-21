@@ -992,11 +992,9 @@
                 );
             }
 
-            // === Météo France BRA — API Key (header apikey:) ===
-            // Générer sur https://portail-api.meteofrance.fr > Mes APIs > Générer Token
-            // Mettre la durée au maximum (ex: 31536000 = 1 an) pour éviter de renouveler
-            const MF_API_KEY =
-                "eyJ4NXQiOiJZV0kxTTJZNE1qWTNOemsyTkRZeU5XTTRPV014TXpjek1UVmhNbU14T1RSa09ETXlOVEE0Tnc9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZGF1dmV0QGNhcmJvbi5zdXBlciIsImFwcGxpY2F0aW9uIjp7Im93bmVyIjoidGRhdXZldCIsInRpZXJRdW90YVR5cGUiOm51bGwsInRpZXIiOiJVbmxpbWl0ZWQiLCJuYW1lIjoiRGVmYXVsdEFwcGxpY2F0aW9uIiwiaWQiOjM2OTU0LCJ1dWlkIjoiOWI5Y2VhNDAtYmEwZi00YzVhLTgwNDctM2EwYjM3NWQyODM3In0sImlzcyI6Imh0dHBzOlwvXC9wb3J0YWlsLWFwaS5tZXRlb2ZyYW5jZS5mcjo0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6eyI1MFBlck1pbiI6eyJ0aWVyUXVvdGFUeXBlIjoicmVxdWVzdENvdW50IiwiZ3JhcGhRTE1heENvbXBsZXhpdHkiOjAsImdyYXBoUUxNYXhEZXB0aCI6MCwic3RvcE9uUXVvdGFSZWFjaCI6dHJ1ZSwic3Bpa2VBcnJlc3RMaW1pdCI6MCwic3Bpa2VBcnJlc3RVbml0Ijoic2VjIn19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkRvbm5lZXNQdWJsaXF1ZXNCUkEiLCJjb250ZXh0IjoiXC9wdWJsaWNcL0RQQlJBXC92MSIsInB1Ymxpc2hlciI6ImJhc3RpZW5nIiwidmVyc2lvbiI6InYxIiwic3Vic2NyaXB0aW9uVGllciI6IjUwUGVyTWluIn1dLCJleHAiOjE4MDIzODIxMDEsInRva2VuX3R5cGUiOiJhcGlLZXkiLCJpYXQiOjE3NzA4NDYxMDEsImp0aSI6IjhkYzI2MjU0LTlmZTktNGIwNC1iYTQyLWIxNzhkZmQzMzI3MCJ9.T0Sah5HGtP61Lk2f7dUMVqxQUTj0kiOz0yn_ceaHuy_gtUSHFfZ0SDec28M72AHqh12On_IETCDNRFR90mrlzbWUTREK8h8b5GvR-wRtPrBAze0WQ_1GhSsOIMcHCETqioCSa84kAy6Kv1yazPlkHnP5Cn9ZNzB5K_x8Dqo1kyyNazuO-7lpnkovmWMg-vnCVYEGmkWaFPPQTpOR_uBn84hiEb1PoG0RJ5vjl5Yxv72kJ24uWSwS-hBQbxsXNhB_ddPTEdd4WIiwuC_wZ7aNsFRplJMCmgCeH7K0sRKy4sLWB4kuQuTozrIgeWny9q_QDlzpc73ZQBV4sSbXF_FcOg==";
+            // === Météo France BRA — proxifié via le Worker Cloudflare ===
+            // La clé API MF est stockée côté serveur (wrangler secret put MF_API_KEY)
+            // et jamais exposée au client. Les appels BRA passent par PROXY_URL + "/bra".
 
             /**
              * Récupère les données BRA (Bulletin Risque Avalanche) pour un massif
@@ -1006,17 +1004,10 @@
             async function fetchBRAData(massifId) {
                 if (!massifId) return null;
 
-                const baseUrl =
-                    "https://public-api.meteofrance.fr/public/DPBRA/v1";
-                const headers = {
-                    apikey: MF_API_KEY,
-                };
-
                 try {
-                    // Récupérer le XML du bulletin
+                    // Récupérer le XML du bulletin via le proxy Worker (clé MF côté serveur)
                     const response = await fetch(
-                        `${baseUrl}/massif/BRA?id-massif=${massifId}&format=xml`,
-                        { headers },
+                        `${PROXY_URL}/bra?massif-id=${encodeURIComponent(massifId)}&format=xml`,
                     );
 
                     if (!response.ok) {
@@ -2324,8 +2315,7 @@
                                                                                                               const detail = braDataForResort._detail;
                                                                                                               setBeraModal({ resortName: resort.name, detail, loading: true });
                                                                                                               fetch(
-                                                                                                                  `https://public-api.meteofrance.fr/public/DPBRA/v1/massif/BRA?id-massif=${detail.massifId}&format=pdf`,
-                                                                                                                  { headers: { apikey: MF_API_KEY } }
+                                                                                                                  `${PROXY_URL}/bra?massif-id=${encodeURIComponent(detail.massifId)}&format=pdf`
                                                                                                               )
                                                                                                                   .then(r => r.blob())
                                                                                                                   .then(blob => {
