@@ -512,12 +512,17 @@
                 height: auto;
             }
 
-            /* Séparateur visuel entre colonne sticky et colonnes scrollables */
+            /* Séparateur visuel + sticky sur la colonne Secteur (th ET td) */
             .hourly-view .snow-table th:first-child,
             .hourly-view .snow-table td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                background: white;
                 border-right: 2px solid #C8D6E5 !important;
                 box-shadow: 3px 0 6px rgba(0, 0, 0, 0.07);
             }
+            /* Le th Secteur passe en z-index 3 (inline style) pour rester au-dessus des td */
 
             /* Alternance légère sur les lignes du tbody */
             .hourly-view .snow-table tbody tr:nth-child(even) td:first-child {
