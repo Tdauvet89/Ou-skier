@@ -1186,23 +1186,42 @@
             }
 
             /**
-             * Convertit une direction en degrés en flèche et point cardinal
+             * Convertit une direction en degrés en point cardinal (abréviation + nom français)
+             * Convention météo : la direction indique D'OÙ vient le vent.
+             *   ex : winddirection=45° → "le vent vient de Nord-Est"
              * @param {number} degrees - Direction en degrés (0-360)
-             * @returns {object} { arrow: string, cardinal: string }
+             * @returns {{ cardinal: string, label: string }}
              */
             function getWindDirectionDisplay(degrees) {
                 if (degrees === null || degrees === undefined) {
-                    return { cardinal: "" };
+                    return { cardinal: "", label: "" };
                 }
 
                 // Normaliser entre 0-360
                 const normalized = ((degrees % 360) + 360) % 360;
 
-                // Points cardinaux (8 directions)
-                const cardinals = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+                // 16 points cardinaux — cardinal (abréviation FR) + label (nom complet FR)
+                const dirs = [
+                    { cardinal: "N",   label: "Nord" },
+                    { cardinal: "NNE", label: "Nord-Nord-Est" },
+                    { cardinal: "NE",  label: "Nord-Est" },
+                    { cardinal: "ENE", label: "Est-Nord-Est" },
+                    { cardinal: "E",   label: "Est" },
+                    { cardinal: "ESE", label: "Est-Sud-Est" },
+                    { cardinal: "SE",  label: "Sud-Est" },
+                    { cardinal: "SSE", label: "Sud-Sud-Est" },
+                    { cardinal: "S",   label: "Sud" },
+                    { cardinal: "SSO", label: "Sud-Sud-Ouest" },
+                    { cardinal: "SO",  label: "Sud-Ouest" },
+                    { cardinal: "OSO", label: "Ouest-Sud-Ouest" },
+                    { cardinal: "O",   label: "Ouest" },
+                    { cardinal: "ONO", label: "Ouest-Nord-Ouest" },
+                    { cardinal: "NO",  label: "Nord-Ouest" },
+                    { cardinal: "NNO", label: "Nord-Nord-Ouest" },
+                ];
 
-                const index = Math.round(normalized / 45) % 8;
-                return { cardinal: cardinals[index] };
+                const index = Math.round(normalized / 22.5) % 16;
+                return dirs[index];
             }
 
             /**
@@ -1896,6 +1915,7 @@
                             windSpeed:   Math.round((d3h.windspeed?.[i]  || 0) * 3.6), // m/s → km/h
                             windDir:     d3h.winddirection?.[i] ?? null,
                             windCardinal: windDisplay.cardinal,
+                            windLabel:   windDisplay.label,
                             precip:      Math.round(totalPrecip * 10) / 10,
                             snowMm,
                             rainMm,
@@ -2441,28 +2461,33 @@
                                                                                 const sep = hIdx === day.hours.length - 1 && dIdx < hourlyResort.days.length - 1;
                                                                                 return (
                                                                                     <td key={`${dIdx}-${hIdx}`}
-                                                                                        className={`hourly-cell${sep ? ' hourly-day-sep' : ''}`}
-                                                                                        title={h.desc}>
-                                                                                        {/* Icône météo (pictocode adapté jour/nuit) */}
-                                                                                        <div className="cell-icon">
+                                                                                        className={`hourly-cell${sep ? ' hourly-day-sep' : ''}`}>
+                                                                                        {/* Icône météo — tooltip : description conditions (ex: "Ensoleillé") */}
+                                                                                        <div className="cell-icon" title={h.desc}>
                                                                                             <span dangerouslySetInnerHTML={{__html: h.icon}}></span>
                                                                                         </div>
-                                                                                        {/* Température */}
-                                                                                        <div className="cell-temp">{h.temp}°</div>
-                                                                                        {/* Vent : flèche direction + vitesse km/h */}
-                                                                                        <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}>
+                                                                                        {/* Température — tooltip : précision "instantanée" */}
+                                                                                        <div className="cell-temp" title="Température instantanée">{h.temp}°</div>
+                                                                                        {/* Vent — tooltip : vitesse moyenne + direction d'origine du vent */}
+                                                                                        <div className="cell-wind" style={{color: getWindColor(h.windSpeed)}}
+                                                                                             title={h.windSpeed > 0 && h.windLabel
+                                                                                                 ? `Vent moyen — vient de ${h.windLabel}`
+                                                                                                 : "Vent calme"}>
                                                                                             {h.windDir !== null && (
                                                                                                 <span className="wind-arrow" dangerouslySetInnerHTML={{__html: windArrowSvg(h.windDir, 14)}}></span>
                                                                                             )}
                                                                                             <span>{h.windSpeed}</span>
                                                                                         </div>
-                                                                                        {/* Précipitations — neige ou pluie, tiret si 0 */}
+                                                                                        {/* Précipitations — tooltip : cumul sur la période 3h */}
                                                                                         {h.precip > 0 ? (
-                                                                                            <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}>
+                                                                                            <div className={`cell-precip${h.snowMm > 0 ? ' has-snow' : ' has-rain'}`}
+                                                                                                 title={h.snowMm > 0
+                                                                                                     ? `Cumul neige sur 3h : ${h.snowMm} mm`
+                                                                                                     : `Cumul pluie sur 3h : ${h.rainMm} mm`}>
                                                                                                 {h.snowMm > 0 ? `${h.snowMm}mm` : `${h.rainMm}mm`}
                                                                                             </div>
                                                                                         ) : (
-                                                                                            <div className="cell-precip" style={{color:'#ccc'}}>-</div>
+                                                                                            <div className="cell-precip" style={{color:'#ccc'}} title="Aucune précipitation">-</div>
                                                                                         )}
                                                                                     </td>
                                                                                 );

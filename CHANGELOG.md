@@ -5,6 +5,21 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.8.0] - 2026-02-21
+
+### Ajouté
+- **Tooltips vue horaire** : chaque élément de cellule porte désormais un tooltip explicatif natif (`title`)
+  - Icône météo : description des conditions (ex : "Ensoleillé", "Neige légère")
+  - Température : "Température instantanée"
+  - Vent : "Vent moyen — vient de {direction}" (ex : "Vent moyen — vient de Nord-Est") — ou "Vent calme" si vitesse = 0
+  - Précipitations : "Cumul neige sur 3h : X mm" / "Cumul pluie sur 3h : X mm" / "Aucune précipitation"
+
+### Modifié
+- **`getWindDirectionDisplay`** : passage de 8 à **16 points cardinaux** (précision 22.5° au lieu de 45°), noms abrégés en français (NO, NNO, SSO…) et ajout du champ `label` avec le nom complet (ex : "Nord-Nord-Est")
+- **Données slot horaire** : champ `windLabel` ajouté dans chaque slot 3h pour alimenter les tooltips
+
+---
+
 ## [7.7.0] - 2026-02-21
 
 ### Corrigé
