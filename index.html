@@ -932,8 +932,8 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            // v10 : invalide cache v9 stocké sans data_3h (worker redéployé avec basic-3h)
-            const CACHE_VERSION = 10;
+            // v11 : invalide cache v10 — vitesses vent en m/s converties en km/h (×3.6)
+            const CACHE_VERSION = 11;
 
             function getWeatherCache() {
                 try {
@@ -1765,9 +1765,10 @@
                                 icon: weatherInfo.icon,
                                 temp_max: dayData.temperature_max?.[dataIndex] || 0,
                                 temp_min: dayData.temperature_min?.[dataIndex] || 0,
-                                wind_mean: dayData.windspeed_mean?.[dataIndex] || 0,
-                                gust_min: dayData.gust_min?.[dataIndex] || 0,
-                                gust_max: dayData.gust_max?.[dataIndex] || 0,
+                                // API retourne m/s → conversion km/h (×3.6)
+                                wind_mean: Math.round((dayData.windspeed_mean?.[dataIndex] || 0) * 3.6),
+                                gust_min:  Math.round((dayData.gust_min?.[dataIndex]  || 0) * 3.6),
+                                gust_max:  Math.round((dayData.gust_max?.[dataIndex]  || 0) * 3.6),
                                 windDirection: dayData.winddirection?.[dataIndex] || null,
                                 precipitation: precip,
                                 snowCm,
@@ -1892,7 +1893,7 @@
                             icon:        weatherInfo.icon,
                             desc:        weatherInfo.desc,
                             temp:        Math.round(d3h.temperature?.[i] || 0),
-                            windSpeed:   Math.round(d3h.windspeed?.[i]   || 0),
+                            windSpeed:   Math.round((d3h.windspeed?.[i]  || 0) * 3.6), // m/s → km/h
                             windDir:     d3h.winddirection?.[i] ?? null,
                             windCardinal: windDisplay.cardinal,
                             precip:      Math.round(totalPrecip * 10) / 10,

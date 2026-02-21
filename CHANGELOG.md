@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.7.0] - 2026-02-21
+
+### Corrigé
+- **Vitesse du vent affichée à 0** (vue journalière ET horaire) : l'API Météoblue retourne `windspeed` en **m/s** (`units.windspeed = "ms-1"`), pas en km/h. L'app faisait `Math.round(0.22)` → 0 au lieu de `Math.round(0.22 × 3.6)` → 1 km/h
+  - Vue horaire : `d3h.windspeed` × 3.6 avant `Math.round`
+  - Vue journalière : `windspeed_mean`, `gust_min`, `gust_max` × 3.6 à la lecture (source)
+
+### Technique
+- `CACHE_VERSION` 10 → 11 : invalide le cache localStorage contenant des valeurs vent en m/s
+
+---
+
 ## [7.6.0] - 2026-02-21
 
 ### Ajouté
