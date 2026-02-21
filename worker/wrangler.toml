@@ -7,5 +7,17 @@ account_id = "32b2a508b6674c705c58b8b5d9c4f979"  # Dashboard CF → barre droite
 # [vars]
 # ALLOWED_ORIGIN = "https://ton-domaine.com"
 
+# ─── Cron : vérification quotidienne des crédits API Météoblue ───────────────
+# Tourne tous les jours à 7h UTC → envoie un email si crédits < CREDIT_THRESHOLD
+[triggers]
+crons = ["0 7 * * *"]
+
+# ─── KV : anti-spam (1 email max toutes les 24h) ─────────────────────────────
+# Créer avec : wrangler kv:namespace create ALERTS_KV
+# Puis remplacer REMPLACER_PAR_ID_KV par l'ID retourné
+[[kv_namespaces]]
+binding = "ALERTS_KV"
+id = "REMPLACER_PAR_ID_KV"
+
 [dev]
 port = 8787

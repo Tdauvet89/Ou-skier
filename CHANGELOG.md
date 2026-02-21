@@ -5,6 +5,25 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.9.0] - 2026-02-21
+
+### Ajouté
+- **Alerte email crédits Météoblue** (`worker/worker.js`, `worker/wrangler.toml`) :
+  - Cron Cloudflare `0 7 * * *` (7h UTC) — vérification quotidienne automatique
+  - Appel endpoint `GET /packages/credits?apikey=…` → lecture des crédits restants
+  - Si crédits < **100** (seuil `CREDIT_THRESHOLD`) → email d'alerte HTML envoyé à `tdauvet@gmail.com` via **Resend** (service gratuit, 3 000 emails/mois)
+  - KV namespace `ALERTS_KV` (anti-spam) : 1 email max toutes les 24h
+  - Parsing défensif de la réponse credits (plusieurs formats Météoblue couverts)
+
+### Technique
+- `wrangler.toml` : ajout `[triggers] crons` + `[[kv_namespaces]]` ALERTS_KV
+- `worker.js` : ajout handler `scheduled`, fonctions `checkMeteoblueCredits` + `sendCreditAlert`
+- **Setup requis côté ops** (voir README worker) :
+  1. `wrangler kv:namespace create ALERTS_KV` → coller l'ID dans `wrangler.toml`
+  2. Compte Resend gratuit → `wrangler secret put RESEND_API_KEY`
+
+---
+
 ## [7.8.0] - 2026-02-21
 
 ### Ajouté
