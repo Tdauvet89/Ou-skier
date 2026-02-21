@@ -5,6 +5,23 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.6.0] - 2026-02-21
+
+### Ajouté
+- **Garde CHANGELOG obligatoire** dans le workflow CI (`auto-merge-claude.yml`) : le merge dans `main` est bloqué si `CHANGELOG.md` n'a pas été modifié dans les commits de la branch — message d'erreur explicite avec référence à la règle `CLAUDE.md`
+- **Récapitulatif de déploiement automatique** dans GitHub Actions Job Summary :
+  - Liste des commits mergés (hash + message, sans merges)
+  - Liste des fichiers modifiés
+  - Section CHANGELOG.md de la version déployée (extraite automatiquement)
+  - Statut final ✅ / ❌
+
+### Technique
+- `auto-merge-claude.yml` : 3 nouvelles étapes (`fetch`, `vérification CHANGELOG`, `récapitulatif`, `statut final`)
+- Extraction CHANGELOG via `awk` (première section jusqu'au séparateur `---`)
+- Sécurité : aucun secret exposé dans les logs ou le Job Summary — seuls les messages de commit et noms de fichiers sont affichés
+
+---
+
 ## [7.5.0] - 2026-02-21
 
 ### Corrigé

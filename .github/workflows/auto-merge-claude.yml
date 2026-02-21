@@ -23,8 +23,92 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge claude branch into main
+      - name: Fetch branch claude
+        run: git fetch origin ${{ github.ref_name }}
+
+      # ── GARDE : CHANGELOG.md obligatoire ──────────────────────────────────
+      - name: Vérifier que CHANGELOG.md a été mis à jour
         run: |
-          git fetch origin ${{ github.ref_name }}
+          NOUVEAUX=$(git log origin/main..origin/${{ github.ref_name }} --oneline)
+          if [ -z "$NOUVEAUX" ]; then
+            echo "Aucun nouveau commit à merger — rien à faire."
+            exit 0
+          fi
+
+          CHANGELOG_MODIFIE=$(git diff origin/main..origin/${{ github.ref_name }} \
+            --name-only | grep -c "CHANGELOG.md" || true)
+
+          if [ "$CHANGELOG_MODIFIE" -eq 0 ]; then
+            echo "──────────────────────────────────────────────"
+            echo "❌  CHANGELOG.md n'a pas été mis à jour."
+            echo ""
+            echo "  Règle du projet (CLAUDE.md) :"
+            echo "  Chaque commit doit documenter ses changements"
+            echo "  dans CHANGELOG.md (section MAJOR/MINOR/PATCH)."
+            echo ""
+            echo "  → Mettez à jour CHANGELOG.md puis re-pushez."
+            echo "──────────────────────────────────────────────"
+            exit 1
+          fi
+
+          echo "✅  CHANGELOG.md présent dans les nouveaux commits."
+
+      # ── RÉCAPITULATIF PRÉ-MERGE ───────────────────────────────────────────
+      - name: Générer le récapitulatif de déploiement
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          DATE=$(date '+%d/%m/%Y à %H:%M UTC')
+
+          {
+            echo "## 🚀 Déploiement \`${BRANCH}\` → \`main\`"
+            echo ""
+            echo "> **${DATE}**"
+            echo ""
+
+            echo "### 📋 Commits mergés"
+            echo ""
+            git log origin/main..origin/${BRANCH} \
+              --pretty=format:"- \`%h\` %s" \
+              --no-merges
+            echo ""
+            echo ""
+
+            echo "### 📁 Fichiers modifiés"
+            echo ""
+            git diff origin/main..origin/${BRANCH} --name-only \
+              | grep -v "^$" \
+              | awk '{print "- `" $0 "`"}'
+            echo ""
+            echo ""
+
+            echo "### 📝 Notes de version (CHANGELOG.md)"
+            echo ""
+            # Extrait la première section du CHANGELOG (jusqu'au premier ---)
+            awk '/^---$/{exit} /^## \[/{found=1} found' CHANGELOG.md \
+              || echo "_Aucune section trouvée dans CHANGELOG.md_"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ── MERGE ─────────────────────────────────────────────────────────────
+      - name: Merger la branch dans main
+        run: |
           git merge origin/${{ github.ref_name }} --no-edit
           git push origin main
+
+      # ── STATUT FINAL ──────────────────────────────────────────────────────
+      - name: Statut final
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            {
+              echo "---"
+              echo "### ✅ Merge réussi"
+              echo "Branch \`${{ github.ref_name }}\` intégrée dans \`main\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "---"
+              echo "### ❌ Déploiement échoué"
+              echo "Voir les logs ci-dessus pour le détail."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
