@@ -927,8 +927,8 @@
             // === CACHE MÉTÉO (localStorage, TTL 2h) ===
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
-            // v9 : ajout données horaires 3h (basic-3h package)
-            const CACHE_VERSION = 9;
+            // v10 : invalide cache v9 stocké sans data_3h (worker redéployé avec basic-3h)
+            const CACHE_VERSION = 10;
 
             function getWeatherCache() {
                 try {
