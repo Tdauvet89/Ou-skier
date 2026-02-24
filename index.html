@@ -1794,6 +1794,10 @@
                     if (!resort.data || !resort.data.data_day) return null;
 
                     const dayData = resort.data.data_day;
+                    // LOG DIAGNOSTIC — à supprimer après debug
+                    console.log(`[Snow] ${resort.name} → clés data_day :`, Object.keys(dayData).join(', '));
+                    console.log(`[Snow] ${resort.name} → snowdepth[0..3] :`, dayData.snowdepth?.slice(0,4));
+                    console.log(`[Snow] ${resort.name} → snowaccumulation[0..3] :`, dayData.snowaccumulation?.slice(0,4));
                     const snowByDay = [];
                     const todayStr = getTodayStr();
 
