@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.22.2] - 2026-02-24
+
+### Corrigé
+- **Manteau neigeux à 0** (`index.html`) : l'API Météoblue ne retourne pas `snowdepth` seul mais `snowdepth_mean` (agrégat journalier) — lecture corrigée de `dayData.snowdepth` → `dayData.snowdepth_mean`
+
+### Technique
+- Logs diagnostic `[Snow]` supprimés après identification du bug
+
+---
+
 ## [7.22.1] - 2026-02-24
 
 ### Technique
