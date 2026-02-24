@@ -1549,8 +1549,10 @@
                                 resort.lon,
                                 resort.name,
                             );
+                            console.log(`[BRA] ${resort.name} → massif:`, massif ? `${massif.name} (id=${massif.id})` : 'null');
                             if (massif) {
                                 const data = await fetchBRAData(massif.id);
+                                console.log(`[BRA] ${resort.name} → data:`, data ? JSON.stringify(data).slice(0, 120) : 'null');
                                 return data
                                     ? { name: resort.name, data }
                                     : null;
@@ -1565,6 +1567,7 @@
                                 braDataObj[result.name] = result.data;
                             }
                         });
+                        console.log('[BRA] braDataObj final:', JSON.stringify(braDataObj).slice(0, 300));
                         setBraData(braDataObj);
 
                         // Sauvegarder dans le cache
