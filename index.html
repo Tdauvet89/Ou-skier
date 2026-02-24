@@ -1910,22 +1910,26 @@
                     const apiKeys = Object.keys(resort.data).sort().join(', ');
                     console.log(`[Hourly] ${resort.name} → clés API reçues : ${apiKeys}`);
 
-                    if (!resort.data.data_1h) {
-                        console.warn(`[Hourly] ❌ ${resort.name} : data_1h ABSENT`);
+                    // data_1h = réponse depuis le cache CF (ancien package)
+                    // data_3h = réponse fraîche du worker actuel (basic-3h)
+                    const is1h = !!resort.data.data_1h;
+                    const d1h = resort.data.data_1h ?? resort.data.data_3h;
+
+                    if (!d1h) {
+                        console.warn(`[Hourly] ❌ ${resort.name} : data_1h et data_3h ABSENTS`);
                         return null;
                     }
 
-                    const d1h = resort.data.data_1h;
                     const totalSlots = d1h.time?.length ?? 0;
 
                     // Log 2 — nombre de créneaux et plage de dates
-                    console.log(`[Hourly] ✅ ${resort.name} : ${totalSlots} créneaux 1h`);
+                    console.log(`[Hourly] ✅ ${resort.name} : ${totalSlots} créneaux (${is1h ? '1h' : '3h'})`);
                     if (totalSlots > 0) {
                         console.log(`[Hourly]   plage : ${d1h.time[0]}  →  ${d1h.time[totalSlots - 1]}`);
                     }
 
                     // ─── REGROUPEMENT PAR JOUR (max 5 jours) ────────────────────
-                    // On groupe tous les créneaux 3h par date (YYYY-MM-DD).
+                    // On groupe tous les créneaux par date (YYYY-MM-DD).
                     // On s'arrête à 5 jours pour garder le tableau lisible.
                     const dayMap = new Map(); // date → slots[]
 
@@ -1934,8 +1938,9 @@
                         const dateStr = timeStr.substring(0, 10);
                         const hour = parseInt(timeStr.substring(11, 13), 10);
 
-                        // Garder uniquement les tranches 3h (00, 03, 06, 09, 12, 15, 18, 21)
-                        if (hour % 3 !== 0) continue;
+                        // Si données 1h : garder uniquement les tranches 3h (00, 03, 06, …, 21)
+                        // Si données 3h : déjà au bon intervalle, pas de filtre nécessaire
+                        if (is1h && hour % 3 !== 0) continue;
 
                         if (!dayMap.has(dateStr)) {
                             if (dayMap.size >= 5) continue; // ← limite à 5 jours
