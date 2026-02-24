@@ -1794,19 +1794,15 @@
                     if (!resort.data || !resort.data.data_day) return null;
 
                     const dayData = resort.data.data_day;
-                    // LOG DIAGNOSTIC — à supprimer après debug
-                    console.log(`[Snow] ${resort.name} → clés data_day :`, Object.keys(dayData).join(', '));
-                    console.log(`[Snow] ${resort.name} → snowdepth[0..3] :`, dayData.snowdepth?.slice(0,4));
-                    console.log(`[Snow] ${resort.name} → snowaccumulation[0..3] :`, dayData.snowaccumulation?.slice(0,4));
                     const snowByDay = [];
                     const todayStr = getTodayStr();
 
                     let todayIndex = dayData.time.findIndex(d => d === todayStr);
                     if (todayIndex === -1) todayIndex = 0;
 
-                    // Manteau neigeux : snowdepth en mètres → cm (source : data_day)
-                    // Fallback sur data_1h si data_day ne contient pas snowdepth
-                    let snowDepthCm = Math.round((dayData.snowdepth?.[todayIndex] || 0) * 100);
+                    // Manteau neigeux : l'API Météoblue retourne snowdepth_mean (m) dans data_day
+                    // (le champ "snowdepth" seul n'existe pas — agrégats disponibles : _mean, _max, _min)
+                    let snowDepthCm = Math.round((dayData.snowdepth_mean?.[todayIndex] || 0) * 100);
                     if (snowDepthCm === 0 && resort.data.data_1h?.snowdepth) {
                         const d1h = resort.data.data_1h;
                         const noonIdx = d1h.time?.findIndex(t => t.startsWith(todayStr + ' 12')) ?? -1;
