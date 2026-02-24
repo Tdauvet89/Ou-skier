@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.22.1] - 2026-02-24
+
+### Technique
+- **Log diagnostic neige** (`index.html`) : ajout de `console.log` dans `processSnowDataForResort` pour vérifier si `snowdepth` et `snowaccumulation` sont présents dans `data_day` (debug package `snowice-day`)
+
+---
+
 ## [7.22.0] - 2026-02-24
 
 ### Corrigé
