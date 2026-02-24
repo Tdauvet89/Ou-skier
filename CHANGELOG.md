@@ -7,8 +7,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ## [7.23.3] - 2026-02-24
 
-### Corrigé
-- **PROXY_URL** (`index.html`) : l'URL du worker pointait vers `ou-skier-proxy.tdauvet.workers.dev` (ancien nom) → corrigé vers `infometeomontagne.tdauvet.workers.dev` (worker actuellement déployé)
+### Technique
+- **PROXY_URL** (`index.html`) : URL rétablie vers `ou-skier-proxy.tdauvet.workers.dev` (revert d'une correction erronée). Le vrai fix est un redéploiement du worker pour activer la route `/bra`.
 
 ---
 
