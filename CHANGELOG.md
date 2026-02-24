@@ -5,6 +5,17 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.23.0] - 2026-02-24
+
+### Modifié
+- **Tableaux neige** (`index.html`) : la section neige est désormais scindée en 2 tableaux côte à côte — "Manteau neigeux" (colonne unique avec profondeur actuelle) et "Chutes de Neige (5 jours)" (J à J+4)
+- **Chutes de neige** (`index.html`) : suppression de D-2 et D-1 — on n'affiche plus que 5 jours à partir d'aujourd'hui (offset 0 → 4)
+
+### Technique
+- `index.html` : layout `.snow-tables-row` flex côte-à-côte + responsive media query ≤ 900px → colonne
+
+---
+
 ## [7.22.2] - 2026-02-24
 
 ### Corrigé

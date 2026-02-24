@@ -128,6 +128,38 @@
                 animation-delay: 0.2s;
             }
 
+            /* Layout côte-à-côte pour les 2 tableaux neige */
+            .snow-tables-row {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .snow-tables-row .comparison-card {
+                width: auto;
+                max-width: none;
+            }
+
+            .snow-manteau-card {
+                flex: 0 0 auto;
+                min-width: 360px;
+            }
+
+            .snow-chutes-card {
+                flex: 1;
+                min-width: 0;
+            }
+
+            @media (max-width: 900px) {
+                .snow-tables-row {
+                    flex-direction: column;
+                }
+                .snow-manteau-card {
+                    min-width: 100%;
+                }
+            }
+
             h2 {
                 font-family: "Garnett", sans-serif;
                 font-size: 24px;
@@ -1825,8 +1857,8 @@
                         }
                     }
 
-                    // 7 jours : J-2 à J+4
-                    for (let offset = -2; offset <= 4; offset++) {
+                    // 5 jours : J à J+4
+                    for (let offset = 0; offset <= 4; offset++) {
                         const dataIndex = todayIndex + offset;
                         if (dataIndex >= 0 && dataIndex < dayData.time.length) {
                             // snowaccumulation (snowice-day) est en cm de neige fraîche
@@ -2036,80 +2068,116 @@
 
                             <>
                                     <section className="section">
-                                            <div className="comparison-card">
+                                        <div className="snow-tables-row">
+                                            {/* === TABLE 1 : MANTEAU NEIGEUX === */}
+                                            <div className="comparison-card snow-manteau-card">
                                                 <div className="comparison-card-header">
                                                     <div>
-                                                        <h2 className="title" style={{margin:0}}>Chutes de Neige (7 jours)</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Les données viennent de <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteobleu</a></p>
+                                                        <h2 className="title" style={{margin:0}}>Manteau neigeux</h2>
+                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a></p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
-                                            <div className="snow-table">
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Secteur</th>
-                                                            <th>
-                                                                <span className="day-abbr">Manteau</span>
-                                                                <span className="day-num">neigeux</span>
-                                                            </th>
-                                                            {[
-                                                                -2, -1, 0, 1, 2, 3,
-                                                                4,
-                                                            ].map((offset) => {
-                                                                const date = new Date();
-                                                                date.setDate(date.getDate() + offset);
-                                                                const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
-                                                                const dayNum = date.getDate();
-                                                                return (
-                                                                    <th key={offset}>
-                                                                        <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
-                                                                        <span className="day-num">{dayNum}</span>
+                                                    <div className="snow-table">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Secteur</th>
+                                                                    <th>
+                                                                        <span className="day-abbr">Aujourd'hui</span>
                                                                     </th>
-                                                                );
-                                                            })}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {snowData.length > 0 ? snowData.map(
-                                                            (resort, index) => {
-                                                                const resortInfo = resorts[index];
-                                                                const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
-                                                                return (
-                                                                    <tr key={index}>
-                                                                        <td>
-                                                                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
-                                                                                <span className="sector-name">{resort.name}</span>
-                                                                            </a>
-                                                                            <span className="sector-altitude"> ({resortInfo?.altitude}m)</span>
-                                                                        </td>
-                                                                        <td>
-                                                                            <span className="snow-value">{resort.snowDepthCm}</span>
-                                                                            {" "}<span className="snow-unit">cm</span>
-                                                                            {resort.lastSnowDate && <span className="manteau-last-fall">Dernière chute : {resort.lastSnowDate} : {resort.lastSnowCm}cm</span>}
-                                                                        </td>
-                                                                        {resort.snowByDay.map(
-                                                                            (snow, dayIndex) => (
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {snowData.length > 0 ? snowData.map((resort, index) => {
+                                                                    const resortInfo = resorts[index];
+                                                                    const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
+                                                                    return (
+                                                                        <tr key={index}>
+                                                                            <td>
+                                                                                <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                                    <span className="sector-name">{resort.name}</span>
+                                                                                </a>
+                                                                                <span className="sector-altitude"> ({resortInfo?.altitude}m)</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span className="snow-value">{resort.snowDepthCm}</span>
+                                                                                {" "}<span className="snow-unit">cm</span>
+                                                                                {resort.lastSnowDate && <span className="manteau-last-fall">Dernière chute : {resort.lastSnowDate} : {resort.lastSnowCm}cm</span>}
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                }) : (
+                                                                    <tr>
+                                                                        <td className="table-blank-state" colSpan={2}>Aucun secteur à afficher</td>
+                                                                    </tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* === TABLE 2 : CHUTES DE NEIGE (5 jours) === */}
+                                            <div className="comparison-card snow-chutes-card">
+                                                <div className="comparison-card-header">
+                                                    <div>
+                                                        <h2 className="title" style={{margin:0}}>Chutes de Neige (5 jours)</h2>
+                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a></p>
+                                                    </div>
+                                                </div>
+                                                <div className="comparison-card-body">
+                                                    <div className="snow-table">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Secteur</th>
+                                                                    {[0, 1, 2, 3, 4].map((offset) => {
+                                                                        const date = new Date();
+                                                                        date.setDate(date.getDate() + offset);
+                                                                        const dayAbbr = date.toLocaleDateString("fr-FR", { weekday: "short" });
+                                                                        const dayNum = date.getDate();
+                                                                        return (
+                                                                            <th key={offset}>
+                                                                                <span className="day-abbr">{dayAbbr.charAt(0).toUpperCase() + dayAbbr.slice(1)}</span>
+                                                                                <span className="day-num">{dayNum}</span>
+                                                                            </th>
+                                                                        );
+                                                                    })}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {snowData.length > 0 ? snowData.map((resort, index) => {
+                                                                    const resortInfo = resorts[index];
+                                                                    const meteoblueUrl = resortInfo ? getMeteoblueUrl(resortInfo) : "#";
+                                                                    return (
+                                                                        <tr key={index}>
+                                                                            <td>
+                                                                                <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                                                                    <span className="sector-name">{resort.name}</span>
+                                                                                </a>
+                                                                                <span className="sector-altitude"> ({resortInfo?.altitude}m)</span>
+                                                                            </td>
+                                                                            {resort.snowByDay.map((snow, dayIndex) => (
                                                                                 <td key={dayIndex}>
                                                                                     <span className="snow-value">{snow}</span>
                                                                                     {" "}<span className="snow-unit">cm</span>
                                                                                 </td>
-                                                                            ),
-                                                                        )}
+                                                                            ))}
+                                                                        </tr>
+                                                                    );
+                                                                }) : (
+                                                                    <tr>
+                                                                        <td className="table-blank-state" colSpan={6}>Aucun secteur à afficher</td>
                                                                     </tr>
-                                                                );
-                                                            },
-                                                        ) : (
-                                                            <tr>
-                                                                <td className="table-blank-state" colSpan={9}>Aucun secteur à afficher</td>
-                                                            </tr>
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </section>
+                                        </div>
+                                    </section>
 
                                     <section className="section">
                                             <div className="comparison-card">
