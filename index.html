@@ -1004,7 +1004,8 @@
                         (r) => `${r.name}_${r.lat}_${r.lon}_${r.altitude}`,
                     ),
                     results,
-                    braData: braDataObj,
+                    // Ne jamais cacher braData vide (BRA en échec) → évite le cache empoisonné
+                    braData: Object.keys(braDataObj).length > 0 ? braDataObj : undefined,
                 };
                 try {
                     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));

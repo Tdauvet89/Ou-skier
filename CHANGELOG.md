@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.23.2] - 2026-02-24
+
+### Technique
+- **G1 — Guardrail cache BRA** (`index.html`) : `setWeatherCache` ne sauvegarde plus `braData: {}` — si le BRA est en échec, `braData` est omis du cache (valeur `undefined`). Empêche le cache empoisonné de propager l'absence de BERA sur les rechargements suivants.
+
+---
+
 ## [7.23.1] - 2026-02-24
 
 ### Corrigé
