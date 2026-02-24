@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.23.3] - 2026-02-24
+
+### Corrigé
+- **PROXY_URL** (`index.html`) : l'URL du worker pointait vers `ou-skier-proxy.tdauvet.workers.dev` (ancien nom) → corrigé vers `infometeomontagne.tdauvet.workers.dev` (worker actuellement déployé)
+
+---
+
 ## [7.23.2] - 2026-02-24
 
 ### Technique
