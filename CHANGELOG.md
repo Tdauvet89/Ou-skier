@@ -5,6 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.23.1] - 2026-02-24
+
+### Corrigé
+- **Badges BERA absents** (`index.html`) : régression silencieuse — quand un fetch BRA échouait, le cache était écrit avec `braData: {}` ; lors des rechargements suivants, le chemin cache faisait un `return` prématuré sans jamais atteindre le bloc BRA → badges jamais affichés
+  - **Fix 1** : `CACHE_VERSION` 12 → 13 pour invalider les caches corrompus et forcer un fetch frais
+  - **Fix 2** : dans le chemin cache, si `braData` est vide, le BRA est re-fetché en arrière-plan sans bloquer l'affichage météo
+  - **Refacto** : extraction de `fetchBRAForResorts()` pour éliminer la duplication du bloc BRA dans `loadInitialWeatherData` et `fetchAllWeatherData`
+
+### Technique
+- `CACHE_VERSION` 12 → 13 (cache BRA corrompu)
+
+---
+
 ## [7.23.0] - 2026-02-24
 
 ### Modifié

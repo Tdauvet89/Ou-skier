@@ -965,7 +965,7 @@
             const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
             const CACHE_KEY = "weatherCache";
             // v11 : invalide cache v10 — vitesses vent en m/s converties en km/h (×3.6)
-            const CACHE_VERSION = 12;
+            const CACHE_VERSION = 13;
 
             function getWeatherCache() {
                 try {
@@ -1502,6 +1502,27 @@
                     }
                 }, []);
 
+                /**
+                 * Récupère les données BRA pour tous les secteurs.
+                 * Retourne un objet { [resort.name]: braData } — vide si toutes les requêtes échouent.
+                 */
+                const fetchBRAForResorts = async (resortList) => {
+                    const braPromises = resortList.map(async (resort) => {
+                        const massif = getMassifFromCoords(
+                            resort.lat,
+                            resort.lon,
+                            resort.name,
+                        );
+                        if (!massif) return null;
+                        const data = await fetchBRAData(massif.id);
+                        return data ? { name: resort.name, data } : null;
+                    });
+                    const braResults = await Promise.all(braPromises);
+                    const obj = {};
+                    braResults.forEach((r) => { if (r) obj[r.name] = r.data; });
+                    return obj;
+                };
+
                 const loadInitialWeatherData = async () => {
                     // Vérifier le cache avant d'appeler l'API
                     const cache = getWeatherCache();
@@ -1509,7 +1530,20 @@
                         processWeatherData(cache.results);
                         processSnowData(cache.results);
                         processHourlyData(cache.results);
-                        if (cache.braData) setBraData(cache.braData);
+
+                        // Si braData présent et non vide, utiliser le cache
+                        if (cache.braData && Object.keys(cache.braData).length > 0) {
+                            setBraData(cache.braData);
+                        } else {
+                            // BRA absent ou vide dans le cache (ex: échec lors du dernier fetch)
+                            // → re-fetch en arrière-plan sans bloquer l'affichage météo
+                            fetchBRAForResorts(resorts).then((braDataObj) => {
+                                if (Object.keys(braDataObj).length > 0) {
+                                    setBraData(braDataObj);
+                                    setWeatherCache(resorts, cache.results, braDataObj);
+                                }
+                            });
+                        }
 
                         const cachedDate = new Date(cache.timestamp);
                         setLastUpdate(cachedDate.toISOString());
@@ -1543,28 +1577,7 @@
                         processHourlyData(results);
 
                         // Charger les données BRA pour tous les secteurs
-                        const braPromises = resorts.map(async (resort) => {
-                            const massif = getMassifFromCoords(
-                                resort.lat,
-                                resort.lon,
-                                resort.name,
-                            );
-                            if (massif) {
-                                const data = await fetchBRAData(massif.id);
-                                return data
-                                    ? { name: resort.name, data }
-                                    : null;
-                            }
-                            return null;
-                        });
-
-                        const braResults = await Promise.all(braPromises);
-                        const braDataObj = {};
-                        braResults.forEach((result) => {
-                            if (result) {
-                                braDataObj[result.name] = result.data;
-                            }
-                        });
+                        const braDataObj = await fetchBRAForResorts(resorts);
                         setBraData(braDataObj);
 
                         // Sauvegarder dans le cache
@@ -1705,25 +1718,7 @@
                         processHourlyData(results);
 
                         // Recharger les BRA aussi
-                        const braPromises = resorts.map(async (resort) => {
-                            const massif = getMassifFromCoords(
-                                resort.lat,
-                                resort.lon,
-                                resort.name,
-                            );
-                            if (massif) {
-                                const data = await fetchBRAData(massif.id);
-                                return data
-                                    ? { name: resort.name, data }
-                                    : null;
-                            }
-                            return null;
-                        });
-                        const braResults = await Promise.all(braPromises);
-                        const braDataObj = {};
-                        braResults.forEach((result) => {
-                            if (result) braDataObj[result.name] = result.data;
-                        });
+                        const braDataObj = await fetchBRAForResorts(resorts);
                         setBraData(braDataObj);
 
                         // Sauvegarder dans le cache
