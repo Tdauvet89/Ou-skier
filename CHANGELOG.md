@@ -5,6 +5,20 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.22.0] - 2026-02-24
+
+### Corrigé
+- **Vue horaire vide** (`index.html`) : `data_3h` remplacé par `data_1h` — l'API Météoblue retourne effectivement les données sous la clé `data_1h`, la vue par heure est maintenant fonctionnelle
+- **Manteau neigeux à 0** (`index.html`) : ajout d'un fallback sur `data_1h.snowdepth` (à midi du jour J) si `data_day.snowdepth` est absent ou nul
+- **Syntaxe JSX invalide** (`index.html`) : remplacement de `html\`<span>...\`` par `<span>...` pur JSX dans le rendu de la dernière chute de neige
+
+### Technique
+- `CACHE_VERSION` 11 → 12 (invalide le localStorage v11 sans `data_1h`)
+- Cache key CF v=3 → v=4 dans `worker.js` (invalide le cache Cloudflare — nécessite `wrangler deploy`)
+- Filtre `hour % 3 !== 0` dans la boucle `data_1h` : affiche 8 créneaux/jour (00h, 03h, …, 21h) même avec des données 1h
+
+---
+
 ## [7.21.0] - 2026-02-24
 
 ### Ajouté

@@ -95,9 +95,9 @@ async function handleWeather(url, env, ctx) {
     upstream.searchParams.set("tz", "Europe/Paris"); // dates en heure locale française
 
     // Clé de cache sans la clé API (sûr à logguer / inspecter)
-    // v=3 : force l'invalidation du cache v=2 qui ne contenait pas data_3h
+    // v=4 : force l'invalidation du cache v=3 pour obtenir des réponses fraîches
     const cacheKey = new Request(
-        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=3`
+        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=4`
     );
     const cache = caches.default;
 
