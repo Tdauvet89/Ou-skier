@@ -25,7 +25,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.20.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.21.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -1800,6 +1800,22 @@
                     let todayIndex = dayData.time.findIndex(d => d === todayStr);
                     if (todayIndex === -1) todayIndex = 0;
 
+                    // Manteau neigeux : snowdepth en mètres → cm
+                    const snowDepthCm = Math.round((dayData.snowdepth?.[todayIndex] || 0) * 100);
+
+                    // Dernière chute de neige : remonter les jours passés
+                    let lastSnowDate = null;
+                    let lastSnowCm = 0;
+                    for (let i = todayIndex - 1; i >= 0; i--) {
+                        const acc = Math.round(dayData.snowaccumulation?.[i] || 0);
+                        if (acc > 0) {
+                            const parts = dayData.time[i].split('-'); // "YYYY-MM-DD"
+                            lastSnowDate = `${parts[2]}/${parts[1]}/${parts[0].slice(2)}`;
+                            lastSnowCm = acc;
+                            break;
+                        }
+                    }
+
                     // 7 jours : J-2 à J+4
                     for (let offset = -2; offset <= 4; offset++) {
                         const dataIndex = todayIndex + offset;
@@ -1811,7 +1827,7 @@
                         }
                     }
 
-                    return { name: resort.name, snowByDay };
+                    return { name: resort.name, snowByDay, snowDepthCm, lastSnowDate, lastSnowCm };
                 };
 
                 const processWeatherData = (results) => {
@@ -2024,6 +2040,10 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Secteur</th>
+                                                            <th>
+                                                                <span className="day-abbr">Manteau</span>
+                                                                <span className="day-num">neigeux</span>
+                                                            </th>
                                                             {[
                                                                 -2, -1, 0, 1, 2, 3,
                                                                 4,
@@ -2054,6 +2074,11 @@
                                                                             </a>
                                                                             <span className="sector-altitude"> ({resortInfo?.altitude}m)</span>
                                                                         </td>
+                                                                        <td>
+                                                                            <span className="snow-value">{resort.snowDepthCm}</span>
+                                                                            {" "}<span className="snow-unit">cm</span>
+                                                                            {resort.lastSnowDate && html`<span className="manteau-last-fall">Dernière chute : ${resort.lastSnowDate} : ${resort.lastSnowCm}cm</span>`}
+                                                                        </td>
                                                                         {resort.snowByDay.map(
                                                                             (snow, dayIndex) => (
                                                                                 <td key={dayIndex}>
@@ -2067,7 +2092,7 @@
                                                             },
                                                         ) : (
                                                             <tr>
-                                                                <td className="table-blank-state" colSpan={8}>Aucun secteur à afficher</td>
+                                                                <td className="table-blank-state" colSpan={9}>Aucun secteur à afficher</td>
                                                             </tr>
                                                         )}
                                                     </tbody>

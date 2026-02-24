@@ -372,6 +372,16 @@
     opacity: 0.6;
 }
 
+.snow-table .manteau-last-fall {
+    display: block;
+    color: #5E7690;
+    font-family: "Garnett", sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: normal;
+    margin-top: 4px;
+}
+
 /* === TYPOGRAPHIES GLOBALES === */
 
 /* Titre XL — Garnett Medium 36px/500 #1F2023 */

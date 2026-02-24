@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.21.0] - 2026-02-24
+
+### Ajouté
+- **Colonne "Manteau neigeux"** (`index.html`, `design-system.css`) : nouvelle colonne en position 2 du tableau des chutes de neige, affichant l'hauteur totale du manteau neigeux (snowdepth Météoblue, en cm) ainsi que la date et le cumul de la dernière chute de neige — zéro appel API supplémentaire, données déjà disponibles dans le package `snowice-day`
+
+### Technique
+- `processSnowDataForResort()` : extraction de `snowdepth` (m → cm) et calcul de la dernière chute (scan rétrospectif sur `snowaccumulation`)
+- `.manteau-last-fall` ajouté dans `design-system.css` (10px, #5E7690)
+- `design-system.css` v7.20.0 → v7.21.0 (cache bust)
+
+---
+
 ## [7.10.1] - 2026-02-21
 
 ### Sécurité
