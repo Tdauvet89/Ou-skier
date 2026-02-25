@@ -7,8 +7,11 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ## [7.23.5] - 2026-02-25
 
+### Corrigé
+- **Chutes de neige × 10** (`index.html`) : `snowaccumulation` est en **mm** dans l'API Meteoblue, pas en cm — division par 10 ajoutée pour `snowByDay` et `lastSnowCm` → valeurs affichées correctes (ex : 80.7 mm → 8 cm au lieu de 81 cm)
+
 ### Technique
-- **Debug snow** (`index.html`) : logs bruts `snowaccumulation`, `snowfall`, `precipitation`, `snowfraction` pour diagnostiquer les valeurs incorrectes dans le tableau chutes de neige
+- Logs debug neige supprimés (`index.html`)
 
 ---
 
