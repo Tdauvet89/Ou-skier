@@ -1828,6 +1828,17 @@
                     let todayIndex = dayData.time.findIndex(d => d === todayStr);
                     if (todayIndex === -1) todayIndex = 0;
 
+                    // ─── LOGS DEBUG NEIGE ────────────────────────────────────
+                    console.group(`[Snow] ${resort.name} — données brutes`);
+                    console.log('[Snow] todayStr:', todayStr, '| todayIndex:', todayIndex);
+                    console.log('[Snow] time[]   :', dayData.time?.slice(todayIndex, todayIndex + 7));
+                    console.log('[Snow] snowaccumulation[] (brut) :', dayData.snowaccumulation?.slice(todayIndex, todayIndex + 7));
+                    console.log('[Snow] snowfall[] (si dispo)     :', dayData.snowfall?.slice(todayIndex, todayIndex + 7));
+                    console.log('[Snow] precipitation[]           :', dayData.precipitation?.slice(todayIndex, todayIndex + 7));
+                    console.log('[Snow] snowfraction[]            :', dayData.snowfraction?.slice(todayIndex, todayIndex + 7));
+                    console.log('[Snow] toutes les clés data_day  :', Object.keys(dayData).filter(k => k.toLowerCase().includes('snow')));
+                    console.groupEnd();
+
                     // Manteau neigeux : l'API Météoblue retourne snowdepth_mean (m) dans data_day
                     // (le champ "snowdepth" seul n'existe pas — agrégats disponibles : _mean, _max, _min)
                     let snowDepthCm = Math.round((dayData.snowdepth_mean?.[todayIndex] || 0) * 100);

@@ -5,7 +5,14 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
-## [7.23.4] - 2026-02-24
+## [7.23.5] - 2026-02-25
+
+### Technique
+- **Debug snow** (`index.html`) : logs bruts `snowaccumulation`, `snowfall`, `precipitation`, `snowfraction` pour diagnostiquer les valeurs incorrectes dans le tableau chutes de neige
+
+---
+
+## [7.23.4] - 2026-02-25
 
 ### Corrigé
 - **Vue horaire — data_1h absent** (`index.html`) : le worker actuel (`basic-3h`) retourne `data_3h` pour les appels frais ; le cache CF retourne `data_1h` (ancienne réponse). `processHourlyDataForResort` plantait sur les cache-miss. Fix : fallback `data_1h → data_3h`, filtre `hour % 3` activé uniquement pour `data_1h`.
