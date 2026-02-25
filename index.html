@@ -16,7 +16,7 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.14.0"></script>
+        <script src="icons.js?v=7.24.0"></script>
         <script src="weatherCodes.js?v=7.15.0"></script>
         <script src="massifMapping.js?v=7.13.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1453,8 +1453,30 @@
                 );
             }
 
+            // Decode sectors from URL param ?s=BASE64
+            function decodeShareParam(param) {
+                try {
+                    const decoded = JSON.parse(atob(param));
+                    if (!Array.isArray(decoded) || decoded.length === 0) return null;
+                    return decoded.slice(0, MAX_RESORTS).map(s => ({
+                        name: s.n,
+                        lat: Number(s.la),
+                        lon: Number(s.lo),
+                        altitude: Number(s.al),
+                        mbUrl: s.u || null,
+                    })).filter(s => s.name && !isNaN(s.lat) && !isNaN(s.lon));
+                } catch (e) { return null; }
+            }
+
             function MountainWeatherApp() {
                 const [resorts, setResorts] = useState(() => {
+                    // Priorité aux paramètres URL (?s=...) pour les dashboards partagés
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sharedParam = urlParams.get('s');
+                    if (sharedParam) {
+                        const fromUrl = decodeShareParam(sharedParam);
+                        if (fromUrl) return fromUrl;
+                    }
                     const saved = localStorage.getItem("skiResorts");
                     return saved ? JSON.parse(saved) : DEFAULT_RESORTS;
                 });
@@ -1473,6 +1495,9 @@
                 const [weatherView, setWeatherView] = useState('day');
                 // hourlyData : tableau de { name, hours: [{ label, icon, desc, temp, windSpeed, windDir, windCardinal, precip, snowCm }] }
                 const [hourlyData, setHourlyData] = useState([]);
+
+                // --- Partage par URL ---
+                const [shareCopied, setShareCopied] = useState(false);
 
                 useEffect(() => {
                     const now = new Date();
@@ -1687,6 +1712,23 @@
                     setHourlyData((prev) => prev.filter((_, i) => i !== index));
                     // Invalider le cache (la liste de stations a changé)
                     localStorage.removeItem(CACHE_KEY);
+                };
+
+                const shareUrl = () => {
+                    const encoded = btoa(JSON.stringify(resorts.map(r => ({
+                        n: r.name,
+                        la: r.lat,
+                        lo: r.lon,
+                        al: r.altitude,
+                        u: r.mbUrl || null,
+                    }))));
+                    const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
+                    navigator.clipboard.writeText(url).then(() => {
+                        setShareCopied(true);
+                        setTimeout(() => setShareCopied(false), 2500);
+                    }).catch(() => {
+                        window.prompt('Copie ce lien :', url);
+                    });
                 };
 
                 const fetchWeatherForResort = async (resort) => {
@@ -2060,12 +2102,24 @@
                                         ))}
                                     </div>
                                 )}
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={() => setIsModalOpen(true)}
-                                >
-                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
-                                </button>
+                                <div style={{display:"flex",gap:"12px",flexWrap:"wrap",justifyContent:"center"}}>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setIsModalOpen(true)}
+                                    >
+                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
+                                    </button>
+                                    {resorts.length > 0 && (
+                                        <button
+                                            className={`btn ${shareCopied ? 'btn-primary' : 'btn-secondary'}`}
+                                            onClick={shareUrl}
+                                            title="Copier le lien de ce dashboard"
+                                        >
+                                            <span className="icon" dangerouslySetInnerHTML={{__html: shareCopied ? uiSvg.check : uiSvg.share}}></span>
+                                            {shareCopied ? ' Lien copié !' : ' Partager'}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <>

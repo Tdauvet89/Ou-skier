@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.24.0] - 2026-02-25
+
+### Ajouté
+- **Dashboard partageable par URL** (`index.html`) : bouton "Partager" dans le bloc secteurs — génère une URL avec les secteurs encodés en base64 (`?s=...`) et la copie dans le presse-papiers. Au clic, le bouton bascule en "Lien copié !" pendant 2,5s.
+- **Lecture du paramètre `?s=`** (`index.html`) : au chargement, si l'URL contient `?s=...`, les secteurs sont décodés et chargés à la place du localStorage — permet d'ouvrir un dashboard pré-configuré (ex: "Grand Tourmalet 4 secteurs", "Vallée d'Ossau 5 secteurs").
+- **Icône `share` et `check`** (`icons.js`) : deux nouvelles icônes SVG ajoutées à `uiSvg` pour le bouton de partage.
+
+### Technique
+- `icons.js` v7.14.0 → v7.24.0 (cache bust — ajout `share` + `check`)
+
+---
+
 ## [7.23.5] - 2026-02-25
 
 ### Corrigé
