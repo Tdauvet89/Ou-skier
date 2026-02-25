@@ -1723,10 +1723,21 @@
                         u: r.mbUrl || null,
                     }))));
                     const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
+                    const trackShare = () => {
+                        if (typeof gtag === 'function') {
+                            gtag('event', 'partager_dashboard', {
+                                nb_secteurs: resorts.length,
+                                secteurs: resorts.map(r => r.name).join(', ').slice(0, 100),
+                                altitudes: resorts.map(r => r.altitude).join(', '),
+                            });
+                        }
+                    };
                     navigator.clipboard.writeText(url).then(() => {
+                        trackShare();
                         setShareCopied(true);
                         setTimeout(() => setShareCopied(false), 2500);
                     }).catch(() => {
+                        trackShare();
                         window.prompt('Copie ce lien :', url);
                     });
                 };
