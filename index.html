@@ -1200,18 +1200,18 @@
                         xmlDoc.querySelector("QUALITE TEXTE")?.textContent ||
                         "";
 
-                    // Extraction d'une section dans QUALITE > TEXTE
-                    const extractSection = (text, label, firstSentenceOnly) => {
-                        const marker = label + ' : ';
-                        const start = text.indexOf(marker);
-                        if (start === -1) return '';
-                        const content = text.slice(start + marker.length).trim();
-                        if (!firstSentenceOnly) return content;
-                        const end = content.search(/\.\s/);
-                        return end !== -1 ? content.slice(0, end + 1) : content.split('\n')[0];
+                    // Extraction par ligne — plus robuste que indexOf sur CDATA
+                    const qualiteLines = qualiteNeige.split(/\r?\n/).filter(l => l.trim());
+                    const findQualiteLine = (pattern) => {
+                        const line = qualiteLines.find(l => pattern.test(l));
+                        if (!line) return '';
+                        const sep = line.indexOf(' : ');
+                        return sep !== -1 ? line.slice(sep + 3).trim() : '';
                     };
-                    const limitesNeigeCourt = extractSection(qualiteNeige, 'Limites skiables', true);
-                    const etatNeigeComplet = extractSection(qualiteNeige, 'État de la neige', false);
+                    const limitesRaw = findQualiteLine(/limites\s+skiables/i);
+                    const dotIdx = limitesRaw.search(/\.\s/);
+                    const limitesNeigeCourt = dotIdx !== -1 ? limitesRaw.slice(0, dotIdx + 1) : limitesRaw;
+                    const etatNeigeComplet = findQualiteLine(/tat\s+de\s+la\s+neige/i);
 
                     // Enneigement
                     const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");

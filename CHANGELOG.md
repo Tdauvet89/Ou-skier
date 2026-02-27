@@ -5,6 +5,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.4] - 2026-02-27
+
+### Corrigé
+- **Widget qualité neige — extraction QUALITE > TEXTE vide** (`index.html`) :
+  - Remplacement de `indexOf()` par split `\r?\n` + regex — plus robuste sur CDATA
+  - Pattern `/limites\s+skiables/i` et `/tat\s+de\s+la\s+neige/i` (insensible à la casse et aux accents)
+
+---
+
 ## [7.27.3] - 2026-02-27
 
 ### Modifié
