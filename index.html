@@ -479,26 +479,20 @@
             .qualite-section {
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 6px;
             }
             .qualite-bloc {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
-            .qualite-bloc-label {
-                font-family: "Inter", sans-serif;
-                font-size: 11px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                color: #5E7690;
-            }
-            .qualite-bloc-text {
                 font-family: "Garnett", sans-serif;
                 font-size: 14px;
                 color: #1F2023;
                 line-height: 1.5;
+                margin: 0;
+            }
+            .qualite-bloc-label {
+                font-family: "Garnett", sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F2023;
             }
 
             /* Lien vers la page Meteoblue du secteur */
@@ -2330,6 +2324,14 @@
                                                 });
                                         };
 
+                                        const firstDate = massifRows[0]?.dateBulletin;
+                                        const headerDateStr = firstDate
+                                            ? (() => {
+                                                const parts = firstDate.split(/[- T]/);
+                                                return parts.length >= 3 ? `Le ${parts[2]}/${parts[1]}` : '';
+                                            })()
+                                            : '';
+
                                         return (
                                             <section className="section">
                                                 <div className="comparison-card">
@@ -2342,14 +2344,14 @@
                                                     <div className="comparison-card-body">
                                                         <div className="snow-table qualite-neige-table">
                                                             <table>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Massif</th>
+                                                                        <th>{headerDateStr}</th>
+                                                                    </tr>
+                                                                </thead>
                                                                 <tbody>
                                                                     {massifRows.map(d => {
-                                                                        const dateStr = d.dateBulletin
-                                                                            ? (() => {
-                                                                                const parts = d.dateBulletin.split(/[- T]/);
-                                                                                return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : '';
-                                                                            })()
-                                                                            : '';
                                                                         const limitesText = d.enneigement
                                                                             ? [
                                                                                 d.enneigement.limiteNord && `${d.enneigement.limiteNord}m versant nord`,
@@ -2360,7 +2362,6 @@
                                                                             <tr key={d.massifId}>
                                                                                 <td>
                                                                                     <span className="sector-name">{d.massifName}</span>
-                                                                                    {dateStr && <span className="manteau-last-fall">MAJ {dateStr}</span>}
                                                                                     <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
                                                                                         Voir le BERA
                                                                                     </a>
@@ -2368,22 +2369,22 @@
                                                                                 <td>
                                                                                     <div className="qualite-section">
                                                                                         {d.enneigementTexte && (
-                                                                                            <div className="qualite-bloc">
-                                                                                                <span className="qualite-bloc-label">Enneigement</span>
-                                                                                                <span className="qualite-bloc-text">{d.enneigementTexte}</span>
-                                                                                            </div>
+                                                                                            <p className="qualite-bloc">
+                                                                                                <strong className="qualite-bloc-label">Enneigement</strong>
+                                                                                                {' : '}{d.enneigementTexte}
+                                                                                            </p>
                                                                                         )}
                                                                                         {limitesText && (
-                                                                                            <div className="qualite-bloc">
-                                                                                                <span className="qualite-bloc-label">Limites skiables</span>
-                                                                                                <span className="qualite-bloc-text">{limitesText}</span>
-                                                                                            </div>
+                                                                                            <p className="qualite-bloc">
+                                                                                                <strong className="qualite-bloc-label">Limites skiables</strong>
+                                                                                                {' : '}{limitesText}
+                                                                                            </p>
                                                                                         )}
                                                                                         {d.qualiteNeige && (
-                                                                                            <div className="qualite-bloc">
-                                                                                                <span className="qualite-bloc-label">État de la neige</span>
-                                                                                                <span className="qualite-bloc-text">{d.qualiteNeige}</span>
-                                                                                            </div>
+                                                                                            <p className="qualite-bloc">
+                                                                                                <strong className="qualite-bloc-label">État de la neige</strong>
+                                                                                                {' : '}{d.qualiteNeige}
+                                                                                            </p>
                                                                                         )}
                                                                                     </div>
                                                                                 </td>

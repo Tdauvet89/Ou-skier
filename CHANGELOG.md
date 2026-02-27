@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.1] - 2026-02-27
+
+### Modifié
+- **Widget qualité neige — mise en forme selon maquette Figma** (`index.html`) :
+  - Labels désormais inline gras (`**Enneigement** : texte...`) au lieu d'un bloc séparé au-dessus
+  - `<thead>` ajouté avec colonnes "Massif" et date bulletin ("Le JJ/MM") — date retirée de la cellule
+  - `.qualite-bloc` devient un `<p>` ; `.qualite-bloc-label` passe en Garnett 14px 600 (même police que le texte)
+
+---
+
 ## [7.27.0] - 2026-02-27
 
 ### Ajouté
