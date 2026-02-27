@@ -501,17 +501,17 @@
                 margin: 0;
                 line-height: 1.5;
             }
-            /* Label (ex: "Enneigement") : Garnett Medium 16px sombre */
+            /* Label (ex: "Enneigement") : Garnett Bold 12px sombre */
             .qualite-bloc-label {
                 font-family: "Garnett", sans-serif;
-                font-size: 16px;
-                font-weight: 500;
+                font-size: 12px;
+                font-weight: 700;
                 color: #1F2023;
             }
-            /* Texte description : Garnett Medium 13px gris */
+            /* Texte description : Garnett 12px gris */
             .qualite-bloc-text {
                 font-family: "Garnett", sans-serif;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 500;
                 color: #5E7690;
                 line-height: 18px;
@@ -2364,10 +2364,12 @@
 
                                         const firstDate = massifRows[0]?.dateBulletin;
                                         const headerDateStr = firstDate
-                                            ? (() => {
-                                                const parts = firstDate.split(/[- T]/);
-                                                return parts.length >= 3 ? `Le ${parts[2]}/${parts[1]}` : '';
-                                            })()
+                                            ? 'Bulletin du ' + new Date(firstDate).toLocaleDateString('fr-FR', {
+                                                weekday: 'long',
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                            })
                                             : '';
 
                                         return (

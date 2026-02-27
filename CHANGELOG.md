@@ -5,6 +5,14 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.7] - 2026-02-27
+
+### Modifié
+- **Widget qualité neige — en-tête colonne** (`index.html`) : format `Le JJ/MM` → `Bulletin du jeudi 26 février 2026` (même format que la modale BERA)
+- **Widget qualité neige — typographie** (`index.html`) : `.qualite-bloc-label` 16px→12px Bold, `.qualite-bloc-text` 13px→12px (harmonisé avec le tableau comparatif)
+
+---
+
 ## [7.27.6] - 2026-02-27
 
 ### Corrigé
