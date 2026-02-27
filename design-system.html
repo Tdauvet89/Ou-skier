@@ -181,6 +181,19 @@
                 color: var(--storm-gray);
             }
 
+            /* Widget Qualité de la neige — override local (même règle que dans index.html) */
+            .qualite-neige-table tbody td:first-child {
+                min-width: 180px;
+            }
+            .qualite-neige-table tbody td:not(:first-child) {
+                text-align: left;
+                background: #FFF;
+                font-family: "Garnett", sans-serif;
+                font-size: 14px;
+                color: #1F2023;
+                line-height: 1.5;
+            }
+
             /* Back link */
             .back-link {
                 display: inline-flex;
@@ -203,7 +216,7 @@
             <a href="index.html" class="back-link">&larr; Retour au dashboard</a>
 
             <h1>Design System</h1>
-            <div class="subtitle">Ou-skier v7.7 — Composants, icônes, couleurs et typographie</div>
+            <div class="subtitle">Ou-skier v7.26 — Composants, icônes, couleurs et typographie</div>
 
             <!-- ============================================================ -->
             <!-- COULEURS -->
@@ -439,6 +452,78 @@
             </div>
             <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
                 Classes : <code>.snow-table</code>, <code>.sector-name</code>, <code>.sector-altitude</code>, <code>.snow-value</code>, <code>.snow-unit</code>, <code>.day-abbr</code>, <code>.day-num</code>
+            </div>
+
+            <h3>Tableau Manteau neigeux (avec .manteau-last-fall)</h3>
+            <div style="max-width:600px;margin-bottom:24px">
+                <div class="snow-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Secteur</th>
+                                <th>Manteau neigeux</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="sector-name">Pic du Pourtalet</span> <span class="sector-altitude">(2000m)</span></td>
+                                <td>
+                                    <span class="snow-value">85</span> <span class="snow-unit">cm</span>
+                                    <span class="manteau-last-fall">Dernière chute : 24/02/26 : 12cm</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="sector-name">Cauterets</span> <span class="sector-altitude">(1800m)</span></td>
+                                <td>
+                                    <span class="snow-value">42</span> <span class="snow-unit">cm</span>
+                                    <span class="manteau-last-fall">Dernière chute : 21/02/26 : 5cm</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classe : <code>.manteau-last-fall</code> — Garnett 10px 500, #5E7690, display:block — sous <code>.snow-value</code> dans la cellule manteau
+            </div>
+
+            <h3>Widget Qualité de la neige (groupé par massif)</h3>
+            <div style="max-width:1100px;margin-bottom:24px">
+                <div class="comparison-card">
+                    <div class="comparison-card-header">
+                        <div>
+                            <h2 class="title" style="margin:0">Qualité de la neige</h2>
+                            <p class="subtitle" style="margin:0">Texte extrait du BERA · <a href="#" style="color:inherit;text-decoration:underline">Météo France</a></p>
+                        </div>
+                    </div>
+                    <div class="comparison-card-body">
+                        <div class="snow-table qualite-neige-table">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="sector-name">Haute-Bigorre</span>
+                                            <span class="manteau-last-fall">MAJ 27/02</span>
+                                        </td>
+                                        <td>Neige poudreuse sous 2200m, regel nocturne en altitude sur les versants exposés au froid. Qualité médiocre en basse altitude avec une croûte de regel en surface.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="sector-name">Ossau</span>
+                                            <span class="manteau-last-fall">MAJ 27/02</span>
+                                        </td>
+                                        <td>Enneigement déficitaire sous 1800m. Quelques centimètres de neige fraîche récente en altitude, sur fond de manteau tassé. Bonne qualité au-dessus de 2000m versants N.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classes : <code>.comparison-card</code> + <code>.snow-table.qualite-neige-table</code><br>
+                <code>.qualite-neige-table</code> est un modifier local (override dans <code>&lt;style&gt;</code>) : col1 min-width 180px, col2 text-align:left bg:#FFF Garnett 14px.<br>
+                1 ligne par massif, dédupliqué par <code>massifId</code>. Source : champ <code>qualiteNeige</code> du XML BERA Météo France.
             </div>
 
             <h3>Comparison Card (tableau météo comparatif)</h3>

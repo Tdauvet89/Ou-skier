@@ -12,6 +12,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ### Technique
 - `.qualite-neige-table` ajouté dans `<style>` local (`index.html`) : override `td:first-child` (min-width 180px) et `td:not(:first-child)` (text-align left, bg blanc, Garnett 14px)
+- `design-system.html` : 2 nouvelles sections showcase — "Tableau Manteau neigeux (.manteau-last-fall)" et "Widget Qualité de la neige" ; version mise à jour v7.7 → v7.26
+- `DESIGN_SYSTEM.md` : documentation de `.manteau-last-fall` + section "Widget Qualité de la neige" complète (JSX, classes, source données) ; v3.4 → v3.5
 
 ---
 

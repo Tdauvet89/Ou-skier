@@ -266,6 +266,70 @@ Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleCloc
 | `.snow-unit` | Unité "cm" | Garnett 13px 500, #5E7690 |
 | `.day-abbr` | Jour abrégé | Garnett 14px **600**, #5E7690 |
 | `.day-num` | Numéro du jour | Garnett 16px **600**, #1F2023 |
+| `.manteau-last-fall` | Sous-ligne "Dernière chute" | Garnett 10px 500, #5E7690, display:block, margin-top:4px |
+
+### Widget Qualité de la neige
+
+Widget textuel groupé par massif, positionné entre les tableaux neige et les prévisions météo.
+Utilise `.comparison-card` + `.snow-table` avec le modifier local `.qualite-neige-table`.
+
+```jsx
+// Déduplication par massifId — 1 ligne par massif même si plusieurs secteurs
+const seen = {};
+const massifRows = [];
+Object.values(braData).forEach(bra => {
+    const d = bra?._detail;
+    if (d && d.massifId && d.qualiteNeige && !seen[d.massifId]) {
+        seen[d.massifId] = true;
+        massifRows.push(d);
+    }
+});
+
+// Rendu conditionnel — caché si aucun massif n'a de texte qualité
+if (massifRows.length === 0) return null;
+```
+
+```jsx
+<div className="comparison-card">
+    <div className="comparison-card-header">
+        <div>
+            <h2 className="title" style={{margin:0}}>Qualité de la neige</h2>
+            <p className="subtitle" style={{margin:0}}>Texte extrait du BERA · Météo France</p>
+        </div>
+    </div>
+    <div className="comparison-card-body">
+        <div className="snow-table qualite-neige-table">
+            <table>
+                <tbody>
+                    {massifRows.map(d => (
+                        <tr key={d.massifId}>
+                            <td>
+                                <span className="sector-name">{d.massifName}</span>
+                                <span className="manteau-last-fall">MAJ {dateStr}</span>
+                            </td>
+                            <td>{d.qualiteNeige}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+```
+
+**Classes et overrides :**
+
+| Classe | Source | Rôle |
+|--------|--------|------|
+| `.comparison-card` | `design-system.css` | Conteneur card avec header + body scrollable |
+| `.snow-table` | `design-system.css` | Structure tableau partagée |
+| `.qualite-neige-table` | `<style>` local | Modifier : col1 min-width 180px, col2 text-align:left, bg:#FFF, Garnett 14px |
+| `.sector-name` | `design-system.css` | Nom du massif (Inter 16px 600) |
+| `.manteau-last-fall` | `design-system.css` | Date de MAJ (Garnett 10px, #5E7690) |
+
+**Source de données :** champ `qualiteNeige` = `<QUALITE><TEXTE>` dans le XML BERA Météo France, via `braData[resort]._detail.qualiteNeige`.
+
+---
 
 ### Footer CTA
 
@@ -376,5 +440,5 @@ Seuil : > 15cm → classe `heavy-snow` (orange)
 
 ---
 
-**Version** : 3.4 — Suppression `.section-title`, sticky colonne correcte, pattern modal mis à jour
-**Dernière mise à jour** : 19 février 2026
+**Version** : 3.5 — Ajout `.manteau-last-fall`, widget Qualité de la neige
+**Dernière mise à jour** : 27 février 2026
