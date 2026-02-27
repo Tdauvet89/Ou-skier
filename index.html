@@ -453,11 +453,48 @@
 
             /* Widget Qualité de la neige */
             .qualite-neige-table tbody td:first-child {
-                min-width: 180px;
+                min-width: 200px;
+                vertical-align: top;
             }
             .qualite-neige-table tbody td:not(:first-child) {
                 text-align: left;
                 background: #FFF;
+                vertical-align: top;
+            }
+            /* Lien BERA dans la colonne massif du widget qualité */
+            .qualite-neige-bera-link {
+                display: inline-block;
+                margin-top: 6px;
+                font-family: "Inter", sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                color: #155DFC;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            .qualite-neige-bera-link:hover {
+                color: #0f3fa0;
+            }
+            /* Sections structurées dans la colonne texte */
+            .qualite-section {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .qualite-bloc {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .qualite-bloc-label {
+                font-family: "Inter", sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #5E7690;
+            }
+            .qualite-bloc-text {
                 font-family: "Garnett", sans-serif;
                 font-size: 14px;
                 color: #1F2023;
@@ -1149,6 +1186,8 @@
 
                     // Enneigement
                     const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");
+                    const enneigementTexte =
+                        enneigementEl?.querySelector("TEXTE")?.textContent || "";
                     const enneigement = enneigementEl
                         ? {
                               limiteSud:
@@ -1176,6 +1215,7 @@
                         resume,
                         stabilite,
                         qualiteNeige,
+                        enneigementTexte,
                         enneigement,
                         pentes,
                         risqueMaxi,
@@ -2269,12 +2309,27 @@
                                         const massifRows = [];
                                         Object.values(braData).forEach(bra => {
                                             const d = bra?._detail;
-                                            if (d && d.massifId && d.qualiteNeige && !seen[d.massifId]) {
+                                            const hasContent = d && d.massifId && (d.qualiteNeige || d.enneigementTexte || d.enneigement);
+                                            if (hasContent && !seen[d.massifId]) {
                                                 seen[d.massifId] = true;
                                                 massifRows.push(d);
                                             }
                                         });
                                         if (massifRows.length === 0) return null;
+
+                                        const openBeraModal = (d) => {
+                                            setBeraModal({ resortName: d.massifName, detail: d, loading: true });
+                                            fetch(`${PROXY_URL}/bra?massif-id=${encodeURIComponent(d.massifId)}&format=pdf`)
+                                                .then(r => r.blob())
+                                                .then(blob => {
+                                                    const url = URL.createObjectURL(blob);
+                                                    setBeraModal(prev => prev ? { ...prev, pdfUrl: url, loading: false } : null);
+                                                })
+                                                .catch(() => {
+                                                    setBeraModal(prev => prev ? { ...prev, loading: false, pdfError: true } : null);
+                                                });
+                                        };
+
                                         return (
                                             <section className="section">
                                                 <div className="comparison-card">
@@ -2295,13 +2350,43 @@
                                                                                 return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : '';
                                                                             })()
                                                                             : '';
+                                                                        const limitesText = d.enneigement
+                                                                            ? [
+                                                                                d.enneigement.limiteNord && `${d.enneigement.limiteNord}m versant nord`,
+                                                                                d.enneigement.limiteSud && `${d.enneigement.limiteSud}m versant sud`,
+                                                                              ].filter(Boolean).join(' · ')
+                                                                            : '';
                                                                         return (
                                                                             <tr key={d.massifId}>
                                                                                 <td>
                                                                                     <span className="sector-name">{d.massifName}</span>
                                                                                     {dateStr && <span className="manteau-last-fall">MAJ {dateStr}</span>}
+                                                                                    <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
+                                                                                        Voir le BERA
+                                                                                    </a>
                                                                                 </td>
-                                                                                <td>{d.qualiteNeige}</td>
+                                                                                <td>
+                                                                                    <div className="qualite-section">
+                                                                                        {d.enneigementTexte && (
+                                                                                            <div className="qualite-bloc">
+                                                                                                <span className="qualite-bloc-label">Enneigement</span>
+                                                                                                <span className="qualite-bloc-text">{d.enneigementTexte}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {limitesText && (
+                                                                                            <div className="qualite-bloc">
+                                                                                                <span className="qualite-bloc-label">Limites skiables</span>
+                                                                                                <span className="qualite-bloc-text">{limitesText}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {d.qualiteNeige && (
+                                                                                            <div className="qualite-bloc">
+                                                                                                <span className="qualite-bloc-label">État de la neige</span>
+                                                                                                <span className="qualite-bloc-text">{d.qualiteNeige}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </td>
                                                                             </tr>
                                                                         );
                                                                     })}

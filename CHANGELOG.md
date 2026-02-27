@@ -5,6 +5,20 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.0] - 2026-02-27
+
+### Ajouté
+- **Widget "Qualité de la neige" — 3 sections structurées** (`index.html`) : la colonne texte est désormais découpée en 3 blocs labellisés : **Enneigement** (extrait de `ENNEIGEMENT TEXTE`), **Limites skiables** (formaté depuis `LimiteNord`/`LimiteSud`), **État de la neige** (extrait de `QUALITE TEXTE`). Chaque bloc est conditionnel (affiché uniquement si la donnée est présente).
+- **Lien "Voir le BERA"** dans la colonne massif du widget qualité neige : ouvre la modale PDF BERA existante via `setBeraModal`, même comportement que dans le tableau météo.
+
+### Modifié
+- Condition d'affichage du widget élargie : s'affiche si `qualiteNeige`, `enneigementTexte` **ou** `enneigement` sont présents (au lieu de `qualiteNeige` uniquement).
+- `td:first-child` passe à `min-width: 200px` + `vertical-align: top`.
+
+### Technique
+- `fetchBRAData` : extraction de `enneigementTexte` = `ENNEIGEMENT TEXTE` + stockage dans `_detail`
+- Nouvelles classes locales : `.qualite-section`, `.qualite-bloc`, `.qualite-bloc-label`, `.qualite-bloc-text`, `.qualite-neige-bera-link`
+
 ## [7.26.0] - 2026-02-27
 
 ### Ajouté
