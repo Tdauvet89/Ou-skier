@@ -5,6 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.2] - 2026-02-27
+
+### Modifié
+- **Widget qualité neige — alignement précis sur maquette Figma (API)** (`index.html`) :
+  - Label section : Garnett Medium 16px `#1F2023` (était 14px bold)
+  - Texte description : Garnett Medium 13px `#5E7690` (gris muted, via `.qualite-bloc-text`)
+  - Fond cellule texte : `#F9FAFC` (gris clair Figma, était `#FFF`)
+  - Header date "Le JJ/MM" : aligné à gauche (`text-align: left; padding-left: 16px`)
+  - Colonne massif : largeur 277px, padding 30px 24px (spec Figma)
+  - Lien BERA : 14px, `letter-spacing: -0.15px` (spec Inter Figma)
+
+---
+
 ## [7.27.1] - 2026-02-27
 
 ### Modifié

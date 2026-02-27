@@ -457,17 +457,22 @@
             .qualite-neige-table table {
                 width: 100% !important;
             }
+            .qualite-neige-table thead th:not(:first-child) {
+                text-align: left;
+                padding-left: 16px;
+            }
             .qualite-neige-table tbody td:first-child {
                 min-width: 180px;
-                max-width: 220px;
-                width: 220px;
+                max-width: 277px;
+                width: 277px;
                 vertical-align: top;
+                padding: 30px 24px;
             }
             .qualite-neige-table tbody td:not(:first-child) {
                 text-align: left;
-                background: #FFF;
+                background: #F9FAFC;
                 vertical-align: top;
-                padding: 16px 20px;
+                padding: 20px 24px;
                 word-break: break-word;
                 white-space: normal;
             }
@@ -476,8 +481,9 @@
                 display: inline-block;
                 margin-top: 6px;
                 font-family: "Inter", sans-serif;
-                font-size: 12px;
+                font-size: 14px;
                 font-weight: 500;
+                letter-spacing: -0.15px;
                 color: #155DFC;
                 text-decoration: underline;
                 cursor: pointer;
@@ -489,20 +495,26 @@
             .qualite-section {
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 12px;
             }
             .qualite-bloc {
-                font-family: "Garnett", sans-serif;
-                font-size: 14px;
-                color: #1F2023;
-                line-height: 1.5;
                 margin: 0;
+                line-height: 1.5;
             }
+            /* Label (ex: "Enneigement") : Garnett Medium 16px sombre */
             .qualite-bloc-label {
                 font-family: "Garnett", sans-serif;
-                font-size: 14px;
-                font-weight: 600;
+                font-size: 16px;
+                font-weight: 500;
                 color: #1F2023;
+            }
+            /* Texte description : Garnett Medium 13px gris */
+            .qualite-bloc-text {
+                font-family: "Garnett", sans-serif;
+                font-size: 13px;
+                font-weight: 500;
+                color: #5E7690;
+                line-height: 18px;
             }
 
             /* Lien vers la page Meteoblue du secteur */
@@ -2381,19 +2393,19 @@
                                                                                         {d.enneigementTexte && (
                                                                                             <p className="qualite-bloc">
                                                                                                 <strong className="qualite-bloc-label">Enneigement</strong>
-                                                                                                {' : '}{d.enneigementTexte}
+                                                                                                <span className="qualite-bloc-text"> : {d.enneigementTexte}</span>
                                                                                             </p>
                                                                                         )}
                                                                                         {limitesText && (
                                                                                             <p className="qualite-bloc">
                                                                                                 <strong className="qualite-bloc-label">Limites skiables</strong>
-                                                                                                {' : '}{limitesText}
+                                                                                                <span className="qualite-bloc-text"> : {limitesText}</span>
                                                                                             </p>
                                                                                         )}
                                                                                         {d.qualiteNeige && (
                                                                                             <p className="qualite-bloc">
                                                                                                 <strong className="qualite-bloc-label">État de la neige</strong>
-                                                                                                {' : '}{d.qualiteNeige}
+                                                                                                <span className="qualite-bloc-text"> : {d.qualiteNeige}</span>
                                                                                             </p>
                                                                                         )}
                                                                                     </div>
