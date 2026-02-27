@@ -1847,8 +1847,8 @@
                             const weatherCode = dayData.pictocode?.[dataIndex] || 1;
                             const weatherInfo = getWeatherInfo(weatherCode);
 
-                            // snowaccumulation (snowice-day) est en cm de neige fraîche
-                            const snowCm = Math.round(dayData.snowaccumulation?.[dataIndex] || 0);
+                            // snowaccumulation (snowice-day) est en mm → convertir en cm
+                            const snowCm = Math.round((dayData.snowaccumulation?.[dataIndex] || 0) / 10);
                             const precip = dayData.precipitation?.[dataIndex] || 0;
                             const snowFraction = dayData.snowfraction?.[dataIndex] || 0;
                             const rainMm = Math.round((1 - snowFraction) * precip);

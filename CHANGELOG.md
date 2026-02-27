@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.25.1] - 2026-02-27
+
+### Corrigé
+- **Chutes de neige × 10 dans widget comparatif météo** (`index.html`) : `processWeatherData` lisait `snowaccumulation` en mm sans division par 10 — la valeur `snowCm` affichée dans la vue jour comparative était ~10× trop élevée (ex : 76 cm au lieu de 8 cm). Même correctif que le fix `processSnowDataForResort` du [7.23.5].
+
+---
+
 ## [7.25.0] - 2026-02-27
 
 ### Ajouté
