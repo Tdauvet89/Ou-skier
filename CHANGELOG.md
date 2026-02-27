@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.8] - 2026-02-27
+
+### Corrigé
+- **Widget météo comparative** (`index.html`) : coquille "France Météo" → "Météo France"
+
+---
+
 ## [7.27.7] - 2026-02-27
 
 ### Modifié
