@@ -2341,7 +2341,7 @@
                                         const massifRows = [];
                                         Object.values(braData).forEach(bra => {
                                             const d = bra?._detail;
-                                            const hasContent = d && d.massifId && (d.qualiteNeige || d.enneigementTexte || d.enneigement);
+                                            const hasContent = d && d.massifId && d.qualiteNeige;
                                             if (hasContent && !seen[d.massifId]) {
                                                 seen[d.massifId] = true;
                                                 massifRows.push(d);
@@ -2389,32 +2389,42 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    {massifRows.map(d => (
-                                                                        <tr key={d.massifId}>
-                                                                            <td>
-                                                                                <span className="sector-name">{d.massifName}</span>
-                                                                                <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
-                                                                                    Voir le BERA
-                                                                                </a>
-                                                                            </td>
-                                                                            <td>
-                                                                                <div className="qualite-section">
-                                                                                    {d.limitesNeigeCourt && (
-                                                                                        <p className="qualite-bloc">
-                                                                                            <strong className="qualite-bloc-label">Limites skiables</strong>
-                                                                                            <span className="qualite-bloc-text"> : {d.limitesNeigeCourt}</span>
-                                                                                        </p>
-                                                                                    )}
-                                                                                    {d.etatNeigeComplet && (
-                                                                                        <p className="qualite-bloc">
-                                                                                            <strong className="qualite-bloc-label">État de la neige</strong>
-                                                                                            <span className="qualite-bloc-text"> : {d.etatNeigeComplet}</span>
-                                                                                        </p>
-                                                                                    )}
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))}
+                                                                                    {massifRows.map(d => {
+                                                                                        // Extraction depuis qualiteNeige au moment du rendu
+                                                                                        // (fonctionne même avec le cache — pas de dépendance aux champs pré-calculés)
+                                                                                        const qLines = (d.qualiteNeige || '').split(/\r?\n/).filter(l => l.trim());
+                                                                                        const findLine = (pat) => { const ln = qLines.find(l => pat.test(l)); if (!ln) return ''; const s = ln.indexOf(' : '); return s !== -1 ? ln.slice(s + 3).trim() : ''; };
+                                                                                        const limRaw = findLine(/limites\s+skiables/i);
+                                                                                        const di = limRaw.search(/\.\s/);
+                                                                                        const limitesNeigeCourt = di !== -1 ? limRaw.slice(0, di + 1) : limRaw;
+                                                                                        const etatNeigeComplet = findLine(/tat\s+de\s+la\s+neige/i);
+                                                                                        return (
+                                                                                            <tr key={d.massifId}>
+                                                                                                <td>
+                                                                                                    <span className="sector-name">{d.massifName}</span>
+                                                                                                    <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
+                                                                                                        Voir le BERA
+                                                                                                    </a>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <div className="qualite-section">
+                                                                                                        {limitesNeigeCourt && (
+                                                                                                            <p className="qualite-bloc">
+                                                                                                                <strong className="qualite-bloc-label">Limites skiables</strong>
+                                                                                                                <span className="qualite-bloc-text"> : {limitesNeigeCourt}</span>
+                                                                                                            </p>
+                                                                                                        )}
+                                                                                                        {etatNeigeComplet && (
+                                                                                                            <p className="qualite-bloc">
+                                                                                                                <strong className="qualite-bloc-label">État de la neige</strong>
+                                                                                                                <span className="qualite-bloc-text"> : {etatNeigeComplet}</span>
+                                                                                                            </p>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        );
+                                                                                    })}
                                                                 </tbody>
                                                             </table>
                                                         </div>

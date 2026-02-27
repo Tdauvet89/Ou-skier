@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.6] - 2026-02-27
+
+### Corrigé
+- **Widget qualité neige — cause racine : extraction depuis le cache** (`index.html`) :
+  - Le cache localStorage stockait l'ancien `braData` sans `limitesNeigeCourt`/`etatNeigeComplet`
+  - Fix : extraction de `qualiteNeige` déplacée dans le rendu JSX — fonctionne avec toute version du cache
+  - `hasContent` simplifié à `d.qualiteNeige` (seule condition nécessaire)
+
+---
+
 ## [7.27.5] - 2026-02-27
 
 ### Corrigé
