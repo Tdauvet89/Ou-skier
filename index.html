@@ -1200,16 +1200,25 @@
                         xmlDoc.querySelector("QUALITE TEXTE")?.textContent ||
                         "";
 
+                    // Extraction d'une section dans QUALITE > TEXTE
+                    const extractSection = (text, label, firstSentenceOnly) => {
+                        const marker = label + ' : ';
+                        const start = text.indexOf(marker);
+                        if (start === -1) return '';
+                        const content = text.slice(start + marker.length).trim();
+                        if (!firstSentenceOnly) return content;
+                        const end = content.search(/\.\s/);
+                        return end !== -1 ? content.slice(0, end + 1) : content.split('\n')[0];
+                    };
+                    const limitesNeigeCourt = extractSection(qualiteNeige, 'Limites skiables', true);
+                    const etatNeigeComplet = extractSection(qualiteNeige, 'État de la neige', false);
+
                     // Enneigement
                     const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");
-                    const enneigementTexte =
-                        enneigementEl?.querySelector("TEXTE")?.textContent || "";
                     const enneigement = enneigementEl
                         ? {
-                              limiteSud:
-                                  enneigementEl.getAttribute("LimiteSud"),
-                              limiteNord:
-                                  enneigementEl.getAttribute("LimiteNord"),
+                              limiteSud: enneigementEl.getAttribute("LimiteSud"),
+                              limiteNord: enneigementEl.getAttribute("LimiteNord"),
                           }
                         : null;
 
@@ -1231,7 +1240,8 @@
                         resume,
                         stabilite,
                         qualiteNeige,
-                        enneigementTexte,
+                        limitesNeigeCourt,
+                        etatNeigeComplet,
                         enneigement,
                         pentes,
                         risqueMaxi,
@@ -2373,46 +2383,32 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    {massifRows.map(d => {
-                                                                        const limitesText = d.enneigement
-                                                                            ? [
-                                                                                d.enneigement.limiteNord && `${d.enneigement.limiteNord}m versant nord`,
-                                                                                d.enneigement.limiteSud && `${d.enneigement.limiteSud}m versant sud`,
-                                                                              ].filter(Boolean).join(' · ')
-                                                                            : '';
-                                                                        return (
-                                                                            <tr key={d.massifId}>
-                                                                                <td>
-                                                                                    <span className="sector-name">{d.massifName}</span>
-                                                                                    <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
-                                                                                        Voir le BERA
-                                                                                    </a>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <div className="qualite-section">
-                                                                                        {d.enneigementTexte && (
-                                                                                            <p className="qualite-bloc">
-                                                                                                <strong className="qualite-bloc-label">Enneigement</strong>
-                                                                                                <span className="qualite-bloc-text"> : {d.enneigementTexte}</span>
-                                                                                            </p>
-                                                                                        )}
-                                                                                        {limitesText && (
-                                                                                            <p className="qualite-bloc">
-                                                                                                <strong className="qualite-bloc-label">Limites skiables</strong>
-                                                                                                <span className="qualite-bloc-text"> : {limitesText}</span>
-                                                                                            </p>
-                                                                                        )}
-                                                                                        {d.qualiteNeige && (
-                                                                                            <p className="qualite-bloc">
-                                                                                                <strong className="qualite-bloc-label">État de la neige</strong>
-                                                                                                <span className="qualite-bloc-text"> : {d.qualiteNeige}</span>
-                                                                                            </p>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        );
-                                                                    })}
+                                                                    {massifRows.map(d => (
+                                                                        <tr key={d.massifId}>
+                                                                            <td>
+                                                                                <span className="sector-name">{d.massifName}</span>
+                                                                                <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
+                                                                                    Voir le BERA
+                                                                                </a>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div className="qualite-section">
+                                                                                    {d.limitesNeigeCourt && (
+                                                                                        <p className="qualite-bloc">
+                                                                                            <strong className="qualite-bloc-label">Limites skiables</strong>
+                                                                                            <span className="qualite-bloc-text"> : {d.limitesNeigeCourt}</span>
+                                                                                        </p>
+                                                                                    )}
+                                                                                    {d.etatNeigeComplet && (
+                                                                                        <p className="qualite-bloc">
+                                                                                            <strong className="qualite-bloc-label">État de la neige</strong>
+                                                                                            <span className="qualite-bloc-text"> : {d.etatNeigeComplet}</span>
+                                                                                        </p>
+                                                                                    )}
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
                                                                 </tbody>
                                                             </table>
                                                         </div>

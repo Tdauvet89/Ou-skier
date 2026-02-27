@@ -5,6 +5,17 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.3] - 2026-02-27
+
+### Modifié
+- **Widget qualité neige — résumés texte** (`index.html`) :
+  - Suppression de la section "Enneigement"
+  - "Limites skiables" : 1re phrase extraite de `QUALITE > TEXTE`
+  - "État de la neige" : texte complet de la section `QUALITE > TEXTE`
+  - Parsing JS automatique via `extractSection()` dans `fetchBRAData()`
+
+---
+
 ## [7.27.2] - 2026-02-27
 
 ### Modifié
