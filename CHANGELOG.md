@@ -5,6 +5,17 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.28.0] - 2026-02-27
+
+### Ajouté
+- **Regroupement des descriptions identiques** (`index.html`) : dans le widget "Qualité de la neige", les massifs partageant les mêmes "Limites skiables" et "État de la neige" sont désormais regroupés sur une seule ligne. La colonne massif liste chaque secteur avec son propre lien "Voir le BERA" ; la colonne description affiche une note italique *"Météo France a rédigé la même description pour ces N secteurs."*
+
+### Technique
+- `index.html` : helper `extractFields()` + logique de groupement par clé `limitesNeigeCourt|||etatNeigeComplet`
+- CSS : `.qualite-neige-massif-row` (séparateur inter-massifs) + `.qualite-groupe-note` (note d'information)
+
+---
+
 ## [7.27.8] - 2026-02-27
 
 ### Corrigé

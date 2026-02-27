@@ -516,6 +516,21 @@
                 color: #5E7690;
                 line-height: 18px;
             }
+            /* Séparateur entre massifs dans une cellule groupée */
+            .qualite-neige-massif-row + .qualite-neige-massif-row {
+                margin-top: 14px;
+                padding-top: 14px;
+                border-top: 1px solid #E8EDF2;
+            }
+            /* Note indiquant que Météo France a rédigé la même description pour plusieurs secteurs */
+            .qualite-groupe-note {
+                margin: 0;
+                font-family: "Inter", sans-serif;
+                font-size: 11px;
+                font-style: italic;
+                color: #8FA3B8;
+                line-height: 1.4;
+            }
 
             /* Lien vers la page Meteoblue du secteur */
             .resort-link {
@@ -2349,6 +2364,31 @@
                                         });
                                         if (massifRows.length === 0) return null;
 
+                                        // Helper : extrait les deux champs clés pour la comparaison
+                                        const extractFields = (d) => {
+                                            const qLines = (d.qualiteNeige || '').split(/\r?\n/).filter(l => l.trim());
+                                            const findLine = (pat) => { const ln = qLines.find(l => pat.test(l)); if (!ln) return ''; const s = ln.indexOf(' : '); return s !== -1 ? ln.slice(s + 3).trim() : ''; };
+                                            const limRaw = findLine(/limites\s+skiables/i);
+                                            const di = limRaw.search(/\.\s/);
+                                            const limitesNeigeCourt = di !== -1 ? limRaw.slice(0, di + 1) : limRaw;
+                                            const etatNeigeComplet = findLine(/tat\s+de\s+la\s+neige/i);
+                                            return { limitesNeigeCourt, etatNeigeComplet };
+                                        };
+
+                                        // Regrouper les massifs ayant des descriptions identiques
+                                        const groups = [];
+                                        const groupKeys = {};
+                                        massifRows.forEach(d => {
+                                            const { limitesNeigeCourt, etatNeigeComplet } = extractFields(d);
+                                            const key = limitesNeigeCourt + '|||' + etatNeigeComplet;
+                                            if (groupKeys[key] !== undefined) {
+                                                groups[groupKeys[key]].massifs.push(d);
+                                            } else {
+                                                groupKeys[key] = groups.length;
+                                                groups.push({ massifs: [d], limitesNeigeCourt, etatNeigeComplet });
+                                            }
+                                        });
+
                                         const openBeraModal = (d) => {
                                             setBeraModal({ resortName: d.massifName, detail: d, loading: true });
                                             fetch(`${PROXY_URL}/bra?massif-id=${encodeURIComponent(d.massifId)}&format=pdf`)
@@ -2391,25 +2431,26 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                                    {massifRows.map(d => {
-                                                                                        // Extraction depuis qualiteNeige au moment du rendu
-                                                                                        // (fonctionne même avec le cache — pas de dépendance aux champs pré-calculés)
-                                                                                        const qLines = (d.qualiteNeige || '').split(/\r?\n/).filter(l => l.trim());
-                                                                                        const findLine = (pat) => { const ln = qLines.find(l => pat.test(l)); if (!ln) return ''; const s = ln.indexOf(' : '); return s !== -1 ? ln.slice(s + 3).trim() : ''; };
-                                                                                        const limRaw = findLine(/limites\s+skiables/i);
-                                                                                        const di = limRaw.search(/\.\s/);
-                                                                                        const limitesNeigeCourt = di !== -1 ? limRaw.slice(0, di + 1) : limRaw;
-                                                                                        const etatNeigeComplet = findLine(/tat\s+de\s+la\s+neige/i);
+                                                                                    {groups.map((group) => {
+                                                                                        const { massifs, limitesNeigeCourt, etatNeigeComplet } = group;
+                                                                                        const isGrouped = massifs.length > 1;
                                                                                         return (
-                                                                                            <tr key={d.massifId}>
+                                                                                            <tr key={massifs.map(m => m.massifId).join('-')}>
                                                                                                 <td>
-                                                                                                    <span className="sector-name">{d.massifName}</span>
-                                                                                                    <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(d); }}>
-                                                                                                        Voir le BERA
-                                                                                                    </a>
+                                                                                                    {massifs.map(m => (
+                                                                                                        <div key={m.massifId} className="qualite-neige-massif-row">
+                                                                                                            <span className="sector-name">{m.massifName}</span>
+                                                                                                            <a className="qualite-neige-bera-link" href="#" onClick={(e) => { e.preventDefault(); openBeraModal(m); }}>
+                                                                                                                Voir le BERA
+                                                                                                            </a>
+                                                                                                        </div>
+                                                                                                    ))}
                                                                                                 </td>
                                                                                                 <td>
                                                                                                     <div className="qualite-section">
+                                                                                                        {isGrouped && (
+                                                                                                            <p className="qualite-groupe-note">Météo France a rédigé la même description pour ces {massifs.length} secteurs.</p>
+                                                                                                        )}
                                                                                                         {limitesNeigeCourt && (
                                                                                                             <p className="qualite-bloc">
                                                                                                                 <strong className="qualite-bloc-label">Limites skiables</strong>
