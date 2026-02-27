@@ -452,14 +452,24 @@
             }
 
             /* Widget Qualité de la neige */
+            /* Annule le width:max-content du snow-table générique : pas de scroll horizontal ici */
+            .qualite-neige-table,
+            .qualite-neige-table table {
+                width: 100% !important;
+            }
             .qualite-neige-table tbody td:first-child {
-                min-width: 200px;
+                min-width: 180px;
+                max-width: 220px;
+                width: 220px;
                 vertical-align: top;
             }
             .qualite-neige-table tbody td:not(:first-child) {
                 text-align: left;
                 background: #FFF;
                 vertical-align: top;
+                padding: 16px 20px;
+                word-break: break-word;
+                white-space: normal;
             }
             /* Lien BERA dans la colonne massif du widget qualité */
             .qualite-neige-bera-link {
