@@ -451,6 +451,19 @@
                 color: #0f3fa0;
             }
 
+            /* Widget Qualité de la neige */
+            .qualite-neige-table tbody td:first-child {
+                min-width: 180px;
+            }
+            .qualite-neige-table tbody td:not(:first-child) {
+                text-align: left;
+                background: #FFF;
+                font-family: "Garnett", sans-serif;
+                font-size: 14px;
+                color: #1F2023;
+                line-height: 1.5;
+            }
+
             /* Lien vers la page Meteoblue du secteur */
             .resort-link {
                 text-decoration: none;
@@ -2249,6 +2262,57 @@
                                             </div>
                                         </div>
                                     </section>
+
+                                    {/* ===== SECTION : QUALITÉ DE LA NEIGE (BRA) ===== */}
+                                    {(() => {
+                                        const seen = {};
+                                        const massifRows = [];
+                                        Object.values(braData).forEach(bra => {
+                                            const d = bra?._detail;
+                                            if (d && d.massifId && d.qualiteNeige && !seen[d.massifId]) {
+                                                seen[d.massifId] = true;
+                                                massifRows.push(d);
+                                            }
+                                        });
+                                        if (massifRows.length === 0) return null;
+                                        return (
+                                            <section className="section">
+                                                <div className="comparison-card">
+                                                    <div className="comparison-card-header">
+                                                        <div>
+                                                            <h2 className="title" style={{margin:0}}>Qualité de la neige</h2>
+                                                            <p className="subtitle" style={{margin:0}}>Texte extrait du BERA · <a href="https://www.meteo.fr" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Météo France</a></p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="comparison-card-body">
+                                                        <div className="snow-table qualite-neige-table">
+                                                            <table>
+                                                                <tbody>
+                                                                    {massifRows.map(d => {
+                                                                        const dateStr = d.dateBulletin
+                                                                            ? (() => {
+                                                                                const parts = d.dateBulletin.split(/[- T]/);
+                                                                                return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : '';
+                                                                            })()
+                                                                            : '';
+                                                                        return (
+                                                                            <tr key={d.massifId}>
+                                                                                <td>
+                                                                                    <span className="sector-name">{d.massifName}</span>
+                                                                                    {dateStr && <span className="manteau-last-fall">MAJ {dateStr}</span>}
+                                                                                </td>
+                                                                                <td>{d.qualiteNeige}</td>
+                                                                            </tr>
+                                                                        );
+                                                                    })}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        );
+                                    })()}
 
                                     <section className="section">
                                             <div className="comparison-card">

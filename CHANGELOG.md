@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.26.0] - 2026-02-27
+
+### Ajouté
+- **Widget "Qualité de la neige"** (`index.html`) : nouvelle section positionnée entre les tableaux neige et les prévisions météo — une ligne par massif (dédupliqué par `massifId`), affichant le nom du massif + date MAJ et le texte `qualiteNeige` extrait du BERA de Météo France. Conditionnel : n'apparaît que si au moins un massif a un texte qualité renseigné.
+
+### Technique
+- `.qualite-neige-table` ajouté dans `<style>` local (`index.html`) : override `td:first-child` (min-width 180px) et `td:not(:first-child)` (text-align left, bg blanc, Garnett 14px)
+
+---
+
 ## [7.25.1] - 2026-02-27
 
 ### Corrigé
