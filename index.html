@@ -478,7 +478,7 @@
             }
             /* Lien BERA dans la colonne massif du widget qualité */
             .qualite-neige-bera-link {
-                display: inline-block;
+                display: block;
                 margin-top: 6px;
                 font-family: "Inter", sans-serif;
                 font-size: 14px;
@@ -1201,9 +1201,13 @@
                         "";
 
                     // Extraction par ligne — plus robuste que indexOf sur CDATA
+                    console.log(`[BRA debug] massif=${massifId} qualiteNeige.length=${qualiteNeige.length}`);
+                    console.log(`[BRA debug] qualiteNeige raw:`, JSON.stringify(qualiteNeige.slice(0, 300)));
                     const qualiteLines = qualiteNeige.split(/\r?\n/).filter(l => l.trim());
+                    console.log(`[BRA debug] qualiteLines (${qualiteLines.length}):`, qualiteLines.map((l, i) => `[${i}] ${l.slice(0, 80)}`));
                     const findQualiteLine = (pattern) => {
                         const line = qualiteLines.find(l => pattern.test(l));
+                        console.log(`[BRA debug] pattern=${pattern} → line found:`, line ? line.slice(0, 80) : 'NONE');
                         if (!line) return '';
                         const sep = line.indexOf(' : ');
                         return sep !== -1 ? line.slice(sep + 3).trim() : '';
@@ -1212,6 +1216,8 @@
                     const dotIdx = limitesRaw.search(/\.\s/);
                     const limitesNeigeCourt = dotIdx !== -1 ? limitesRaw.slice(0, dotIdx + 1) : limitesRaw;
                     const etatNeigeComplet = findQualiteLine(/tat\s+de\s+la\s+neige/i);
+                    console.log(`[BRA debug] limitesNeigeCourt=`, JSON.stringify(limitesNeigeCourt));
+                    console.log(`[BRA debug] etatNeigeComplet=`, JSON.stringify(etatNeigeComplet.slice(0, 100)));
 
                     // Enneigement
                     const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");

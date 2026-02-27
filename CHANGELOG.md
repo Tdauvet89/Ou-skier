@@ -5,6 +5,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.27.5] - 2026-02-27
+
+### Corrigé
+- **Widget qualité neige** (`index.html`) :
+  - Logs debug `[BRA debug]` ajoutés pour diagnostiquer l'extraction QUALITE > TEXTE
+  - Lien "Voir le BERA" : `display: block` pour qu'il s'affiche sous le nom du massif
+
+---
+
 ## [7.27.4] - 2026-02-27
 
 ### Corrigé
