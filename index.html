@@ -1299,6 +1299,9 @@
 
                         if (data.results) {
                             setSearchResults(data.results.slice(0, 10));
+                            if (data.results.length === 0 && typeof gtag === 'function') {
+                                gtag('event', 'recherche_vide', { 'query_secteur': query });
+                            }
                         } else {
                             console.warn("⚠️ Pas de champ 'results' dans la réponse :", data);
                         }
@@ -1324,9 +1327,10 @@
                     // --- DÉBUT DE L'AJOUT GOOGLE ANALYTICS ---
                     if (typeof gtag === 'function') {
                         gtag('event', 'ajout_secteur', {
-                            'nom_secteur': location.name,      // ex: Guzet
-                            'region_secteur': location.admin1, // ex: Occitanie
-                            'altitude_secteur': location.asl   // ex: 1400
+                            'nom_secteur': location.name || '(vide)',      // ex: Guzet
+                            'region_secteur': location.admin1 || '(inconnue)', // ex: Occitanie
+                            'altitude_secteur': location.asl || null,      // ex: 1400
+                            'query_secteur': searchQuery,                  // ce que l'utilisateur a tapé
                         });
                     }
                     // --- FIN DE L'AJOUT ---

@@ -5,6 +5,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.25.0] - 2026-02-27
+
+### Ajouté
+- **Tracking `query_secteur`** (`index.html`) : le paramètre `query_secteur` (texte tapé par l'utilisateur) est désormais inclus dans l'event GA4 `ajout_secteur` — permet de savoir quelle recherche a mené à l'ajout d'un secteur.
+- **Event `recherche_vide`** (`index.html`) : nouvel event GA4 déclenché lorsqu'une recherche renvoie 0 résultats — paramètre `query_secteur` pour identifier les requêtes sans résultat.
+- **Fallbacks champs nullables** (`index.html`) : `nom_secteur` et `region_secteur` utilisent désormais `'(vide)'` et `'(inconnue)'` comme valeur de repli si l'API renvoie `undefined`/`null`/`""` — élimine les "(not set)" dans GA4 et rend l'origine du problème explicite.
+
+---
+
 ## [7.24.0] - 2026-02-25
 
 ### Ajouté
