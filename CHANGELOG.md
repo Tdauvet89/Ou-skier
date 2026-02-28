@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.29.0] - 2026-02-28
+
+### Modifié
+- **Message "aucun résultat" de la recherche** (`index.html`) : le message affiche désormais le terme recherché et trois conseils (orthographe, lieu plus connu, type de lieu) pour aider l'utilisateur à reformuler sa recherche.
+
+### Corrigé
+- **Widget Qualité de la neige — mémoire des secteurs supprimés** (`index.html`) : lors de la suppression d'un secteur, `braData` n'était pas mis à jour, ce qui laissait apparaître les données BRA des massifs supprimés. `removeResort` supprime maintenant l'entrée correspondante dans `braData`.
+
+---
+
 ## [7.28.0] - 2026-02-27
 
 ### Ajouté

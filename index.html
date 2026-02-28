@@ -1505,8 +1505,12 @@
                                             searchResults.length === 0 &&
                                             searchQuery.length >= 3 && (
                                                 <div className="no-results">
-                                                    Aucun résultat trouvé. Essayez une
-                                                    autre recherche.
+                                                    <p style={{margin:'0 0 6px'}}>Aucun résultat trouvé pour <strong>{searchQuery}</strong>.</p>
+                                                    <ul style={{margin:0, paddingLeft:'18px'}}>
+                                                        <li>Recherchez une ville, un village ou un lieu d'intérêt.</li>
+                                                        <li>Assurez-vous que le lieu est bien orthographié.</li>
+                                                        <li>Essayez un lieu plus connu.</li>
+                                                    </ul>
                                                 </div>
                                             )}
 
@@ -1807,6 +1811,7 @@
 
                 const removeResort = (index) => {
                     // Retirer le secteur et ses données
+                    const removedName = resorts[index]?.name;
                     const newResorts = resorts.filter((_, i) => i !== index);
                     setResorts(newResorts);
                     setWeatherData((prev) =>
@@ -1814,6 +1819,13 @@
                     );
                     setSnowData((prev) => prev.filter((_, i) => i !== index));
                     setHourlyData((prev) => prev.filter((_, i) => i !== index));
+                    if (removedName) {
+                        setBraData((prev) => {
+                            const next = { ...prev };
+                            delete next[removedName];
+                            return next;
+                        });
+                    }
                     // Invalider le cache (la liste de stations a changé)
                     localStorage.removeItem(CACHE_KEY);
                 };
