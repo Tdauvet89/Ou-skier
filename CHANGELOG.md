@@ -5,6 +5,22 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.29.1] - 2026-02-28
+
+### Corrigé
+- **Widget Qualité de la neige — extraction texte BERA** (`index.html`) : certains massifs (ex. Haute-Ariège) n'affichaient aucune description car le parseur supposait un séparateur ` : ` et des sauts de ligne `\n` entre sections. La nouvelle logique :
+  1. Cherche le label dans le texte complet si aucune ligne dédiée n'est trouvée (format mono-ligne)
+  2. Localise le séparateur `: ` **après** le label (et non le premier `: ` de la ligne)
+  3. Accepte `Limite skiable` au singulier et `État`/`Etat` indifféremment
+
+### Ajouté
+- **Fallback texte brut** (`index.html`) : si les deux champs structurés (Limites skiables, État de la neige) restent vides après extraction, le texte brut du BERA est affiché tel quel — la cellule ne sera jamais silencieusement vide
+
+### Technique
+- Suppression des `console.log` de debug BRA restés en production
+
+---
+
 ## [7.29.0] - 2026-02-28
 
 ### Modifié
