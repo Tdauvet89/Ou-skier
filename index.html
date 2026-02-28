@@ -1215,25 +1215,44 @@
                         xmlDoc.querySelector("QUALITE TEXTE")?.textContent ||
                         "";
 
-                    // Extraction robuste — gère formats multi-lignes ET lignes uniques,
-                    // séparateurs " : " ET ": ", labels singuliers/pluriels.
-                    const qualiteLines = qualiteNeige.split(/\r?\n/).filter(l => l.trim());
-                    const findQualiteLine = (pattern) => {
-                        // 1. Cherche une ligne dédiée contenant le label
-                        const line = qualiteLines.find(l => pattern.test(l));
-                        // 2. Si pas de ligne dédiée, cherche dans le texte complet (format mono-ligne)
-                        const src = line || qualiteNeige;
-                        const labelMatch = src.match(pattern);
-                        if (!labelMatch) return '';
-                        // 3. Extrait ce qui suit le label jusqu'au premier ": " (avec ou sans espace avant)
-                        const afterLabel = src.slice(labelMatch.index + labelMatch[0].length);
-                        const colonMatch = afterLabel.match(/^[^:]*:\s*/);
-                        return colonMatch ? afterLabel.slice(colonMatch[0].length).trim() : '';
+                    // Extraction robuste — 2 formats Météo France :
+                    // Format A (Pyr. Occ.) : "Limites skiables : valeur" sur une ligne
+                    // Format B (Pyr. Cent./Or.) : "Enneigement :\n paragraphe\n\nQualité de la neige :\n paragraphe"
+                    const qualiteLines = qualiteNeige.split(/\r?\n/);
+                    const KNOWN_LABELS = [
+                        /limites?\s+skiables?/i, /enneigement/i,
+                        /[eé]tat\s+de\s+la\s+neige/i, /qualit[eé]\s+de\s+la\s+neige/i,
+                    ];
+                    const isSectionHeader = (line) => KNOWN_LABELS.some(p => p.test(line)) && line.includes(':');
+                    const findSection = (patterns) => {
+                        for (const pattern of patterns) {
+                            const idx = qualiteLines.findIndex(l => pattern.test(l));
+                            if (idx === -1) continue;
+                            const m = qualiteLines[idx].match(pattern);
+                            const after = qualiteLines[idx].slice(m.index + m[0].length);
+                            const ci = after.indexOf(':');
+                            if (ci !== -1) {
+                                const inline = after.slice(ci + 1).trim();
+                                if (inline) return inline; // Format A : valeur sur la même ligne
+                            }
+                            // Format B : label seul sur sa ligne, contenu dans le paragraphe suivant
+                            const content = [];
+                            let started = false;
+                            for (let i = idx + 1; i < qualiteLines.length; i++) {
+                                const t = qualiteLines[i].trim();
+                                if (!t) { if (started) break; continue; }
+                                if (isSectionHeader(qualiteLines[i])) break;
+                                content.push(t);
+                                started = true;
+                            }
+                            if (content.length > 0) return content.join(' ');
+                        }
+                        return '';
                     };
-                    const limitesRaw = findQualiteLine(/limites?\s+skiables?/i);
-                    const dotIdx = limitesRaw.search(/\.\s/);
-                    const limitesNeigeCourt = dotIdx !== -1 ? limitesRaw.slice(0, dotIdx + 1) : limitesRaw;
-                    const etatNeigeComplet = findQualiteLine(/[eé]tat\s+de\s+la\s+neige/i);
+                    // champ 1 — limites / enneigement
+                    const texteEnneigement = findSection([/limites?\s+skiables?/i, /enneigement/i]);
+                    // champ 2 — qualité / état de la neige
+                    const texteQualite = findSection([/[eé]tat\s+de\s+la\s+neige/i, /qualit[eé]\s+de\s+la\s+neige/i]);
 
                     // Enneigement
                     const enneigementEl = xmlDoc.querySelector("ENNEIGEMENT");
@@ -1262,8 +1281,8 @@
                         resume,
                         stabilite,
                         qualiteNeige,
-                        limitesNeigeCourt,
-                        etatNeigeComplet,
+                        texteEnneigement,
+                        texteQualite,
                         enneigement,
                         pentes,
                         risqueMaxi,
@@ -2377,37 +2396,47 @@
                                         });
                                         if (massifRows.length === 0) return null;
 
-                                        // Helper : extrait les deux champs clés pour la comparaison
+                                        // Helper : extrait les deux champs pour le groupement et l'affichage
+                                        // Même logique que fetchBRAData — 2 formats Météo France
                                         const extractFields = (d) => {
-                                            const qualiteNeige = d.qualiteNeige || '';
-                                            const qLines = qualiteNeige.split(/\r?\n/).filter(l => l.trim());
-                                            const findLine = (pat) => {
-                                                const ln = qLines.find(l => pat.test(l));
-                                                const src = ln || qualiteNeige;
-                                                const labelMatch = src.match(pat);
-                                                if (!labelMatch) return '';
-                                                const afterLabel = src.slice(labelMatch.index + labelMatch[0].length);
-                                                const colonMatch = afterLabel.match(/^[^:]*:\s*/);
-                                                return colonMatch ? afterLabel.slice(colonMatch[0].length).trim() : '';
+                                            const qLines = (d.qualiteNeige || '').split(/\r?\n/);
+                                            const LABELS = [/limites?\s+skiables?/i, /enneigement/i, /[eé]tat\s+de\s+la\s+neige/i, /qualit[eé]\s+de\s+la\s+neige/i];
+                                            const isSectionHdr = (line) => LABELS.some(p => p.test(line)) && line.includes(':');
+                                            const findSec = (patterns) => {
+                                                for (const pattern of patterns) {
+                                                    const idx = qLines.findIndex(l => pattern.test(l));
+                                                    if (idx === -1) continue;
+                                                    const m = qLines[idx].match(pattern);
+                                                    const after = qLines[idx].slice(m.index + m[0].length);
+                                                    const ci = after.indexOf(':');
+                                                    if (ci !== -1) { const v = after.slice(ci + 1).trim(); if (v) return v; }
+                                                    const content = []; let started = false;
+                                                    for (let i = idx + 1; i < qLines.length; i++) {
+                                                        const t = qLines[i].trim();
+                                                        if (!t) { if (started) break; continue; }
+                                                        if (isSectionHdr(qLines[i])) break;
+                                                        content.push(t); started = true;
+                                                    }
+                                                    if (content.length > 0) return content.join(' ');
+                                                }
+                                                return '';
                                             };
-                                            const limRaw = findLine(/limites?\s+skiables?/i);
-                                            const di = limRaw.search(/\.\s/);
-                                            const limitesNeigeCourt = di !== -1 ? limRaw.slice(0, di + 1) : limRaw;
-                                            const etatNeigeComplet = findLine(/[eé]tat\s+de\s+la\s+neige/i);
-                                            return { limitesNeigeCourt, etatNeigeComplet };
+                                            const texteEnneigement = findSec([/limites?\s+skiables?/i, /enneigement/i]);
+                                            const texteQualite = findSec([/[eé]tat\s+de\s+la\s+neige/i, /qualit[eé]\s+de\s+la\s+neige/i]);
+                                            return { texteEnneigement, texteQualite };
                                         };
 
                                         // Regrouper les massifs ayant des descriptions identiques
                                         const groups = [];
                                         const groupKeys = {};
                                         massifRows.forEach(d => {
-                                            const { limitesNeigeCourt, etatNeigeComplet } = extractFields(d);
-                                            const key = limitesNeigeCourt + '|||' + etatNeigeComplet;
+                                            const { texteEnneigement, texteQualite } = extractFields(d);
+                                            const key = texteEnneigement + '|||' + texteQualite;
                                             if (groupKeys[key] !== undefined) {
                                                 groups[groupKeys[key]].massifs.push(d);
                                             } else {
                                                 groupKeys[key] = groups.length;
-                                                groups.push({ massifs: [d], limitesNeigeCourt, etatNeigeComplet });
+                                                groups.push({ massifs: [d], texteEnneigement, texteQualite });
                                             }
                                         });
 
@@ -2454,7 +2483,7 @@
                                                                 </thead>
                                                                 <tbody>
                                                                                     {groups.map((group) => {
-                                                                                        const { massifs, limitesNeigeCourt, etatNeigeComplet } = group;
+                                                                                        const { massifs, texteEnneigement, texteQualite } = group;
                                                                                         const isGrouped = massifs.length > 1;
                                                                                         return (
                                                                                             <tr key={massifs.map(m => m.massifId).join('-')}>
@@ -2473,19 +2502,19 @@
                                                                                                         {isGrouped && (
                                                                                                             <p className="qualite-groupe-note">Météo France a rédigé la même description pour ces {massifs.length} secteurs.</p>
                                                                                                         )}
-                                                                                                        {limitesNeigeCourt && (
+                                                                                                        {texteEnneigement && (
                                                                                                             <p className="qualite-bloc">
-                                                                                                                <strong className="qualite-bloc-label">Limites skiables</strong>
-                                                                                                                <span className="qualite-bloc-text"> : {limitesNeigeCourt}</span>
+                                                                                                                <strong className="qualite-bloc-label">Enneigement</strong>
+                                                                                                                <span className="qualite-bloc-text"> : {texteEnneigement}</span>
                                                                                                             </p>
                                                                                                         )}
-                                                                                                        {etatNeigeComplet && (
+                                                                                                        {texteQualite && (
                                                                                                             <p className="qualite-bloc">
-                                                                                                                <strong className="qualite-bloc-label">État de la neige</strong>
-                                                                                                                <span className="qualite-bloc-text"> : {etatNeigeComplet}</span>
+                                                                                                                <strong className="qualite-bloc-label">Qualité de la neige</strong>
+                                                                                                                <span className="qualite-bloc-text"> : {texteQualite}</span>
                                                                                                             </p>
                                                                                                         )}
-                                                                                                        {!limitesNeigeCourt && !etatNeigeComplet && massifs[0]?.qualiteNeige && (
+                                                                                                        {!texteEnneigement && !texteQualite && massifs[0]?.qualiteNeige && (
                                                                                                             <p className="qualite-bloc">
                                                                                                                 <span className="qualite-bloc-text">{massifs[0].qualiteNeige.trim()}</span>
                                                                                                             </p>

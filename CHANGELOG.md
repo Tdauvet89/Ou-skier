@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.29.2] - 2026-02-28
+
+### Corrigé
+- **Widget Qualité de la neige — Format B (Pyr. Centrales/Orientales)** (`index.html`) : Couserans, Haute-Ariège, Orlu, Capcir-Puymorens, Cerdagne-Canigou utilisent des labels différents (`Enneigement :` + `Qualité de la neige :`) avec le contenu sur les **lignes suivantes**. Le parseur précédent ne gérait pas ce format → description vide. Nouveau `findSection` gère les deux formats :
+  - Format A (Pyr. Occ.) : `Limites skiables : valeur` sur une seule ligne
+  - Format B (Pyr. Cent./Or.) : `Enneigement :\n paragraphe\n\nQualité de la neige :\n paragraphe`
+
+### Modifié
+- **Labels UI** (`index.html`) : "Limites skiables" → **"Enneigement"**, "État de la neige" → **"Qualité de la neige"** pour unifier l'affichage entre les deux formats
+
+---
+
 ## [7.29.1] - 2026-02-28
 
 ### Corrigé
