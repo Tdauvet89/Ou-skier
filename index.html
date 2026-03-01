@@ -19,6 +19,7 @@
         <script src="icons.js?v=7.24.0"></script>
         <script src="weatherCodes.js?v=7.15.0"></script>
         <script src="massifMapping.js?v=7.13.0"></script>
+        <script src="peaks.js?v=1.0.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -919,6 +920,15 @@
                 color: #95a5a6;
             }
 
+            .search-section-label {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: #94a3b8;
+                padding: 10px 2px 4px;
+            }
+
             .resort-list {
                 display: flex;
                 flex-wrap: wrap;
@@ -1402,6 +1412,9 @@
             function AddResortModal({ isOpen, onClose, onAdd, isAtLimit }) {
                 const [searchQuery, setSearchQuery] = useState("");
                 const [searchResults, setSearchResults] = useState([]);
+                const localSuggestions = searchQuery.length >= 2 && typeof searchPeaks === 'function'
+                    ? searchPeaks(searchQuery)
+                    : [];
                 const [isSearching, setIsSearching] = useState(false);
 
                 const searchLocation = async (query) => {
@@ -1467,6 +1480,27 @@
                     onClose();
                 };
 
+                const handleSelectPeak = (peak) => {
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'ajout_secteur', {
+                            'nom_secteur': peak.name,
+                            'region_secteur': peak.massif,
+                            'altitude_secteur': peak.altitude,
+                            'query_secteur': searchQuery,
+                        });
+                    }
+                    onAdd({
+                        name: peak.name,
+                        lat: peak.lat,
+                        lon: peak.lon,
+                        altitude: peak.altitude,
+                        mbUrl: null,
+                    });
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    onClose();
+                };
+
                 if (!isOpen) return null;
 
                 return (
@@ -1515,14 +1549,68 @@
                                     />
 
                                     <div className="search-results">
+                                        {/* Chargement API Météoblue */}
                                         {isSearching && (
                                             <div className="loading-search">
                                                 <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.search}}></span> Recherche en cours...
                                             </div>
                                         )}
 
+                                        {/* Hint : trop court pour l'API mais pas de suggestions locales */}
+                                        {searchQuery.length > 0 &&
+                                            searchQuery.length < 3 &&
+                                            localSuggestions.length === 0 && (
+                                                <div className="no-results">
+                                                    Tapez au moins 3 caractères pour lancer la recherche.
+                                                </div>
+                                            )}
+
+                                        {/* Suggestions locales (base de données pics pyrénéens) */}
+                                        {localSuggestions.length > 0 && (
+                                            <div>
+                                                <div className="search-section-label">Nos secteurs</div>
+                                                {localSuggestions.map((peak, index) => (
+                                                    <div
+                                                        key={`local-${index}`}
+                                                        className="search-result-item"
+                                                        onClick={() => handleSelectPeak(peak)}
+                                                    >
+                                                        <div className="result-name">{peak.name}</div>
+                                                        <div className="result-info">
+                                                            {peak.massif} • Alt: {peak.altitude}m
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Résultats Météoblue */}
+                                        {!isSearching && searchResults.length > 0 && (
+                                            <div>
+                                                {localSuggestions.length > 0 && (
+                                                    <div className="search-section-label">Résultats Météoblue</div>
+                                                )}
+                                                {searchResults.map((result, index) => (
+                                                    <div
+                                                        key={`mb-${index}`}
+                                                        className="search-result-item"
+                                                        onClick={() => handleSelect(result)}
+                                                    >
+                                                        <div className="result-name">{result.name}</div>
+                                                        <div className="result-info">
+                                                            {result.country || ""}{" "}
+                                                            {result.admin1 ? `• ${result.admin1}` : ""}{" "}
+                                                            {result.asl ? `• Alt: ${result.asl}m` : ""}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Aucun résultat nulle part */}
                                         {!isSearching &&
                                             searchResults.length === 0 &&
+                                            localSuggestions.length === 0 &&
                                             searchQuery.length >= 3 && (
                                                 <div className="no-results">
                                                     <p style={{margin:'0 0 6px'}}>Aucun résultat trouvé pour <strong>{searchQuery}</strong>.</p>
@@ -1533,37 +1621,6 @@
                                                     </ul>
                                                 </div>
                                             )}
-
-                                        {!isSearching &&
-                                            searchQuery.length > 0 &&
-                                            searchQuery.length < 3 && (
-                                                <div className="no-results">
-                                                    Tapez au moins 3 caractères pour
-                                                    lancer la recherche.
-                                                </div>
-                                            )}
-
-                                        {!isSearching &&
-                                            searchResults.map((result, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="search-result-item"
-                                                    onClick={() => handleSelect(result)}
-                                                >
-                                                    <div className="result-name">
-                                                        {result.name}
-                                                    </div>
-                                                    <div className="result-info">
-                                                        {result.country || ""}{" "}
-                                                        {result.admin1
-                                                            ? `• ${result.admin1}`
-                                                            : ""}{" "}
-                                                        {result.asl
-                                                            ? `• Alt: ${result.asl}m`
-                                                            : ""}
-                                                    </div>
-                                                </div>
-                                            ))}
                                     </div>
 
                                     <div className="modal-buttons">

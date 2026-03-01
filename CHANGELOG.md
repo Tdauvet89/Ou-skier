@@ -5,6 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.30.0] - 2026-03-01
+
+### Ajouté
+- **Suggestions locales de pics pyrénéens** (`peaks.js`, `index.html`) : nouvelle base de données de ~100 pics et secteurs couvrant les 10 massifs Météo France (Pays-Basque, Aspe-Ossau, Haute-Bigorre, Aure-Louron, Luchonnais, Couserans, Haute-Ariège, Orlu–St-Barthélémy, Capcir-Puymorens, Cerdagne-Canigou). Affichées dès 2 caractères saisis, sans appel API — les utilisateurs ne se retrouvent plus face à un écran vide quand Météoblue ne connaît pas le secteur cherché.
+- **Double section dans la modale de recherche** (`index.html`) : « Nos secteurs » (suggestions locales, instantanées) + « Résultats Météoblue » (API, apparaissent après 3 caractères et 500 ms). L'état vide n'apparaît que si les deux sources sont vides simultanément.
+- **Fonction `searchPeaks()`** (`peaks.js`) : recherche insensible à la casse et aux accents, filtre sur le nom du pic et le nom du massif.
+- **Style `.search-section-label`** (`index.html`) : séparateur visuel léger entre les deux sections de résultats.
+
+### Technique
+- `peaks.js` v1.0.0 (nouveau fichier, chargé après `massifMapping.js`)
+
+---
+
 ## [7.29.2] - 2026-02-28
 
 ### Corrigé
