@@ -5,6 +5,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.30.1] - 2026-03-01
+
+### Supprimé
+- **Suggestions locales dans la modale de recherche** (`index.html`) : retrait de la double source de résultats (« Nos secteurs » + Météoblue). La recherche affiche uniquement les résultats de l'API Météoblue — en attendant des données GA pour décider du bon mode de recherche.
+- **Fonction `handleSelectPeak`** (`index.html`) : supprimée avec les suggestions locales.
+- **Style `.search-section-label`** (`index.html`) : supprimé (plus de sections à séparer).
+
+---
+
 ## [7.30.0] - 2026-03-01
 
 ### Ajouté

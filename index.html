@@ -1412,9 +1412,6 @@
             function AddResortModal({ isOpen, onClose, onAdd, isAtLimit }) {
                 const [searchQuery, setSearchQuery] = useState("");
                 const [searchResults, setSearchResults] = useState([]);
-                const localSuggestions = searchQuery.length >= 2 && typeof searchPeaks === 'function'
-                    ? searchPeaks(searchQuery)
-                    : [];
                 const [isSearching, setIsSearching] = useState(false);
 
                 const searchLocation = async (query) => {
@@ -1480,27 +1477,6 @@
                     onClose();
                 };
 
-                const handleSelectPeak = (peak) => {
-                    if (typeof gtag === 'function') {
-                        gtag('event', 'ajout_secteur', {
-                            'nom_secteur': peak.name,
-                            'region_secteur': peak.massif,
-                            'altitude_secteur': peak.altitude,
-                            'query_secteur': searchQuery,
-                        });
-                    }
-                    onAdd({
-                        name: peak.name,
-                        lat: peak.lat,
-                        lon: peak.lon,
-                        altitude: peak.altitude,
-                        mbUrl: null,
-                    });
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    onClose();
-                };
-
                 if (!isOpen) return null;
 
                 return (
@@ -1556,40 +1532,16 @@
                                             </div>
                                         )}
 
-                                        {/* Hint : trop court pour l'API mais pas de suggestions locales */}
-                                        {searchQuery.length > 0 &&
-                                            searchQuery.length < 3 &&
-                                            localSuggestions.length === 0 && (
-                                                <div className="no-results">
-                                                    Tapez au moins 3 caractères pour lancer la recherche.
-                                                </div>
-                                            )}
-
-                                        {/* Suggestions locales (base de données pics pyrénéens) */}
-                                        {localSuggestions.length > 0 && (
-                                            <div>
-                                                <div className="search-section-label">Nos secteurs</div>
-                                                {localSuggestions.map((peak, index) => (
-                                                    <div
-                                                        key={`local-${index}`}
-                                                        className="search-result-item"
-                                                        onClick={() => handleSelectPeak(peak)}
-                                                    >
-                                                        <div className="result-name">{peak.name}</div>
-                                                        <div className="result-info">
-                                                            {peak.massif} • Alt: {peak.altitude}m
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                        {/* Hint : trop court pour lancer la recherche */}
+                                        {searchQuery.length > 0 && searchQuery.length < 3 && (
+                                            <div className="no-results">
+                                                Tapez au moins 3 caractères pour lancer la recherche.
                                             </div>
                                         )}
 
                                         {/* Résultats Météoblue */}
                                         {!isSearching && searchResults.length > 0 && (
                                             <div>
-                                                {localSuggestions.length > 0 && (
-                                                    <div className="search-section-label">Résultats Météoblue</div>
-                                                )}
                                                 {searchResults.map((result, index) => (
                                                     <div
                                                         key={`mb-${index}`}
@@ -1607,10 +1559,9 @@
                                             </div>
                                         )}
 
-                                        {/* Aucun résultat nulle part */}
+                                        {/* Aucun résultat */}
                                         {!isSearching &&
                                             searchResults.length === 0 &&
-                                            localSuggestions.length === 0 &&
                                             searchQuery.length >= 3 && (
                                                 <div className="no-results">
                                                     <p style={{margin:'0 0 6px'}}>Aucun résultat trouvé pour <strong>{searchQuery}</strong>.</p>
