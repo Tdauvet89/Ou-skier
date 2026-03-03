@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.30.2] - 2026-03-03
+
+### Corrigé
+- **Recherche insensible aux articles français** (`index.html`, `peaks.js`) : "Pic du barassé" ne trouvait rien quand le nom officiel est "Pic de barassé". La fonction `searchLocation` génère désormais une requête alternative sans articles français (du, de, des, le, la, les…) et lance les deux appels API en parallèle. Les résultats sont fusionnés et dédupliqués — la recherche retourne maintenant des résultats même si l'article est erroné.
+- **Base locale pyrénéenne réintégrée comme fallback** (`index.html`) : `searchPeaks` (peaks.js) est à nouveau utilisée comme 3ème source de résultats, fusionnée avec les résultats Météoblue.
+
+### Technique
+- `searchPeaks` (`peaks.js` v1.0.0 → v1.1.0) : ajout du matching sans articles (ex: "Pic du X" trouve "Pic de X" dans la base locale).
+- `peaks.js` v1.0.0 → v1.1.0 (cache bust dans index.html)
+
+---
+
 ## [7.30.1] - 2026-03-01
 
 ### Supprimé

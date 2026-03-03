@@ -19,7 +19,7 @@
         <script src="icons.js?v=7.24.0"></script>
         <script src="weatherCodes.js?v=7.15.0"></script>
         <script src="massifMapping.js?v=7.13.0"></script>
-        <script src="peaks.js?v=1.0.0"></script>
+        <script src="peaks.js?v=1.1.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -1422,18 +1422,68 @@
 
                     setIsSearching(true);
 
-                    try {
-                        const url = `${PROXY_URL}/search?query=${encodeURIComponent(query)}`;
-                        const response = await fetch(url);
-                        const data = await response.json();
+                    // Normalise accents et casse
+                    const normalize = (str) => str.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .trim();
 
-                        if (data.results) {
-                            setSearchResults(data.results.slice(0, 10));
-                            if (data.results.length === 0 && typeof gtag === 'function') {
-                                gtag('event', 'recherche_vide', { 'query_secteur': query });
+                    // Retire les articles français pour générer une requête alternative
+                    // Ex : "Pic du barassé" → "Pic barasse" → trouve "Pic de Barassé"
+                    const stripFrenchArticles = (str) => normalize(str)
+                        .replace(/\b(du|de|des|le|la|les|au|aux)\b/g, " ")
+                        .replace(/\b[dl]'/g, " ")
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+                    const trySearch = async (q) => {
+                        try {
+                            const url = `${PROXY_URL}/search?query=${encodeURIComponent(q)}`;
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            return data.results || [];
+                        } catch (e) {
+                            return [];
+                        }
+                    };
+
+                    try {
+                        const stripped = stripFrenchArticles(query);
+                        const needsAltQuery = stripped !== normalize(query) && stripped.length >= 3;
+
+                        // Requête principale + alternative sans articles (en parallèle si besoin)
+                        const [mainResults, altResults] = await Promise.all([
+                            trySearch(query),
+                            needsAltQuery ? trySearch(stripped) : Promise.resolve([]),
+                        ]);
+
+                        // Recherche locale dans la base pyrénéenne (peaks.js)
+                        const localPeaks = typeof searchPeaks === 'function'
+                            ? searchPeaks(query).map(p => ({
+                                name: p.name,
+                                lat: p.lat,
+                                lon: p.lon,
+                                asl: p.altitude,
+                                admin1: p.massif,
+                                country: "FR",
+                              }))
+                            : [];
+
+                        // Fusion avec déduplication par nom normalisé
+                        const seen = new Set();
+                        const merged = [];
+                        for (const r of [...mainResults, ...altResults, ...localPeaks]) {
+                            const key = normalize(r.name);
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                merged.push(r);
                             }
-                        } else {
-                            console.warn("⚠️ Pas de champ 'results' dans la réponse :", data);
+                        }
+
+                        setSearchResults(merged.slice(0, 10));
+
+                        if (merged.length === 0 && typeof gtag === 'function') {
+                            gtag('event', 'recherche_vide', { 'query_secteur': query });
                         }
                     } catch (err) {
                         console.error("❌ Erreur recherche:", err.message, err);

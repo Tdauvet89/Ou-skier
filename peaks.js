@@ -128,8 +128,27 @@ function searchPeaks(query) {
             .replace(/[\u0300-\u036f]/g, "")
             .trim();
     };
+    // Retire les articles français pour matcher "Pic du X" contre "Pic de X"
+    const stripArticles = function(str) {
+        return normalize(str)
+            .replace(/\b(du|de|des|le|la|les|au|aux)\b/g, " ")
+            .replace(/\b[dl]'/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    };
     const q = normalize(query);
+    const qWords = stripArticles(query).split(" ").filter(function(w) { return w.length > 2; });
     return PEAKS_PYRENEES.filter(function(peak) {
-        return normalize(peak.name).includes(q) || normalize(peak.massif).includes(q);
+        const n = normalize(peak.name);
+        const m = normalize(peak.massif);
+        // Correspondance directe (substring)
+        if (n.includes(q) || m.includes(q)) return true;
+        // Correspondance sans articles : tous les mots significatifs de la requête
+        // doivent être présents dans le nom du pic (ex: "pic barasse" ↔ "pic de barasse")
+        if (qWords.length > 0) {
+            const nStripped = stripArticles(peak.name);
+            return qWords.every(function(w) { return nStripped.includes(w); });
+        }
+        return false;
     }).slice(0, 5);
 }
