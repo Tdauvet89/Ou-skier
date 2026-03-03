@@ -5,6 +5,28 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.31.0] - 2026-03-03
+
+### Corrigé
+- **BERA absent pour Val d'Isère et massifs alpins** (`massifMapping.js`) : `getMassifFromCoords()` ne couvrait que les 10 massifs pyrénéens. Les Alpes, la Corse et Andorre renvoyaient `null`, bloquant l'affichage du BERA dans les widgets qualité de neige et météo comparative.
+
+### Ajouté
+- **Support de tous les massifs de France** (`massifMapping.js`) : ajout de 25 nouveaux massifs Météo France :
+  - **Alpes du Nord** (IDs 1–15) : Chablais, Aravis, Mont-Blanc, Bauges, Beaufortain, Haute-Tarentaise, Chartreuse, Belledonne, Maurienne, Vanoise, Haute-Maurienne, Grandes-Rousses, Thabor, Vercors, Oisans
+  - **Alpes du Sud** (IDs 16–23) : Pelvoux, Queyras, Dévoluy, Champsaur, Embrunais-Parpaillon, Ubaye, Haut-Var Haut-Verdon, Mercantour
+  - **Corse** (IDs 40–41) : Cinto-Rotondo, Renoso-Incudine
+  - **Andorre** (ID 71) : ajouté aux Pyrénées Centrales
+- **Mappings stations → massifs pour les Alpes** : ~80 stations alpines ajoutées dans `STATIONS_MASSIF_MAP` (Val d'Isère → 6, Tignes → 6, Courchevel → 10, Chamonix → 3, L'Alpe d'Huez → 12, etc.)
+- **`MASSIFS_ALL`** : tableau combiné de tous les massifs, exposé sur `window`
+- **`testAllMassifsBRA(proxyUrl)`** : fonction de test en console pour vérifier la réception BERA sur les 38 massifs de France
+- **`getAllMassifs()`** : utilitaire retournant la liste complète
+
+### Technique
+- `massifMapping.js` v7.13.0 → v7.31.0 (cache bust dans index.html)
+- `getMassifFromCoords()` : seuil de proximité élargi de 0.3° à 0.45° (~50 km) pour couvrir les zones de montagne peu denses
+
+---
+
 ## [7.30.2] - 2026-03-03
 
 ### Corrigé
