@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.28.1] - 2026-03-03
+
+### Technique
+- **Dossier `analytics/`** : création d'un espace de documentation dédié à Google Analytics 4 — `README.md` avec liens directs GA4, workflow debug, et explication des custom dimensions
+
+---
+
 ## [7.28.0] - 2026-02-27
 
 ### Ajouté
