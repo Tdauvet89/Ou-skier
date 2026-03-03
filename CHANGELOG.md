@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.31.1] - 2026-03-03
+
+### Corrigé
+- **Bounding box Vanoise trop étroite** (`massifMapping.js`) : le massif Vanoise (ID 10) avait `lonMax: 6.7`, laissant Pralognan-la-Vanoise (~6.72°E) hors de la zone exacte et dépendant du fallback de proximité. Agrandir à `lonMax: 6.75` couvre correctement l'étendue est du massif.
+
+### Technique
+- `massifMapping.js` v7.31.0 → v7.31.1 (cache bust dans index.html)
+
+---
+
 ## [7.31.0] - 2026-03-03
 
 ### Corrigé

@@ -77,7 +77,7 @@ const MASSIFS_ALPES_NORD = [
     id: 10,
     name: "Vanoise",
     zone: "Alpes du Nord",
-    bounds: { latMin: 45.25, latMax: 45.55, lonMin: 6.45, lonMax: 6.7 },
+    bounds: { latMin: 45.25, latMax: 45.55, lonMin: 6.45, lonMax: 6.75 },
   },
   {
     id: 11,
