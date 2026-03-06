@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.1] - 2026-03-06
+
+### Ajouté
+- **Workflow deploy-staging-worker** (`.github/workflows/deploy-staging-worker.yml`) : déploiement automatique du worker proxy staging à chaque push sur `staging` touchant `worker/`
+
+---
+
 ## [7.33.0] - 2026-03-06
 
 ### Ajouté
