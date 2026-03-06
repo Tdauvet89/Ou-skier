@@ -173,6 +173,20 @@
     font-size: 0.85rem;
 }
 
+.tag-staging {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    background: #FFE0F0;
+    color: #C2185B;
+    border-radius: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
 /* === MODALS === */
 .modal-overlay {
     position: fixed;

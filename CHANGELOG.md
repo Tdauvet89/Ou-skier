@@ -5,6 +5,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.2] - 2026-03-06
+
+### Ajouté
+- **Tag staging** (`design-system.css`, `index.html`) : badge rose "STAGING" affiché dans le header à droite du logo, visible uniquement hors domaines de production
+
+### Technique
+- `.tag-staging` ajouté dans `design-system.css`
+- `design-system.html` : showcase mis à jour avec le nouveau tag
+- `design-system.css` `v=7.21.0` → `v=7.33.2` (cache bust)
+
+---
+
 ## [7.33.1] - 2026-03-06
 
 ### Ajouté

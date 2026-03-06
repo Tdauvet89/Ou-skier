@@ -26,7 +26,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.21.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.33.2" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -2262,6 +2262,7 @@
                             <header>
                                 <h1>
                                     <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                    {!PROD_HOSTNAMES.includes(window.location.hostname) && <span className="tag-staging">staging</span>}
                                 </h1>
                             </header>
                             <div className="main-content">
@@ -2280,6 +2281,7 @@
                         <header>
                             <h1>
                                 <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                {!PROD_HOSTNAMES.includes(window.location.hostname) && <span className="tag-staging">staging</span>}
                             </h1>
                             <div className="header-controls">
                                 <a
