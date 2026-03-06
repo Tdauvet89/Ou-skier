@@ -5,6 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.32.0] - 2026-03-06
+
+### Modifié
+- **Cache Météoblue** (`worker/worker.js`, `index.html`) : TTL 2h → 4h pour réduire la consommation de crédits API d'environ 50%
+- **Heure de mise à jour** (`index.html`) : affichée dans le sous-titre des widgets Météoblue ("Données Meteoblue · HH:MM") pour indiquer la fraîcheur des données
+
+### Technique
+- `WEATHER_TTL_SECONDS` 7200 → 14400 (worker.js)
+- Cache key `v=4` → `v=5` (invalidation immédiate du cache Cloudflare existant)
+- `CACHE_VERSION` 13 → 14 (invalidation cache localStorage)
+
+---
+
 ## [7.31.1] - 2026-03-03
 
 ### Corrigé

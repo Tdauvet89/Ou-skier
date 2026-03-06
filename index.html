@@ -1052,11 +1052,12 @@
             const MAX_RESORTS = 5;
 
 
-            // === CACHE MÉTÉO (localStorage, TTL 2h) ===
-            const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 heures
+            // === CACHE MÉTÉO (localStorage, TTL 4h) ===
+            const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 heures
             const CACHE_KEY = "weatherCache";
             // v11 : invalide cache v10 — vitesses vent en m/s converties en km/h (×3.6)
-            const CACHE_VERSION = 13;
+            // v14 : cache 4h (optimisation crédits API Météoblue)
+            const CACHE_VERSION = 14;
 
             function getWeatherCache() {
                 try {
@@ -2335,7 +2336,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Manteau neigeux</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a></p>
+                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && ` · ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`}</p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
@@ -2384,7 +2385,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Chutes de Neige 5 jours</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a></p>
+                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && ` · ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`}</p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">

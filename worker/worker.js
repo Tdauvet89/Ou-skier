@@ -27,7 +27,7 @@ const CORS = {
     "Access-Control-Allow-Headers": "Content-Type",
 };
 
-const WEATHER_TTL_SECONDS = 2 * 60 * 60; // 2h
+const WEATHER_TTL_SECONDS = 4 * 60 * 60; // 4h
 
 // ─── Alertes crédits ─────────────────────────────────────────────────────────
 /** Envoyer un email si les crédits restants tombent sous ce seuil */
@@ -95,9 +95,9 @@ async function handleWeather(url, env, ctx) {
     upstream.searchParams.set("tz", "Europe/Paris"); // dates en heure locale française
 
     // Clé de cache sans la clé API (sûr à logguer / inspecter)
-    // v=4 : force l'invalidation du cache v=3 pour obtenir des réponses fraîches
+    // v=5 : force l'invalidation du cache v=4 (passage TTL 2h → 4h)
     const cacheKey = new Request(
-        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=4`
+        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=5`
     );
     const cache = caches.default;
 
