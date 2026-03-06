@@ -10,5 +10,10 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "env": {
+    "staging": {
+      "name": "infometeomontagne-staging"
+    }
+  }
 }

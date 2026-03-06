@@ -1047,7 +1047,12 @@
             const DEFAULT_RESORTS = [];
 
             // URL du proxy Cloudflare Worker
-            const PROXY_URL = "https://ou-skier-proxy.tdauvet.workers.dev";
+            // En production (infometeomontagne.fr / .pages.dev) → proxy prod
+            // Sur staging ou toute autre URL → proxy staging
+            const PROD_HOSTNAMES = ['infometeomontagne.fr', 'www.infometeomontagne.fr', 'infometeomontagne.pages.dev'];
+            const PROXY_URL = PROD_HOSTNAMES.includes(window.location.hostname)
+                ? "https://ou-skier-proxy.tdauvet.workers.dev"
+                : "https://ou-skier-proxy-staging.tdauvet.workers.dev";
 
             const MAX_RESORTS = 5;
 

@@ -5,6 +5,23 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.0] - 2026-03-06
+
+### Ajouté
+- **Environnement staging** : nouveau workflow CI/CD à deux niveaux — `claude/*` → `staging` → `main`
+  - `PROXY_URL` dynamique dans `index.html` : pointe automatiquement vers le bon worker selon le hostname
+  - Workflow `promote-to-prod.yml` : promotion manuelle staging → production via GitHub Actions UI (confirmation requise)
+
+### Modifié
+- **Auto-merge** (`.github/workflows/auto-merge-claude.yml`) : les branches `claude/*` mergent désormais dans `staging` au lieu de `main`
+
+### Technique
+- `worker/wrangler.toml` : environnement `[env.staging]` ajouté → déploie `ou-skier-proxy-staging`
+- `wrangler.jsonc` : environnement `staging` ajouté → déploie `infometeomontagne-staging`
+- Domaines production whitelistés : `infometeomontagne.fr`, `www.infometeomontagne.fr`, `infometeomontagne.pages.dev`
+
+---
+
 ## [7.32.0] - 2026-03-06
 
 ### Modifié

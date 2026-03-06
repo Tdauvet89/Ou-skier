@@ -1,0 +1,96 @@
+name: Promote Staging to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Taper "prod" pour confirmer la mise en production'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "prod" ]; then
+            echo "❌ Confirmation incorrecte. Taper exactement 'prod'."
+            exit 1
+          fi
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch staging
+        run: git fetch origin staging
+
+      - name: Vérifier qu'il y a des commits à promouvoir
+        run: |
+          NOUVEAUX=$(git log origin/main..origin/staging --oneline)
+          if [ -z "$NOUVEAUX" ]; then
+            echo "ℹ️  Staging est déjà synchronisé avec main — rien à promouvoir."
+            exit 0
+          fi
+          echo "📦 Commits à promouvoir :"
+          echo "$NOUVEAUX"
+
+      # ── RÉCAPITULATIF ─────────────────────────────────────────────────────
+      - name: Générer le récapitulatif de promotion
+        run: |
+          DATE=$(date '+%d/%m/%Y à %H:%M UTC')
+          {
+            echo "## 🚢 Promotion staging → production"
+            echo ""
+            echo "> **${DATE}** — déclenché par @${{ github.actor }}"
+            echo ""
+
+            echo "### 📋 Commits promus"
+            echo ""
+            git log origin/main..origin/staging \
+              --pretty=format:"- \`%h\` %s" \
+              --no-merges
+            echo ""
+            echo ""
+
+            echo "### 📁 Fichiers modifiés"
+            echo ""
+            git diff origin/main..origin/staging --name-only \
+              | grep -v "^$" \
+              | awk '{print "- `" $0 "`"}'
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ── MERGE staging → main ───────────────────────────────────────────────
+      - name: Merger staging dans main
+        run: |
+          git merge origin/staging --no-edit
+          git push origin main
+
+      # ── STATUT FINAL ──────────────────────────────────────────────────────
+      - name: Statut final
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            {
+              echo "---"
+              echo "### ✅ Production mise à jour"
+              echo "Staging intégré dans \`main\` — déploiement Cloudflare en cours."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "---"
+              echo "### ❌ Promotion échouée"
+              echo "Voir les logs ci-dessus pour le détail."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -21,3 +21,14 @@ id = "472efd69ec6f4cf99017c8dd9ad9ac43"
 
 [dev]
 port = 8787
+
+# ─── Environnement staging (branche staging → tests avant production) ─────────
+[env.staging]
+name = "ou-skier-proxy-staging"
+
+[env.staging.triggers]
+crons = ["0 7 * * *"]
+
+[[env.staging.kv_namespaces]]
+binding = "ALERTS_KV"
+id = "472efd69ec6f4cf99017c8dd9ad9ac43"

@@ -1,4 +1,4 @@
-name: Auto-merge Claude branches into main
+name: Auto-merge Claude branches into staging
 
 on:
   push:
@@ -12,10 +12,10 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout staging
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: staging
           fetch-depth: 0
 
       - name: Configure git
@@ -29,13 +29,13 @@ jobs:
       # ── GARDE : CHANGELOG.md obligatoire ──────────────────────────────────
       - name: Vérifier que CHANGELOG.md a été mis à jour
         run: |
-          NOUVEAUX=$(git log origin/main..origin/${{ github.ref_name }} --oneline)
+          NOUVEAUX=$(git log origin/staging..origin/${{ github.ref_name }} --oneline)
           if [ -z "$NOUVEAUX" ]; then
             echo "Aucun nouveau commit à merger — rien à faire."
             exit 0
           fi
 
-          CHANGELOG_MODIFIE=$(git diff origin/main..origin/${{ github.ref_name }} \
+          CHANGELOG_MODIFIE=$(git diff origin/staging..origin/${{ github.ref_name }} \
             --name-only | grep -c "CHANGELOG.md" || true)
 
           if [ "$CHANGELOG_MODIFIE" -eq 0 ]; then
@@ -60,14 +60,14 @@ jobs:
           DATE=$(date '+%d/%m/%Y à %H:%M UTC')
 
           {
-            echo "## 🚀 Déploiement \`${BRANCH}\` → \`main\`"
+            echo "## 🚀 Déploiement \`${BRANCH}\` → \`staging\`"
             echo ""
             echo "> **${DATE}**"
             echo ""
 
             echo "### 📋 Commits mergés"
             echo ""
-            git log origin/main..origin/${BRANCH} \
+            git log origin/staging..origin/${BRANCH} \
               --pretty=format:"- \`%h\` %s" \
               --no-merges
             echo ""
@@ -75,7 +75,7 @@ jobs:
 
             echo "### 📁 Fichiers modifiés"
             echo ""
-            git diff origin/main..origin/${BRANCH} --name-only \
+            git diff origin/staging..origin/${BRANCH} --name-only \
               | grep -v "^$" \
               | awk '{print "- `" $0 "`"}'
             echo ""
@@ -83,17 +83,16 @@ jobs:
 
             echo "### 📝 Notes de version (CHANGELOG.md)"
             echo ""
-            # Extrait la première section du CHANGELOG (jusqu'au premier ---)
             awk '/^---$/{exit} /^## \[/{found=1} found' CHANGELOG.md \
               || echo "_Aucune section trouvée dans CHANGELOG.md_"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
       # ── MERGE ─────────────────────────────────────────────────────────────
-      - name: Merger la branch dans main
+      - name: Merger la branch dans staging
         run: |
           git merge origin/${{ github.ref_name }} --no-edit
-          git push origin main
+          git push origin staging
 
       # ── STATUT FINAL ──────────────────────────────────────────────────────
       - name: Statut final
@@ -103,7 +102,10 @@ jobs:
             {
               echo "---"
               echo "### ✅ Merge réussi"
-              echo "Branch \`${{ github.ref_name }}\` intégrée dans \`main\`."
+              echo "Branch \`${{ github.ref_name }}\` intégrée dans \`staging\`."
+              echo ""
+              echo "> 🧪 Tester sur staging avant de promouvoir en production."
+              echo "> Aller dans **Actions → Promote Staging to Production → Run workflow**"
             } >> "$GITHUB_STEP_SUMMARY"
           else
             {
