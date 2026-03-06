@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.3] - 2026-03-06
+
+### Technique
+- **Workflow deploy-staging-app** (`.github/workflows/deploy-staging-app.yml`) : déploiement automatique de l'app principale (`wrangler deploy --env staging`) à chaque push sur `staging` → disponible sur `infometeomontagne-staging.tdauvet.workers.dev`
+
+---
+
 ## [7.33.2] - 2026-03-06
 
 ### Ajouté

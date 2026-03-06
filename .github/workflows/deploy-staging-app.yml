@@ -1,0 +1,32 @@
+name: Deploy Staging App
+
+on:
+  push:
+    branches:
+      - staging
+    paths-ignore:
+      - 'worker/**'
+      - '.github/workflows/deploy-staging-worker.yml'
+      - '.github/workflows/promote-to-prod.yml'
+      - '.github/workflows/auto-merge-claude.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-staging-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging
+        uses: actions/checkout@v4
+        with:
+          ref: staging
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Deploy App (staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          command: deploy --env staging
