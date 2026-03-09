@@ -5,6 +5,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.29.0] - 2026-03-09
+
+### Ajouté
+- **Tracking `nombre_secteurs_apres`** (`index.html`) : paramètre ajouté à l'event `ajout_secteur` — permet de calculer min/max/moyenne de secteurs configurés par utilisateur
+- **Event `suppression_secteur`** (`index.html`) : nouvel event GA4 déclenché au clic sur "×", avec `nom_secteur` et `nombre_secteurs_apres` — permet d'identifier les secteurs abandonnés
+- **Event `clic_bera`** (`index.html`) : nouvel event GA4 déclenché à l'ouverture du BERA, avec `massif_name` et `source` (`qualite_neige` ou `previsions`) — mesure l'usage de la feature sécurité
+- **Event `clic_notion`** (`index.html`) : nouvel event GA4 sur les 3 liens feedback (header, modal_limite, footer) avec paramètre `source` — identifie d'où vient l'engagement
+
+---
+
 ## [7.28.1] - 2026-03-03
 
 ### Technique

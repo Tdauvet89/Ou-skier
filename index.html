@@ -1379,7 +1379,7 @@
                 return `https://www.meteoblue.com/fr/meteo/semaine/${slug}?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
             }
 
-            function AddResortModal({ isOpen, onClose, onAdd, isAtLimit }) {
+            function AddResortModal({ isOpen, onClose, onAdd, isAtLimit, resortsCount }) {
                 const [searchQuery, setSearchQuery] = useState("");
                 const [searchResults, setSearchResults] = useState([]);
                 const [isSearching, setIsSearching] = useState(false);
@@ -1427,10 +1427,11 @@
                     // --- DÉBUT DE L'AJOUT GOOGLE ANALYTICS ---
                     if (typeof gtag === 'function') {
                         gtag('event', 'ajout_secteur', {
-                            'nom_secteur': location.name || '(vide)',      // ex: Guzet
-                            'region_secteur': location.admin1 || '(inconnue)', // ex: Occitanie
-                            'altitude_secteur': location.asl || null,      // ex: 1400
-                            'query_secteur': searchQuery,                  // ce que l'utilisateur a tapé
+                            'nom_secteur': location.name || '(vide)',
+                            'region_secteur': location.admin1 || '(inconnue)',
+                            'altitude_secteur': location.asl || null,
+                            'query_secteur': searchQuery,
+                            'nombre_secteurs_apres': resortsCount + 1,
                         });
                     }
                     // --- FIN DE L'AJOUT ---
@@ -1470,6 +1471,7 @@
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             style={{textDecoration:'none'}}
+                                            onClick={() => { if (typeof gtag === 'function') gtag('event', 'clic_notion', { 'source': 'modal_limite' }); }}
                                         >
                                             Proposer une amélioration
                                         </a>
@@ -1806,6 +1808,12 @@
                 };
 
                 const removeResort = (index) => {
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'suppression_secteur', {
+                            'nom_secteur': resorts[index]?.name || '(vide)',
+                            'nombre_secteurs_apres': resorts.length - 1,
+                        });
+                    }
                     // Retirer le secteur et ses données
                     const newResorts = resorts.filter((_, i) => i !== index);
                     setResorts(newResorts);
@@ -2192,6 +2200,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{textDecoration: "none"}}
+                                    onClick={() => { if (typeof gtag === 'function') gtag('event', 'clic_notion', { 'source': 'header' }); }}
                                 >
                                     Proposer une amélioration
                                 </a>
@@ -2390,6 +2399,12 @@
                                         });
 
                                         const openBeraModal = (d) => {
+                                            if (typeof gtag === 'function') {
+                                                gtag('event', 'clic_bera', {
+                                                    'massif_name': d.massifName,
+                                                    'source': 'qualite_neige',
+                                                });
+                                            }
                                             setBeraModal({ resortName: d.massifName, detail: d, loading: true });
                                             fetch(`${PROXY_URL}/bra?massif-id=${encodeURIComponent(d.massifId)}&format=pdf`)
                                                 .then(r => r.blob())
@@ -2713,6 +2728,12 @@
                                                                                                           <a className="bera-link" href="#" onClick={(e) => {
                                                                                                               e.preventDefault();
                                                                                                               const detail = braDataForResort._detail;
+                                                                                                              if (typeof gtag === 'function') {
+                                                                                                                  gtag('event', 'clic_bera', {
+                                                                                                                      'massif_name': detail.massifName || resort.name,
+                                                                                                                      'source': 'previsions',
+                                                                                                                  });
+                                                                                                              }
                                                                                                               setBeraModal({ resortName: resort.name, detail, loading: true });
                                                                                                               fetch(
                                                                                                                   `${PROXY_URL}/bra?massif-id=${encodeURIComponent(detail.massifId)}&format=pdf`
@@ -2917,6 +2938,7 @@
                             onClose={() => setIsModalOpen(false)}
                             onAdd={addResort}
                             isAtLimit={resorts.length >= MAX_RESORTS}
+                            resortsCount={resorts.length}
                         />
 
                         {/* Modale BERA — PDF embed */}
@@ -3116,6 +3138,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{textDecoration: "none"}}
+                                    onClick={() => { if (typeof gtag === 'function') gtag('event', 'clic_notion', { 'source': 'footer' }); }}
                                 >
                                     Proposer une amélioration
                                 </a>
