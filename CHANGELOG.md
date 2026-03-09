@@ -5,6 +5,24 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.0] - 2026-03-09
+
+### Modifié
+- **Refonte responsive mobile-first** (`index.html`, `design-system.css`) : 65% des utilisateurs étant sur mobile, refonte de l'expérience responsive pour permettre la comparaison de 3+ secteurs sur un écran 375px
+  - Colonne secteur réduite de 277px → 110px sur mobile : libère 265px pour les colonnes de données (4+ jours visibles sans scroll)
+  - Vue Par Jour : cellules compactes (300px → 140px), icône réduite (100px → 36px), texte condition masqué
+  - Vue horaire : sélecteur de jour (Lun/Mar/Mer/Jeu/Ven) sur mobile → affiche 1 jour à la fois (590px au lieu de 3 200px)
+  - Header : padding réduit à 10px 16px sur mobile, date masquée (non critique)
+  - Taille de police tableau corrigée : 0.75rem (11px) → 0.85rem (13px) — lisible
+  - Altitudes masquées sur mobile (`.sector-altitude`) pour compacter les lignes
+  - Nouveau breakpoint 640px en plus des breakpoints existants (768px, 900px, 1200px)
+
+### Technique
+- `design-system.css` v7.21.0 → v7.22.0 (ajout `@media (max-width: 640px)` pour composants partagés)
+- `index.html` : `selectedHourlyDay` state + détection `isMobile` (window resize listener)
+
+---
+
 ## [7.32.1] - 2026-03-09
 
 ### Modifié

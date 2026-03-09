@@ -26,7 +26,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.21.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.22.0" />
         <style>
             body {
                 font-family: "JetBrains Mono", monospace;
@@ -1008,12 +1008,16 @@
                     font-size: 1.5rem;
                 }
 
+                header {
+                    padding: 12px 20px;
+                }
+
                 .main-content {
                     padding: 20px;
                 }
 
                 table {
-                    font-size: 0.75rem;
+                    font-size: 0.85rem;
                 }
 
                 th,
@@ -1032,6 +1036,95 @@
 
                 .resort-inputs {
                     grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 640px) {
+                /* Header compact */
+                header {
+                    padding: 10px 16px;
+                }
+                .date-display {
+                    display: none;
+                }
+
+                /* Main content */
+                .main-content {
+                    padding: 12px 16px;
+                }
+
+                /* Vue Par Jour : cellules compactes */
+                .day-cell {
+                    min-width: 140px;
+                    padding: 16px 8px;
+                    min-height: auto;
+                }
+                .day-cell-icon {
+                    flex: 0 0 36px;
+                }
+                .day-cell-icon svg,
+                .day-cell-icon img {
+                    width: 28px;
+                    height: 28px;
+                }
+                .day-cell-condition {
+                    display: none;
+                }
+                .cell-temp-main {
+                    font-size: 18px;
+                    line-height: 24px;
+                }
+                .cell-temp-range {
+                    font-size: 12px;
+                }
+                .day-cell-info .info-row {
+                    font-size: 12px;
+                    gap: 4px;
+                }
+
+                /* Vue horaire : sélecteur de jour */
+                .hourly-day-tabs {
+                    display: flex;
+                    gap: 6px;
+                    padding: 10px 16px;
+                    overflow-x: auto;
+                    border-bottom: 1px solid #E1E8F2;
+                    background: #F9FAFC;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: none;
+                }
+                .hourly-day-tabs::-webkit-scrollbar {
+                    display: none;
+                }
+                .hourly-day-tab {
+                    flex-shrink: 0;
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    border: 1px solid #C8D6E5;
+                    background: white;
+                    font-family: "Inter", sans-serif;
+                    font-size: 13px;
+                    cursor: pointer;
+                    color: #314158;
+                    white-space: nowrap;
+                }
+                .hourly-day-tab.active {
+                    background: var(--deep-blue);
+                    color: white;
+                    border-color: var(--deep-blue);
+                }
+
+                /* Cellules horaires compactes */
+                .hourly-cell {
+                    min-width: 60px;
+                    padding: 6px 4px;
+                }
+            }
+
+            /* Sélecteur de jour horaire : caché sur desktop */
+            @media (min-width: 641px) {
+                .hourly-day-tabs {
+                    display: none;
                 }
             }
 
@@ -1682,6 +1775,18 @@
                 const [weatherView, setWeatherView] = useState('day');
                 // hourlyData : tableau de { name, hours: [{ label, icon, desc, temp, windSpeed, windDir, windCardinal, precip, snowCm }] }
                 const [hourlyData, setHourlyData] = useState([]);
+
+                // --- Responsive mobile ---
+                const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+                useEffect(() => {
+                    const handleResize = () => setWindowWidth(window.innerWidth);
+                    window.addEventListener('resize', handleResize);
+                    return () => window.removeEventListener('resize', handleResize);
+                }, []);
+                const isMobile = windowWidth <= 640;
+
+                // Jour sélectionné dans la vue horaire (mobile : affiche 1 jour à la fois)
+                const [selectedHourlyDay, setSelectedHourlyDay] = useState(0);
 
                 // --- Partage par URL ---
                 const [shareCopied, setShareCopied] = useState(false);
@@ -2626,6 +2731,23 @@
                                                 {/* ============================================================
                                                   * CONTENU CONDITIONNEL : vue jour OU vue horaire
                                                   * ============================================================ */}
+                                                {/* Sélecteur de jour pour vue horaire — visible sur mobile uniquement (CSS) */}
+                                                {weatherView === 'hour' && (
+                                                    <div className="hourly-day-tabs">
+                                                        {(hourlyData[0]?.days || Array.from({length: 5}, (_, i) => {
+                                                            const d = new Date(); d.setDate(d.getDate() + i);
+                                                            return { label: d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }) };
+                                                        })).map((day, i) => (
+                                                            <button
+                                                                key={i}
+                                                                className={`hourly-day-tab${selectedHourlyDay === i ? ' active' : ''}`}
+                                                                onClick={() => setSelectedHourlyDay(i)}
+                                                            >
+                                                                {day.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 <div className={`comparison-card-body${weatherView === 'hour' ? ' hourly-view' : ''}`}>
                                             {/* ==================== VUE PAR JOUR ==================== */}
                                             {weatherView === 'day' && (
@@ -2911,6 +3033,11 @@
                                                     background: '#F9FAFC', fontFamily: '"Inter", sans-serif',
                                                 };
 
+                                                /* Sur mobile, on ne montre qu'un seul jour à la fois */
+                                                const visibleDays = isMobile
+                                                    ? refDays.filter((_, i) => i === selectedHourlyDay)
+                                                    : refDays;
+
                                                 return (
                                                 <div className="snow-table">
                                                     <table>
@@ -2918,8 +3045,8 @@
                                                             {/* Ligne 1 : "Secteur" (rowSpan=2) + 1 th par jour */}
                                                             <tr>
                                                                 <th rowSpan={2} style={sectorThStyle}>Secteur</th>
-                                                                {refDays.map((day, dIdx) => {
-                                                                    const sep = dIdx < refDays.length - 1;
+                                                                {visibleDays.map((day, dIdx) => {
+                                                                    const sep = !isMobile && dIdx < visibleDays.length - 1;
                                                                     const cap = day.dayLabelLong.charAt(0).toUpperCase() + day.dayLabelLong.slice(1);
                                                                     return (
                                                                         <th key={dIdx} colSpan={day.hours.length}
@@ -2932,9 +3059,9 @@
                                                             </tr>
                                                             {/* Ligne 2 : créneaux 3h (00h → 21h) pour chaque jour */}
                                                             <tr>
-                                                                {refDays.flatMap((day, dIdx) =>
+                                                                {visibleDays.flatMap((day, dIdx) =>
                                                                     day.hours.map((slot, hIdx) => {
-                                                                        const sep = hIdx === day.hours.length - 1 && dIdx < refDays.length - 1;
+                                                                        const sep = !isMobile && hIdx === day.hours.length - 1 && dIdx < visibleDays.length - 1;
                                                                         return (
                                                                             <th key={`${dIdx}-${hIdx}`}
                                                                                 className={sep ? 'hourly-day-sep' : ''}
@@ -2967,9 +3094,11 @@
                                                                             <span className="sector-altitude"> ({resort.altitude}m)</span>
                                                                         </td>
                                                                         {/* Données 3h : 1 td par créneau, .hourly-day-sep en fin de journée */}
-                                                                        {hourlyResort ? hourlyResort.days.flatMap((day, dIdx) =>
+                                                                        {hourlyResort ? hourlyResort.days
+                                                                            .filter((_, dIdx) => !isMobile || dIdx === selectedHourlyDay)
+                                                                            .flatMap((day, dIdx) =>
                                                                             day.hours.map((h, hIdx) => {
-                                                                                const sep = hIdx === day.hours.length - 1 && dIdx < hourlyResort.days.length - 1;
+                                                                                const sep = !isMobile && hIdx === day.hours.length - 1 && dIdx < hourlyResort.days.length - 1;
                                                                                 return (
                                                                                     <td key={`${dIdx}-${hIdx}`}
                                                                                         className={`hourly-cell${sep ? ' hourly-day-sep' : ''}`}>
