@@ -2336,7 +2336,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Manteau neigeux</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && ` · ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`}</p>
+                                                        <p className="subtitle" style={{margin:0}}>Source : <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && `, mise à jour à ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}).replace(':', 'h')}`}</p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
@@ -2385,7 +2385,7 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>Chutes de Neige 5 jours</h2>
-                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && ` · ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`}</p>
+                                                        <p className="subtitle" style={{margin:0}}>Source : <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a>{lastUpdate && `, mise à jour à ${new Date(lastUpdate).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}).replace(':', 'h')}`}</p>
                                                     </div>
                                                 </div>
                                                 <div className="comparison-card-body">
@@ -2599,7 +2599,7 @@
                                                         <h2 className="title" style={{margin:0}}>
                                                             {weatherView === 'day' ? 'Prévisions météo 5 jours' : "Prévisions météo aujourd'hui (3h)"}
                                                         </h2>
-                                                        <p className="subtitle" style={{margin:0}}>Données <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteobleu</a> et Météo France.</p>
+                                                        <p className="subtitle" style={{margin:0}}>Source : <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a> et Météo France.</p>
                                                     </div>
                                                     {/* Toggle Par jour / Par heure — utilise .toggle / .toggle-btn du design-system */}
                                                     <div className="toggle">

@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.32.1] - 2026-03-09
+
+### Modifié
+- **Sous-texte widgets Meteoblue** (`index.html`) : reformulation de "Données Meteoblue · 23:27" en "Source : Meteoblue, mise à jour à 23h27" — lecture plus naturelle et correction de la typo "Meteobleu"
+
+---
+
 ## [7.32.0] - 2026-03-06
 
 ### Modifié
