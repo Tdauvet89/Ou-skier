@@ -5,6 +5,14 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.33.1] - 2026-03-14
+
+### Corrigé
+- **Widget Qualité de la neige illisible sur mobile** (`index.html`) : le tableau 2 colonnes (Massif | Description) écrasait le texte dans une colonne trop étroite → layout empilé 1 colonne sur mobile (≤640px) : nom du massif en haut, description en dessous, pleine largeur
+- **Scroll horizontal de la page entière sur mobile** (`index.html`) : ajout de `overflow-x: hidden` sur `body` pour empêcher le scroll latéral involontaire
+
+---
+
 ## [7.33.0] - 2026-03-09
 
 ### Modifié

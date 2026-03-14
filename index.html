@@ -34,6 +34,7 @@
                 min-height: 100vh;
                 padding: 0;
                 color: var(--storm-gray);
+                overflow-x: hidden;
             }
 
             .container {
@@ -1118,6 +1119,40 @@
                 .hourly-cell {
                     min-width: 60px;
                     padding: 6px 4px;
+                }
+
+                /* Widget Qualité de la neige : layout empilé 1 colonne */
+                .qualite-neige-table table,
+                .qualite-neige-table thead,
+                .qualite-neige-table tbody,
+                .qualite-neige-table tr,
+                .qualite-neige-table td,
+                .qualite-neige-table th {
+                    display: block;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    max-width: 100% !important;
+                }
+                /* Masquer la colonne de date du header (inutile en 1 colonne) */
+                .qualite-neige-table thead th:not(:first-child) {
+                    display: none;
+                }
+                .qualite-neige-table thead th:first-child {
+                    padding: 12px 16px;
+                }
+                /* Massif : bloc haut */
+                .qualite-neige-table tbody td:first-child {
+                    padding: 16px 16px 8px;
+                    border-bottom: none;
+                }
+                /* Description : bloc bas */
+                .qualite-neige-table tbody td:not(:first-child) {
+                    padding: 0 16px 16px;
+                    border-top: none;
+                }
+                /* Séparateur entre groupes massif+description */
+                .qualite-neige-table tbody tr + tr td:first-child {
+                    border-top: 1px solid #E1E8F2;
                 }
             }
 
