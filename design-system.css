@@ -597,4 +597,16 @@
 
     /* Comparison card header */
     .comparison-card-header { padding: 12px 16px; }
+
+    /* Comparison card body : scroll tactile fluide, pas de padding pour maximiser la largeur */
+    .comparison-card-body {
+        padding: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ombre sur la colonne sticky pour indiquer qu'on peut scroller */
+    .comparison-card .snow-table th:first-child,
+    .comparison-card .snow-table td:first-child {
+        box-shadow: 3px 0 6px rgba(0, 0, 0, 0.08);
+    }
 }
