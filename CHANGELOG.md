@@ -19,7 +19,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
   - Suppression du padding `.comparison-card-body` sur mobile → le tableau utilise toute la largeur
   - Ajout `-webkit-overflow-scrolling: touch` pour scroll fluide iOS
   - Ombre portée sur la colonne sticky (secteur) pour indiquer visuellement que le contenu est scrollable
-  - `overflow-x: hidden` sur `html` + `body` → double protection contre le scroll de page
+  - Suppression de `overflow-x: hidden` sur `html` et `body` → sur iOS Safari, ça bloquait tout scroll horizontal y compris dans les enfants `overflow-x: auto`
+  - Altitudes (`.sector-altitude`) réaffichées sur mobile en 11px — information importante pour l'utilisateur
 
 ### Corrigé
 - **Widget Qualité de la neige illisible sur mobile** (`index.html`) : le tableau 2 colonnes (Massif | Description) écrasait le texte dans une colonne trop étroite → layout empilé 1 colonne sur mobile (≤640px) : nom du massif en haut, description en dessous, pleine largeur
@@ -27,8 +28,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ### Technique
 - `index.html` : CSS restructuré avec commentaires de sections numérotées 1→5
-- `design-system.css` v7.22.0 → v7.25.0 (scroll mobile + overflow hidden + max-width card)
-- Cache bust `?v=7.25.0` dans `index.html` et `design-system.html`
+- `design-system.css` v7.22.0 → v7.26.0 (scroll mobile + altitudes + max-width card)
+- Cache bust `?v=7.26.0` dans `index.html` et `design-system.html`
 
 ---
 
