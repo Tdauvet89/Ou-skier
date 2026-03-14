@@ -598,22 +598,25 @@
     /* Comparison card header */
     .comparison-card-header { padding: 12px 16px; }
 
-    /* Comparison card : empêcher la card de dépasser le viewport.
-       - max-width: 100% contraint la largeur dans un contexte flex-column
-       - overflow: hidden remplace clip pour permettre le scroll tactile
-         dans .comparison-card-body (clip bloque le scroll sur iOS/mobile).
-         position:sticky fonctionne toujours car il est relatif au scroll
-         container le plus proche (.comparison-card-body), pas à la card. */
-    .comparison-card {
-        max-width: 100%;
-        overflow: hidden;
-    }
-
-    /* Comparison card body : scroll tactile fluide, pas de padding pour maximiser la largeur */
+    /* Comparison card body : pas de padding pour maximiser la largeur */
     .comparison-card-body {
         padding: 0;
+    }
+
+    /* Snow table = scroll container sur mobile.
+       - width: 100% (pas max-content) → contraint à la largeur de la card
+       - overflow-x: auto → la table scrolle horizontalement à l'intérieur
+       - position:sticky sur th/td:first-child fonctionne car sticky est
+         relatif au scroll container le plus proche (.snow-table ici) */
+    .comparison-card .snow-table {
+        width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+    }
+
+    /* Seule la <table> garde max-content pour dépasser le .snow-table */
+    .comparison-card .snow-table table {
+        width: max-content;
     }
 
     /* Ombre sur la colonne sticky pour indiquer qu'on peut scroller */

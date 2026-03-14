@@ -12,14 +12,11 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 - **Instructions mobile-first dans CLAUDE.md** : section dédiée avec breakpoints, workflow, checklist — toute modification UI est désormais pensée mobile first (375px)
 
 ### Modifié
-- **Widget Chutes de neige — scroll mobile** (`design-system.css`) : scroll horizontal fluide et contextuel au widget sur mobile — le tableau scrolle à l'intérieur de la card, pas la page entière
-  - `max-width: 100%` sur `.comparison-card` mobile → empêche la card de dépasser le viewport (cause racine du scroll de page)
-  - `overflow: hidden` remplace `overflow: clip` sur `.comparison-card` mobile → `clip` bloquait le scroll tactile dans `.comparison-card-body` sur iOS/mobile
-  - `overflow-x: auto` explicite sur `.comparison-card-body` mobile → scroll horizontal contextuel au widget
-  - Suppression du padding `.comparison-card-body` sur mobile → le tableau utilise toute la largeur
-  - Ajout `-webkit-overflow-scrolling: touch` pour scroll fluide iOS
-  - Ombre portée sur la colonne sticky (secteur) pour indiquer visuellement que le contenu est scrollable
-  - Suppression de `overflow-x: hidden` sur `html` et `body` → sur iOS Safari, ça bloquait tout scroll horizontal y compris dans les enfants `overflow-x: auto`
+- **Widget Chutes de neige — scroll mobile** (`design-system.css`) : scroll horizontal contextuel au widget — le `.snow-table` est le scroll container sur mobile
+  - `.comparison-card .snow-table` : `width: 100%; overflow-x: auto` sur mobile → le div `.snow-table` est le scroll container (pas `.comparison-card-body`)
+  - `.comparison-card .snow-table table` : seule la `<table>` garde `width: max-content` pour dépasser son parent
+  - `position: sticky` sur la 1ère colonne fonctionne car sticky est relatif au scroll container le plus proche (`.snow-table`)
+  - Ombre portée sur la colonne sticky pour indiquer que le contenu est scrollable
   - Altitudes (`.sector-altitude`) réaffichées sur mobile en 11px — information importante pour l'utilisateur
 
 ### Corrigé
@@ -28,8 +25,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ### Technique
 - `index.html` : CSS restructuré avec commentaires de sections numérotées 1→5
-- `design-system.css` v7.22.0 → v7.26.0 (scroll mobile + altitudes + max-width card)
-- Cache bust `?v=7.26.0` dans `index.html` et `design-system.html`
+- `design-system.css` v7.22.0 → v7.27.0 (snow-table = scroll container mobile + altitudes)
+- Cache bust `?v=7.27.0` dans `index.html` et `design-system.html`
 
 ---
 
