@@ -177,6 +177,13 @@
                 .snow-manteau-card {
                     min-width: 100%;
                 }
+                /* width:auto + align-items:flex-start → la card prend max-content (largeur table).
+                   min-width:100% force la card à occuper toute la largeur disponible,
+                   ce qui permet à .snow-table (width:100%) d'avoir une base réelle
+                   et à overflow-x:auto de scroller le tableau en interne. */
+                .snow-chutes-card {
+                    min-width: 100%;
+                }
             }
 
             h2 {
