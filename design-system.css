@@ -599,15 +599,20 @@
     .comparison-card-header { padding: 12px 16px; }
 
     /* Comparison card : empêcher la card de dépasser le viewport.
-       max-width: 100% contraint la largeur dans un contexte flex-column
-       même quand le contenu enfant (table max-content) est plus large. */
+       - max-width: 100% contraint la largeur dans un contexte flex-column
+       - overflow: hidden remplace clip pour permettre le scroll tactile
+         dans .comparison-card-body (clip bloque le scroll sur iOS/mobile).
+         position:sticky fonctionne toujours car il est relatif au scroll
+         container le plus proche (.comparison-card-body), pas à la card. */
     .comparison-card {
         max-width: 100%;
+        overflow: hidden;
     }
 
     /* Comparison card body : scroll tactile fluide, pas de padding pour maximiser la largeur */
     .comparison-card-body {
         padding: 0;
+        overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
