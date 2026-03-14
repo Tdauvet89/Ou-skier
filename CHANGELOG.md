@@ -22,12 +22,12 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 ### Corrigé
 - **Widget Qualité de la neige illisible sur mobile** (`index.html`) : le tableau 2 colonnes (Massif | Description) écrasait le texte dans une colonne trop étroite → layout empilé 1 colonne sur mobile (≤640px) : nom du massif en haut, description en dessous, pleine largeur
 - **Scroll horizontal de la page entière sur mobile** (`index.html`) : ajout de `overflow-x: hidden` sur `body` pour empêcher le scroll latéral involontaire
-- **Widget Chutes de neige — page qui scrolle sur mobile** (`index.html`) : cause racine identifiée — `.snow-tables-row .comparison-card { width: auto }` + `align-items: flex-start` sur la row → la card prenait sa largeur intrinsèque (max-content = largeur de la table), faisant scroller la PAGE au lieu du widget. Fix : `.snow-chutes-card { min-width: 100% }` au breakpoint 900px, identique à `.snow-manteau-card`. La card est désormais contrainte à 100% de la row, `.snow-table (width:100%)` a une base réelle, et `overflow-x: auto` scrolle le tableau en interne.
+- **Widget Chutes de neige — scroll interne mobile** (`index.html`) : problème de spécificité CSS — `.snow-tables-row .comparison-card { width: auto }` (0,1,1) écrasait `.snow-chutes-card { min-width: 100% }` (0,1,0), et `min-width` ne plafonne pas max-content → card prenait ~500px. Fix : `.snow-tables-row .snow-chutes-card { width: 100%; max-width: 100% }` (spécificité 0,2,0) contraint la card à 100% → `.snow-table` a une base réelle → `overflow-x: auto` scrolle le tableau en interne
 
 ### Technique
 - `index.html` : CSS restructuré avec commentaires de sections numérotées 1→5
-- `design-system.css` v7.22.0 → v7.27.0 (snow-table = scroll container mobile + altitudes)
-- Cache bust `?v=7.27.0` dans `index.html` et `design-system.html`
+- `design-system.css` v7.22.0 → v7.28.0
+- Cache bust `?v=7.28.0` dans `index.html` et `design-system.html`
 
 ---
 

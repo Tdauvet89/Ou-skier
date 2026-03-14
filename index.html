@@ -26,7 +26,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.27.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.28.0" />
         <style>
             /* ==========================================================
              * CSS ARCHITECTURE — index.html (overrides locaux)
@@ -177,12 +177,16 @@
                 .snow-manteau-card {
                     min-width: 100%;
                 }
-                /* width:auto + align-items:flex-start → la card prend max-content (largeur table).
-                   min-width:100% force la card à occuper toute la largeur disponible,
-                   ce qui permet à .snow-table (width:100%) d'avoir une base réelle
-                   et à overflow-x:auto de scroller le tableau en interne. */
-                .snow-chutes-card {
-                    min-width: 100%;
+                /* Problème de spécificité :
+                   .snow-tables-row .comparison-card { width: auto } = 0,1,1
+                   .snow-chutes-card { min-width: 100% }             = 0,1,0
+                   → width:auto gagne ET min-width ne plafonne pas → card = max-content (~500px)
+                   Fix : .snow-tables-row .snow-chutes-card = 0,2,0 > 0,1,1
+                   width + max-width à 100% → card contrainte à la largeur de la row.
+                   Ensuite .snow-table (width:100%) a une base réelle → overflow-x:auto scrolle. */
+                .snow-tables-row .snow-chutes-card {
+                    width: 100%;
+                    max-width: 100%;
                 }
             }
 
