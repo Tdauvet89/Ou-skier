@@ -13,9 +13,11 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ### Modifié
 - **Widget Chutes de neige — scroll mobile** (`design-system.css`) : scroll horizontal fluide et contextuel au widget sur mobile — le tableau scrolle à l'intérieur de la card, pas la page entière
+  - `max-width: 100%` sur `.comparison-card` mobile → empêche la card de dépasser le viewport (cause racine du scroll de page)
   - Suppression du padding `.comparison-card-body` sur mobile → le tableau utilise toute la largeur
   - Ajout `-webkit-overflow-scrolling: touch` pour scroll fluide iOS
   - Ombre portée sur la colonne sticky (secteur) pour indiquer visuellement que le contenu est scrollable
+  - `overflow-x: hidden` sur `html` + `body` → double protection contre le scroll de page
 
 ### Corrigé
 - **Widget Qualité de la neige illisible sur mobile** (`index.html`) : le tableau 2 colonnes (Massif | Description) écrasait le texte dans une colonne trop étroite → layout empilé 1 colonne sur mobile (≤640px) : nom du massif en haut, description en dessous, pleine largeur
@@ -23,8 +25,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ### Technique
 - `index.html` : CSS restructuré avec commentaires de sections numérotées 1→5
-- `design-system.css` v7.22.0 → v7.23.0 (scroll mobile + ombre sticky column)
-- Cache bust `?v=7.23.0` dans `index.html` et `design-system.html`
+- `design-system.css` v7.22.0 → v7.24.0 (scroll mobile + max-width card + ombre sticky column)
+- Cache bust `?v=7.24.0` dans `index.html` et `design-system.html`
 
 ---
 

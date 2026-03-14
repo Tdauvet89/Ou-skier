@@ -598,6 +598,13 @@
     /* Comparison card header */
     .comparison-card-header { padding: 12px 16px; }
 
+    /* Comparison card : empêcher la card de dépasser le viewport.
+       max-width: 100% contraint la largeur dans un contexte flex-column
+       même quand le contenu enfant (table max-content) est plus large. */
+    .comparison-card {
+        max-width: 100%;
+    }
+
     /* Comparison card body : scroll tactile fluide, pas de padding pour maximiser la largeur */
     .comparison-card-body {
         padding: 0;
