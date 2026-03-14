@@ -2,6 +2,13 @@
    OU-SKIER — DESIGN SYSTEM CSS
    Source unique de vérité pour les composants UI.
    Importé par index.html et design-system.html.
+   ============================================================
+   ARCHITECTURE :
+     1. FONTS & TOKENS     — @font-face, variables CSS
+     2. COMPOSANTS BASE    — styles desktop par défaut
+     3. RESPONSIVE ≤640px  — overrides MOBILE (65% du trafic)
+
+   Règle : penser MOBILE FIRST. Tester sur 375px avant desktop.
    ============================================================ */
 
 /* === FONT FACE === */
@@ -565,10 +572,9 @@
 }
 
 /* =====================================================
- * MOBILE-FIRST — breakpoint 640px
- * Objectif : permettre la comparaison de 3+ secteurs
- * sur un écran 375px en réduisant la colonne secteur
- * de 277px → 110px (libère 265px pour les données).
+ * 3. RESPONSIVE ≤640px — MOBILE (65% du trafic)
+ * Breakpoint principal. Tous les composants partagés
+ * doivent être lisibles sur un écran de 375px.
  * ===================================================== */
 @media (max-width: 640px) {
     /* Colonne secteur compacte */

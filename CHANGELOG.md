@@ -5,11 +5,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
-## [7.33.1] - 2026-03-14
+## [7.34.0] - 2026-03-14
+
+### Ajouté
+- **Architecture CSS mobile-first** (`index.html`, `design-system.css`, `CLAUDE.md`) : réorganisation du CSS en sections numérotées (Base/Desktop → ≤1200px → ≤768px → ≤640px Mobile → ≥641px Desktop-only) pour itérer facilement sur les versions mobile et web
+- **Instructions mobile-first dans CLAUDE.md** : section dédiée avec breakpoints, workflow, checklist — toute modification UI est désormais pensée mobile first (375px)
 
 ### Corrigé
 - **Widget Qualité de la neige illisible sur mobile** (`index.html`) : le tableau 2 colonnes (Massif | Description) écrasait le texte dans une colonne trop étroite → layout empilé 1 colonne sur mobile (≤640px) : nom du massif en haut, description en dessous, pleine largeur
 - **Scroll horizontal de la page entière sur mobile** (`index.html`) : ajout de `overflow-x: hidden` sur `body` pour empêcher le scroll latéral involontaire
+
+### Technique
+- `index.html` : CSS restructuré avec commentaires de sections numérotées 1→5
+- `design-system.css` : en-tête architecture + section 3 (mobile) documentée
 
 ---
 

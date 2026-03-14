@@ -28,6 +28,24 @@
         />
         <link rel="stylesheet" href="design-system.css?v=7.22.0" />
         <style>
+            /* ==========================================================
+             * CSS ARCHITECTURE — index.html (overrides locaux)
+             * ==========================================================
+             * Organisation :
+             *   1. BASE / DESKTOP       — styles par défaut (toutes tailles)
+             *   2. RESPONSIVE ≤1200px   — tablette large
+             *   3. RESPONSIVE ≤768px    — tablette / petit écran
+             *   4. RESPONSIVE ≤640px    — MOBILE (prioritaire, 65% du trafic)
+             *   5. DESKTOP-ONLY ≥641px  — masquage d'éléments mobiles sur desktop
+             *
+             * Règle : penser MOBILE FIRST. Tester sur 375px avant desktop.
+             * Les styles de base (design-system.css) sont partagés.
+             * Les overrides spécifiques à index.html vont ici.
+             * ========================================================== */
+
+            /* ----------------------------------------------------------
+             * 1. BASE / DESKTOP
+             * ---------------------------------------------------------- */
             body {
                 font-family: "JetBrains Mono", monospace;
                 background: white;
@@ -130,7 +148,7 @@
                 animation-delay: 0.2s;
             }
 
-            /* Layout côte-à-côte pour les 2 tableaux neige */
+            /* --- Layout tableaux neige --- */
             .snow-tables-row {
                 display: flex;
                 gap: 24px;
@@ -177,7 +195,7 @@
             }
 
 
-            /* Generic table styles — overridden by .snow-table for snow section */
+            /* --- Tableau générique (overridden par .snow-table) --- */
             table {
                 width: 100%;
                 border-collapse: separate;
@@ -307,7 +325,7 @@
                 margin-bottom: 5px;
             }
 
-            /* Toggle View Switch — Surfline-style pill */
+            /* --- Toggle / Vue Switch --- */
             .view-toggle-container {
                 display: flex;
                 justify-content: space-between;
@@ -453,7 +471,7 @@
                 color: #0f3fa0;
             }
 
-            /* Widget Qualité de la neige */
+            /* --- Widget Qualité de la neige --- */
             /* Annule le width:max-content du snow-table générique : pas de scroll horizontal ici */
             .qualite-neige-table,
             .qualite-neige-table table {
@@ -960,6 +978,9 @@
                 color: white;
             }
 
+            /* ----------------------------------------------------------
+             * 2. RESPONSIVE ≤1200px — Tablette large
+             * ---------------------------------------------------------- */
             @media (max-width: 1200px) {
                 .logo-text-primary {
                     font-size: 1.6rem;
@@ -986,6 +1007,9 @@
                 }
             }
 
+            /* ----------------------------------------------------------
+             * 3. RESPONSIVE ≤768px — Tablette / petit écran
+             * ---------------------------------------------------------- */
             @media (max-width: 768px) {
                 body {
                     padding: 10px;
@@ -1040,6 +1064,11 @@
                 }
             }
 
+            /* ----------------------------------------------------------
+             * 4. RESPONSIVE ≤640px — MOBILE (65% du trafic)
+             * Breakpoint principal. Tous les widgets doivent être
+             * lisibles et utilisables sur un écran de 375px.
+             * ---------------------------------------------------------- */
             @media (max-width: 640px) {
                 /* Header compact */
                 header {
@@ -1156,7 +1185,9 @@
                 }
             }
 
-            /* Sélecteur de jour horaire : caché sur desktop */
+            /* ----------------------------------------------------------
+             * 5. DESKTOP-ONLY ≥641px — Masquage d'éléments mobiles
+             * ---------------------------------------------------------- */
             @media (min-width: 641px) {
                 .hourly-day-tabs {
                     display: none;

@@ -72,6 +72,61 @@ Quand tu modifies `design-system.css`, `icons.js`, `weatherCodes.js` ou `massifM
 - `icons.js` — Bibliothèque SVG (weatherSvg, uiSvg, windArrowSvg)
 - `DESIGN_SYSTEM.md` — Documentation technique
 
+## Approche Mobile First (OBLIGATOIRE)
+
+65% des utilisateurs sont sur mobile. **Chaque modification UI doit être pensée mobile first.**
+
+### Règle absolue
+
+1. **Concevoir pour 375px d'abord**, puis enrichir pour desktop
+2. **Tester visuellement sur mobile** avant de valider un changement UI
+3. **Aucun scroll horizontal** sur la page : tout widget doit tenir dans 375px de large
+4. **Texte lisible** : minimum 12px, pas de troncature de mots sur mobile
+
+### Architecture CSS responsive
+
+Les styles sont organisés en **sections numérotées** pour faciliter l'itération :
+
+```
+┌─ design-system.css ─────────────────────┐
+│ 1. FONTS & TOKENS                       │
+│ 2. COMPOSANTS BASE (desktop)            │
+│ 3. RESPONSIVE ≤640px (MOBILE)           │
+└─────────────────────────────────────────┘
+
+┌─ index.html <style> ────────────────────┐
+│ 1. BASE / DESKTOP                       │
+│ 2. RESPONSIVE ≤1200px (tablette large)  │
+│ 3. RESPONSIVE ≤768px  (tablette)        │
+│ 4. RESPONSIVE ≤640px  (MOBILE) ← ICI   │
+│ 5. DESKTOP-ONLY ≥641px                  │
+└─────────────────────────────────────────┘
+```
+
+### Breakpoints
+
+| Breakpoint | Cible | Fichier(s) |
+|------------|-------|------------|
+| ≤640px | **Mobile** (prioritaire) | `design-system.css` + `index.html` |
+| ≤768px | Tablette | `index.html` |
+| ≤900px | Layout tableaux neige | `index.html` |
+| ≤1200px | Tablette large | `index.html` |
+| ≥641px | Desktop-only (masquer éléments mobiles) | `index.html` |
+
+### Workflow pour modifier un widget
+
+1. **Ouvrir la section 4 (≤640px)** dans `index.html` pour les overrides locaux
+2. **Ouvrir la section 3 (≤640px)** dans `design-system.css` pour les composants partagés
+3. **Ajouter les styles mobile** dans la bonne section
+4. **Vérifier** que le widget tient dans 375px sans scroll horizontal
+
+### Checklist mobile avant chaque commit UI
+
+- [ ] Le widget est lisible sur 375px de large
+- [ ] Pas de scroll horizontal sur la page
+- [ ] Les textes ne sont pas tronqués mot par mot
+- [ ] Les styles mobiles sont dans la section ≤640px (pas mélangés avec le desktop)
+
 ## Architecture du projet
 
 - **index.html** — App principale (React/HTM, single-page)
