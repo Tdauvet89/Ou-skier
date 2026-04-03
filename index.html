@@ -2833,7 +2833,18 @@
                 const processCloudDataForResort = (resort) => {
                     if (!resort.data) return null;
                     const d = resort.data.data_1h ?? resort.data.data_3h;
-                    if (!d || !d.time || !d.lowclouds) return null;
+                    if (!d || !d.time) {
+                        console.warn(`[Cloud] ${resort.name} : pas de data_3h`);
+                        return null;
+                    }
+
+                    // Vérifier si les champs cloud sont présents (nécessite clouds-3h côté worker)
+                    if (!d.lowclouds) {
+                        const keys = Object.keys(d).sort().join(', ');
+                        console.warn(`[Cloud] ${resort.name} : champ 'lowclouds' absent dans data_3h. Clés présentes : ${keys}`);
+                        console.warn(`[Cloud] → Le worker doit être redéployé avec le package clouds-3h`);
+                        return null;
+                    }
 
                     const is1h = !!resort.data.data_1h;
                     const dayMap = new Map();
