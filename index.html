@@ -2195,22 +2195,22 @@
 
                 const meteoblueUrl = getMeteoblueUrl(resort);
 
-                return html`
+                return (
                     <div className="cloud-meteogram-card">
                         <div className="cloud-meteogram-header">
-                            <a href=${meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
-                                <span className="sector-name">${resort.name}</span>
+                            <a href={meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                <span className="sector-name">{resort.name}</span>
                             </a>
-                            <span className="sector-altitude"> (${resort.altitude}m)</span>
+                            <span className="sector-altitude"> ({resort.altitude}m)</span>
                         </div>
                         <div className="cloud-meteogram-canvas-wrap">
-                            ${cloudResort
-                                ? html`<canvas ref=${canvasRef} className="cloud-meteogram-canvas"></canvas>`
-                                : html`<div className="cloud-meteogram-empty">Données nuages non disponibles</div>`
+                            {cloudResort
+                                ? <canvas ref={canvasRef} className="cloud-meteogram-canvas"></canvas>
+                                : <div className="cloud-meteogram-empty">Données nuages non disponibles</div>
                             }
                         </div>
                     </div>
-                `;
+                );
             }
 
             function MountainWeatherApp() {
@@ -3728,14 +3728,16 @@
                                                                 ? cloudData[idx]
                                                                 : cloudData.find(c => c.name === resort.name);
 
-                                                        return html`<${CloudMeteogram}
-                                                            key=${idx}
-                                                            resort=${resort}
-                                                            cloudResort=${cloudResort}
-                                                            visibleDays=${visibleDays}
-                                                            isMobile=${isMobile}
-                                                            selectedHourlyDay=${selectedHourlyDay}
-                                                        />`;
+                                                        return (
+                                                            <CloudMeteogram
+                                                                key={idx}
+                                                                resort={resort}
+                                                                cloudResort={cloudResort}
+                                                                visibleDays={visibleDays}
+                                                                isMobile={isMobile}
+                                                                selectedHourlyDay={selectedHourlyDay}
+                                                            />
+                                                        );
                                                     }) : (
                                                         <div style={{textAlign:'center', color:'#aaa', padding:'32px'}}>Aucun secteur à afficher</div>
                                                     )}
