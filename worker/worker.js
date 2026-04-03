@@ -84,8 +84,9 @@ async function handleWeather(url, env, ctx) {
     // URL upstream avec la clé API (jamais exposée au client)
     // Packages : basic-day + snowice-day + wind-day (vues journalières)
     //          + basic-3h (vue horaire 3h : pictocode, temp, vent, précipitations)
+    //          + clouds-3h (couverture nuageuse 3h : low/mid/high clouds, totalcloudcover)
     const upstream = new URL(
-        "https://my.meteoblue.com/packages/basic-day_snowice-day_wind-day_basic-3h"
+        "https://my.meteoblue.com/packages/basic-day_snowice-day_wind-day_basic-3h_clouds-3h"
     );
     upstream.searchParams.set("apikey", env.METEOBLUE_API_KEY);
     upstream.searchParams.set("lat", lat);
@@ -95,9 +96,9 @@ async function handleWeather(url, env, ctx) {
     upstream.searchParams.set("tz", "Europe/Paris"); // dates en heure locale française
 
     // Clé de cache sans la clé API (sûr à logguer / inspecter)
-    // v=5 : force l'invalidation du cache v=4 (passage TTL 2h → 4h)
+    // v=6 : force l'invalidation du cache v=5 (ajout package clouds-3h)
     const cacheKey = new Request(
-        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=5`
+        `https://cache.ou-skier/weather?lat=${lat}&lon=${lon}&asl=${asl}&v=6`
     );
     const cache = caches.default;
 

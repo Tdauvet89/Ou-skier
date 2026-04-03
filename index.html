@@ -26,7 +26,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.28.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.35.0" />
         <style>
             /* ==========================================================
              * CSS ARCHITECTURE — index.html (overrides locaux)
@@ -988,6 +988,83 @@
                 color: white;
             }
 
+            /* === CLOUD METEOGRAM === */
+            .cloud-meteogram-container {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .cloud-legend {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 8px 16px;
+                font-family: "Inter", sans-serif;
+                font-size: 12px;
+                color: #5E7690;
+                flex-wrap: wrap;
+            }
+            .cloud-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .cloud-legend-swatch {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                border-radius: 3px;
+                opacity: 0.7;
+            }
+            .cloud-legend-scale {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                margin-left: auto;
+                font-size: 10px;
+            }
+            .cloud-legend-gradient {
+                width: 60px;
+                height: 12px;
+                border-radius: 3px;
+                background: linear-gradient(to right, transparent, #b0b8c4);
+            }
+
+            .cloud-meteogram-card {
+                background: #fff;
+                border-radius: 12px;
+                overflow: hidden;
+                border: 1px solid #E5E7EF;
+            }
+            .cloud-meteogram-header {
+                padding: 10px 16px;
+                background: #F9FAFC;
+                border-bottom: 1px solid #E5E7EF;
+                font-family: "Garnett", sans-serif;
+            }
+            .cloud-meteogram-canvas-wrap {
+                position: relative;
+                width: 100%;
+                height: 140px;
+            }
+            .cloud-meteogram-canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            .cloud-meteogram-empty {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                color: #aaa;
+                font-size: 12px;
+                font-family: "Inter", sans-serif;
+                background: #1a1a2e;
+            }
+
             /* ----------------------------------------------------------
              * 2. RESPONSIVE ≤1200px — Tablette large
              * ---------------------------------------------------------- */
@@ -1193,6 +1270,27 @@
                 .qualite-neige-table tbody tr + tr td:first-child {
                     border-top: 1px solid #E1E8F2;
                 }
+
+                /* Cloud meteogram mobile */
+                .cloud-legend {
+                    gap: 8px;
+                    padding: 6px 12px;
+                    font-size: 11px;
+                }
+                .cloud-legend-scale {
+                    margin-left: 0;
+                }
+                .cloud-meteogram-canvas-wrap {
+                    height: 110px;
+                }
+                .cloud-meteogram-header {
+                    padding: 8px 12px;
+                    font-size: 14px;
+                }
+                .toggle.toggle-3 {
+                    width: 100%;
+                    max-width: 302px;
+                }
             }
 
             /* ----------------------------------------------------------
@@ -1210,7 +1308,7 @@
         <div id="root"></div>
 
         <script type="text/babel">
-            const { useState, useEffect } = React;
+            const { useState, useEffect, useRef, useCallback } = React;
 
             // Configuration des secteurs de ski avec coordonnées
             const DEFAULT_RESORTS = [];
@@ -1824,6 +1922,297 @@
                 } catch (e) { return null; }
             }
 
+            /**
+             * CloudMeteogram — Composant Canvas 2D pour afficher la couverture nuageuse.
+             * Rendu : 3 bandes (high 8-15km, mid 4-8km, low 0-4km) avec interpolation
+             * bilinéaire pour un aspect lisse type Meteoblue.
+             *
+             * Props : resort, cloudResort, visibleDays, isMobile, selectedHourlyDay
+             */
+            function CloudMeteogram({ resort, cloudResort, visibleDays, isMobile, selectedHourlyDay }) {
+                const canvasRef = useRef(null);
+
+                // Altitude labels for the Y axis
+                const layers = [
+                    { key: 'high', label: '15 km', labelShort: 'H' },
+                    { key: 'mid',  label: '8 km',  labelShort: 'M' },
+                    { key: 'low',  label: '4 km',  labelShort: 'B' },
+                    { key: 'ground', label: '0',   labelShort: '0' },
+                ];
+
+                const drawMeteogram = useCallback(() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas || !cloudResort) return;
+
+                    const dpr = window.devicePixelRatio || 1;
+                    const container = canvas.parentElement;
+                    const displayWidth = container.clientWidth;
+                    const displayHeight = container.clientHeight || 120;
+
+                    canvas.width = displayWidth * dpr;
+                    canvas.height = displayHeight * dpr;
+                    canvas.style.width = displayWidth + 'px';
+                    canvas.style.height = displayHeight + 'px';
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(dpr, dpr);
+
+                    const W = displayWidth;
+                    const H = displayHeight;
+
+                    // Margins for labels
+                    const marginLeft = isMobile ? 28 : 44;
+                    const marginRight = 4;
+                    const marginTop = 2;
+                    const marginBottom = 20;
+
+                    const plotW = W - marginLeft - marginRight;
+                    const plotH = H - marginTop - marginBottom;
+
+                    // Clear
+                    ctx.clearRect(0, 0, W, H);
+
+                    // Background (sky gradient: dark blue at top, lighter near ground)
+                    const skyGrad = ctx.createLinearGradient(marginLeft, marginTop, marginLeft, marginTop + plotH);
+                    skyGrad.addColorStop(0, '#1a1a2e');
+                    skyGrad.addColorStop(0.3, '#16213e');
+                    skyGrad.addColorStop(0.7, '#1a1a2e');
+                    skyGrad.addColorStop(1, '#2d1f0e');
+                    ctx.fillStyle = skyGrad;
+                    ctx.fillRect(marginLeft, marginTop, plotW, plotH);
+
+                    // Collect all visible slots into a flat array
+                    const days = cloudResort.days.filter((_, i) =>
+                        !isMobile || i === selectedHourlyDay
+                    );
+                    const allSlots = [];
+                    days.forEach((day, dIdx) => {
+                        day.hours.forEach((h, hIdx) => {
+                            allSlots.push({ ...h, dayIdx: dIdx, slotInDay: hIdx, totalInDay: day.hours.length });
+                        });
+                    });
+
+                    if (allSlots.length === 0) return;
+
+                    const slotW = plotW / allSlots.length;
+
+                    // Draw day separators
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    ctx.lineWidth = 1;
+                    let cumSlots = 0;
+                    days.forEach((day, dIdx) => {
+                        if (dIdx > 0) {
+                            const x = marginLeft + cumSlots * slotW;
+                            ctx.beginPath();
+                            ctx.moveTo(x, marginTop);
+                            ctx.lineTo(x, marginTop + plotH);
+                            ctx.stroke();
+                        }
+                        cumSlots += day.hours.length;
+                    });
+
+                    // Draw day/night background bands
+                    allSlots.forEach((slot, i) => {
+                        const x = marginLeft + i * slotW;
+                        const isNight = slot.hour < 6 || slot.hour >= 21;
+                        if (isNight) {
+                            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                            ctx.fillRect(x, marginTop, slotW, plotH);
+                        }
+                    });
+
+                    // === CLOUD RENDERING WITH INTERPOLATION ===
+                    // We create a high-res grid and use bilinear interpolation
+                    // between the 3h data points for smooth blob rendering.
+
+                    // The 3 altitude bands (from top to bottom in the plot):
+                    // high: 0-33% of plotH, mid: 33-66%, low: 66-100%
+                    const bandRanges = [
+                        { key: 'high', y0: 0, y1: 0.33 },
+                        { key: 'mid',  y0: 0.33, y1: 0.66 },
+                        { key: 'low',  y0: 0.66, y1: 1.0 },
+                    ];
+
+                    // Create interpolated image
+                    const imgW = Math.ceil(plotW);
+                    const imgH = Math.ceil(plotH);
+                    const imgData = ctx.createImageData(imgW, imgH);
+                    const pixels = imgData.data;
+
+                    // For each pixel in the plot area
+                    for (let py = 0; py < imgH; py++) {
+                        // Normalized Y position (0 = top = high altitude, 1 = bottom = ground)
+                        const ny = py / imgH;
+
+                        // Determine which band and where within it
+                        let bandKey = 'high';
+                        let bandProgress = 0; // 0 = top of band, 1 = bottom
+                        for (const br of bandRanges) {
+                            if (ny >= br.y0 && ny < br.y1) {
+                                bandKey = br.key;
+                                bandProgress = (ny - br.y0) / (br.y1 - br.y0);
+                                break;
+                            }
+                        }
+
+                        // Adjacent band for vertical blending at edges
+                        let adjacentKey = null;
+                        let blendFactor = 0;
+                        const edgeZone = 0.25; // blend zone at band boundaries
+
+                        if (bandProgress < edgeZone) {
+                            // Top edge of band — blend with band above
+                            const bandIdx = bandRanges.findIndex(b => b.key === bandKey);
+                            if (bandIdx > 0) {
+                                adjacentKey = bandRanges[bandIdx - 1].key;
+                                blendFactor = 1 - (bandProgress / edgeZone);
+                            }
+                        } else if (bandProgress > (1 - edgeZone)) {
+                            // Bottom edge of band — blend with band below
+                            const bandIdx = bandRanges.findIndex(b => b.key === bandKey);
+                            if (bandIdx < bandRanges.length - 1) {
+                                adjacentKey = bandRanges[bandIdx + 1].key;
+                                blendFactor = (bandProgress - (1 - edgeZone)) / edgeZone;
+                            }
+                        }
+
+                        for (let px = 0; px < imgW; px++) {
+                            // Normalized X position — map to slot index (continuous)
+                            const nx = px / imgW * allSlots.length;
+
+                            // Bilinear interpolation between adjacent time slots
+                            const slotIdx = Math.floor(nx);
+                            const frac = nx - slotIdx;
+                            const s0 = allSlots[Math.min(slotIdx, allSlots.length - 1)];
+                            const s1 = allSlots[Math.min(slotIdx + 1, allSlots.length - 1)];
+
+                            // Interpolate cloud value for this band
+                            const v0 = s0[bandKey] || 0;
+                            const v1 = s1[bandKey] || 0;
+                            let cloudVal = v0 + (v1 - v0) * frac;
+
+                            // Vertical blending with adjacent band
+                            if (adjacentKey && blendFactor > 0) {
+                                const a0 = s0[adjacentKey] || 0;
+                                const a1 = s1[adjacentKey] || 0;
+                                const adjVal = a0 + (a1 - a0) * frac;
+                                cloudVal = cloudVal * (1 - blendFactor) + adjVal * blendFactor;
+                            }
+
+                            // Map cloud coverage to pixel opacity
+                            // Cloud color: light gray-white, opacity varies with coverage
+                            const alpha = cloudVal / 100;
+
+                            if (alpha > 0.02) {
+                                // Cloud color varies by altitude (lighter = higher)
+                                let r, g, b;
+                                if (bandKey === 'high' || (adjacentKey === 'high' && blendFactor > 0.5)) {
+                                    r = 200; g = 205; b = 215; // cirrus: bright white-gray
+                                } else if (bandKey === 'low' || (adjacentKey === 'low' && blendFactor > 0.5)) {
+                                    r = 140; g = 150; b = 165; // stratus: darker gray
+                                } else {
+                                    r = 170; g = 178; b = 190; // alto: medium gray
+                                }
+
+                                const pidx = (py * imgW + px) * 4;
+                                pixels[pidx]     = r;
+                                pixels[pidx + 1] = g;
+                                pixels[pidx + 2] = b;
+                                pixels[pidx + 3] = Math.round(alpha * 220);
+                            }
+                        }
+                    }
+
+                    ctx.putImageData(imgData, marginLeft, marginTop);
+
+                    // === AXIS LABELS ===
+                    // Y axis: altitude labels
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = `${isMobile ? 9 : 11}px Inter, sans-serif`;
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+
+                    const altLabels = [
+                        { label: isMobile ? '15' : '15 km', y: 0 },
+                        { label: isMobile ? '8'  : '8 km',  y: 0.33 },
+                        { label: isMobile ? '4'  : '4 km',  y: 0.66 },
+                        { label: isMobile ? '0'  : '0 km',  y: 1.0 },
+                    ];
+                    altLabels.forEach(a => {
+                        ctx.fillText(a.label, marginLeft - 4, marginTop + a.y * plotH);
+                    });
+
+                    // X axis: time labels (under the plot)
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = `${isMobile ? 9 : 10}px Inter, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+
+                    // Show every Nth label to avoid overlap
+                    const labelInterval = isMobile ? 2 : (allSlots.length > 24 ? 2 : 1);
+                    allSlots.forEach((slot, i) => {
+                        if (i % labelInterval !== 0) return;
+                        const x = marginLeft + (i + 0.5) * slotW;
+                        ctx.fillText(slot.label, x, marginTop + plotH + 4);
+                    });
+
+                    // Day labels at the top (centered within each day block)
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.font = `${isMobile ? 10 : 11}px Inter, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+
+                    let dayStart = 0;
+                    days.forEach((day, dIdx) => {
+                        const dayCenter = marginLeft + (dayStart + day.hours.length / 2) * slotW;
+                        const abbr = day.dayLabel.split(' ').slice(0, 2).join(' ');
+                        ctx.fillText(isMobile ? '' : abbr, dayCenter, marginTop + 4);
+                        dayStart += day.hours.length;
+                    });
+
+                    // Horizontal dashed lines at band boundaries
+                    ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+                    ctx.lineWidth = 0.5;
+                    [0.33, 0.66].forEach(ny => {
+                        const y = marginTop + ny * plotH;
+                        ctx.beginPath();
+                        ctx.moveTo(marginLeft, y);
+                        ctx.lineTo(marginLeft + plotW, y);
+                        ctx.stroke();
+                    });
+                    ctx.setLineDash([]);
+
+                }, [cloudResort, visibleDays, isMobile, selectedHourlyDay]);
+
+                // Re-draw on data change and on resize
+                useEffect(() => {
+                    drawMeteogram();
+                    const handleResize = () => drawMeteogram();
+                    window.addEventListener('resize', handleResize);
+                    return () => window.removeEventListener('resize', handleResize);
+                }, [drawMeteogram]);
+
+                const meteoblueUrl = getMeteoblueUrl(resort);
+
+                return html`
+                    <div className="cloud-meteogram-card">
+                        <div className="cloud-meteogram-header">
+                            <a href=${meteoblueUrl} target="_blank" rel="noopener noreferrer" className="resort-link">
+                                <span className="sector-name">${resort.name}</span>
+                            </a>
+                            <span className="sector-altitude"> (${resort.altitude}m)</span>
+                        </div>
+                        <div className="cloud-meteogram-canvas-wrap">
+                            ${cloudResort
+                                ? html`<canvas ref=${canvasRef} className="cloud-meteogram-canvas"></canvas>`
+                                : html`<div className="cloud-meteogram-empty">Données nuages non disponibles</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+
             function MountainWeatherApp() {
                 const [resorts, setResorts] = useState(() => {
                     // Priorité aux paramètres URL (?s=...) pour les dashboards partagés
@@ -1847,10 +2236,12 @@
                 const [beraModal, setBeraModal] = useState(null);
 
                 // --- Vue horaire (3h) ---
-                // weatherView : 'day' = vue journalière (défaut), 'hour' = vue horaire 3h
+                // weatherView : 'day' = vue journalière (défaut), 'hour' = vue horaire 3h, 'clouds' = météogramme nuages
                 const [weatherView, setWeatherView] = useState('day');
                 // hourlyData : tableau de { name, hours: [{ label, icon, desc, temp, windSpeed, windDir, windCardinal, precip, snowCm }] }
                 const [hourlyData, setHourlyData] = useState([]);
+                // cloudData : tableau de { name, days: [{ date, dayLabel, hours: [{ label, hour, low, mid, high, total }] }] }
+                const [cloudData, setCloudData] = useState([]);
 
                 // --- Responsive mobile ---
                 const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -1924,6 +2315,7 @@
                         processWeatherData(cache.results);
                         processSnowData(cache.results);
                         processHourlyData(cache.results);
+                        processCloudData(cache.results);
 
                         // Si braData présent et non vide, utiliser le cache
                         if (cache.braData && Object.keys(cache.braData).length > 0) {
@@ -1969,6 +2361,7 @@
                         processWeatherData(results);
                         processSnowData(results);
                         processHourlyData(results);
+                        processCloudData(results);
 
                         // Charger les données BRA pour tous les secteurs
                         const braDataObj = await fetchBRAForResorts(resorts);
@@ -2146,6 +2539,7 @@
                         processWeatherData(results);
                         processSnowData(results);
                         processHourlyData(results);
+                        processCloudData(results);
 
                         // Recharger les BRA aussi
                         const braDataObj = await fetchBRAForResorts(resorts);
@@ -2430,6 +2824,63 @@
                         .map((resort) => processHourlyDataForResort(resort))
                         .filter(Boolean);
                     setHourlyData(processed);
+                };
+
+                /**
+                 * Extrait les données de couverture nuageuse (clouds-3h) pour un secteur.
+                 * Champs : lowclouds, midclouds, highclouds, totalcloudcover (0-100%)
+                 */
+                const processCloudDataForResort = (resort) => {
+                    if (!resort.data) return null;
+                    const d = resort.data.data_1h ?? resort.data.data_3h;
+                    if (!d || !d.time || !d.lowclouds) return null;
+
+                    const is1h = !!resort.data.data_1h;
+                    const dayMap = new Map();
+
+                    for (let i = 0; i < d.time.length; i++) {
+                        const timeStr = d.time[i];
+                        const dateStr = timeStr.substring(0, 10);
+                        const hour = parseInt(timeStr.substring(11, 13), 10);
+
+                        if (is1h && hour % 3 !== 0) continue;
+
+                        if (!dayMap.has(dateStr)) {
+                            if (dayMap.size >= 5) continue;
+                            dayMap.set(dateStr, []);
+                        }
+
+                        dayMap.get(dateStr).push({
+                            label: `${hour.toString().padStart(2, '0')}h`,
+                            hour,
+                            low:   d.lowclouds[i] ?? 0,
+                            mid:   d.midclouds[i] ?? 0,
+                            high:  d.highclouds[i] ?? 0,
+                            total: d.totalcloudcover?.[i] ?? 0,
+                        });
+                    }
+
+                    const days = [];
+                    for (const [date, hours] of dayMap.entries()) {
+                        const dt = new Date(`${date}T12:00:00`);
+                        const dayLabel = dt.toLocaleDateString('fr-FR', {
+                            weekday: 'short', day: 'numeric', month: 'short',
+                        });
+                        const dayLabelLong = dt.toLocaleDateString('fr-FR', {
+                            weekday: 'long', day: 'numeric', month: 'long',
+                        });
+                        days.push({ date, dayLabel, dayLabelLong, hours });
+                    }
+
+                    return days.length > 0 ? { name: resort.name, days } : null;
+                };
+
+                /** Traite les données cloud pour TOUS les secteurs */
+                const processCloudData = (results) => {
+                    const processed = results
+                        .map((resort) => processCloudDataForResort(resort))
+                        .filter(Boolean);
+                    setCloudData(processed);
                 };
 
                 if (loading) {
@@ -2778,12 +3229,12 @@
                                                 <div className="comparison-card-header">
                                                     <div>
                                                         <h2 className="title" style={{margin:0}}>
-                                                            {weatherView === 'day' ? 'Prévisions météo 5 jours' : "Prévisions météo aujourd'hui (3h)"}
+                                                            {weatherView === 'day' ? 'Prévisions météo 5 jours' : weatherView === 'hour' ? "Prévisions météo aujourd'hui (3h)" : 'Couverture nuageuse 5 jours'}
                                                         </h2>
                                                         <p className="subtitle" style={{margin:0}}>Source : <a href="https://www.meteoblue.com" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Meteoblue</a> et Météo France.</p>
                                                     </div>
-                                                    {/* Toggle Par jour / Par heure — utilise .toggle / .toggle-btn du design-system */}
-                                                    <div className="toggle">
+                                                    {/* Toggle Par jour / Par heure / Nuages — utilise .toggle / .toggle-btn du design-system */}
+                                                    <div className="toggle toggle-3">
                                                         <button
                                                             className={`toggle-btn${weatherView === 'day' ? ' active' : ''}`}
                                                             onClick={() => {
@@ -2802,13 +3253,22 @@
                                                         >
                                                             Par heure
                                                         </button>
+                                                        <button
+                                                            className={`toggle-btn${weatherView === 'clouds' ? ' active' : ''}`}
+                                                            onClick={() => {
+                                                                setWeatherView('clouds');
+                                                                if (typeof gtag === 'function') gtag('event', 'vue_meteo_switch', { vue: 'nuages' });
+                                                            }}
+                                                        >
+                                                            Nuages
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 {/* ============================================================
                                                   * CONTENU CONDITIONNEL : vue jour OU vue horaire
                                                   * ============================================================ */}
-                                                {/* Sélecteur de jour pour vue horaire — visible sur mobile uniquement (CSS) */}
-                                                {weatherView === 'hour' && (
+                                                {/* Sélecteur de jour pour vue horaire/nuages — visible sur mobile uniquement (CSS) */}
+                                                {(weatherView === 'hour' || weatherView === 'clouds') && (
                                                     <div className="hourly-day-tabs">
                                                         {(hourlyData[0]?.days || Array.from({length: 5}, (_, i) => {
                                                             const d = new Date(); d.setDate(d.getDate() + i);
@@ -2824,7 +3284,7 @@
                                                         ))}
                                                     </div>
                                                 )}
-                                                <div className={`comparison-card-body${weatherView === 'hour' ? ' hourly-view' : ''}`}>
+                                                <div className={`comparison-card-body${weatherView === 'hour' || weatherView === 'clouds' ? ' hourly-view' : ''}`}>
                                             {/* ==================== VUE PAR JOUR ==================== */}
                                             {weatherView === 'day' && (
                                             <div className="snow-table">
@@ -3223,6 +3683,62 @@
                                                             )}
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                                );
+                                            })()}
+
+                                            {/* ==================== VUE COUVERTURE NUAGEUSE (Canvas 2D) ====================
+                                              * Météogramme par secteur : 3 couches (high/mid/low) × créneaux 3h × 5 jours.
+                                              * Rendu Canvas avec interpolation bilinéaire pour un aspect lisse type Meteoblue.
+                                              * ============================================================ */}
+                                            {weatherView === 'clouds' && (() => {
+                                                const refDays = cloudData[0]?.days || hourlyData[0]?.days || Array.from({length: 5}, (_, i) => {
+                                                    const dt = new Date();
+                                                    dt.setDate(dt.getDate() + i);
+                                                    return {
+                                                        date: dt.toLocaleDateString('en-CA'),
+                                                        dayLabel: dt.toLocaleDateString('fr-FR', {weekday:'short', day:'numeric', month:'short'}),
+                                                        dayLabelLong: dt.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'}),
+                                                        hours: Array.from({length:8}, (_, j) => ({label:`${(j*3).toString().padStart(2,'0')}h`, hour: j*3, low:0, mid:0, high:0, total:0})),
+                                                    };
+                                                });
+
+                                                const visibleDays = isMobile
+                                                    ? refDays.filter((_, i) => i === selectedHourlyDay)
+                                                    : refDays;
+
+                                                return (
+                                                <div className="cloud-meteogram-container">
+                                                    {/* Légende altitude */}
+                                                    <div className="cloud-legend">
+                                                        <div className="cloud-legend-item"><span className="cloud-legend-swatch" style={{background:'#8b97a8'}}></span> Élevés (8-15 km)</div>
+                                                        <div className="cloud-legend-item"><span className="cloud-legend-swatch" style={{background:'#6b7a8d'}}></span> Moyens (4-8 km)</div>
+                                                        <div className="cloud-legend-item"><span className="cloud-legend-swatch" style={{background:'#4a5568'}}></span> Bas (0-4 km)</div>
+                                                        <div className="cloud-legend-scale">
+                                                            <span>0%</span>
+                                                            <div className="cloud-legend-gradient"></div>
+                                                            <span>100%</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Un météogramme par secteur */}
+                                                    {resorts.length > 0 ? resorts.map((resort, idx) => {
+                                                        const cloudResort =
+                                                            cloudData[idx]?.name === resort.name
+                                                                ? cloudData[idx]
+                                                                : cloudData.find(c => c.name === resort.name);
+
+                                                        return html`<${CloudMeteogram}
+                                                            key=${idx}
+                                                            resort=${resort}
+                                                            cloudResort=${cloudResort}
+                                                            visibleDays=${visibleDays}
+                                                            isMobile=${isMobile}
+                                                            selectedHourlyDay=${selectedHourlyDay}
+                                                        />`;
+                                                    }) : (
+                                                        <div style={{textAlign:'center', color:'#aaa', padding:'32px'}}>Aucun secteur à afficher</div>
+                                                    )}
                                                 </div>
                                                 );
                                             })()}

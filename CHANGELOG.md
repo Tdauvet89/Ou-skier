@@ -5,6 +5,21 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.35.0] - 2026-04-03
+
+### Ajouté
+- **Onglet "Nuages" — météogramme couverture nuageuse** (`index.html`, `worker/worker.js`, `design-system.css`) : nouvel onglet dans le toggle météo (Par jour / Par heure / Nuages) affichant un météogramme Canvas 2D avec interpolation bilinéaire pour chaque secteur. 3 couches d'altitude (bas 0-4 km, moyens 4-8 km, élevés 8-15 km) rendues avec opacité proportionnelle à la couverture nuageuse, fond ciel nocturne/diurne, séparateurs de jours
+- **Package API `clouds-3h`** (`worker/worker.js`) : ajout du package Meteoblue `clouds-3h` pour récupérer `lowclouds`, `midclouds`, `highclouds`, `totalcloudcover` à résolution 3h
+- **Toggle 3 boutons** (`design-system.css`) : variante `.toggle.toggle-3` (302px, flex) pour supporter 3 boutons dans le toggle
+
+### Technique
+- `worker/worker.js` : package API `basic-3h` → `basic-3h_clouds-3h`, cache key `v=5` → `v=6`
+- `design-system.css` v7.28.0 → v7.35.0
+- Cache bust `?v=7.35.0` dans `index.html` et `design-system.html`
+- Import React `useRef` et `useCallback` pour le composant Canvas
+
+---
+
 ## [7.34.0] - 2026-03-14
 
 ### Ajouté

@@ -166,6 +166,16 @@
     fill: #1F2023;
 }
 
+/* Toggle 3 boutons (ex: Par jour / Par heure / Nuages) */
+.toggle.toggle-3 {
+    width: 302px;
+}
+.toggle.toggle-3 .toggle-btn {
+    width: auto;
+    flex: 1;
+    padding: 0 12px;
+}
+
 /* === TAGS === */
 .tag {
     display: inline-flex;

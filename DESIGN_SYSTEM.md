@@ -214,6 +214,16 @@ Pill toggle : 202×36px, border-radius 15px, background #E5E7EF. Bouton actif : 
 
 Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleClock` (15×15 horloge), fill #1F2023.
 
+**Variante 3 boutons** : `.toggle.toggle-3` (302px, flex). Chaque `.toggle-btn` passe en `flex: 1` avec `width: auto`.
+
+```jsx
+<div className="toggle toggle-3">
+    <button className={`toggle-btn ${mode === 'day' ? 'active' : ''}`}>Par jour</button>
+    <button className={`toggle-btn ${mode === 'hour' ? 'active' : ''}`}>Par heure</button>
+    <button className={`toggle-btn ${mode === 'clouds' ? 'active' : ''}`}>Nuages</button>
+</div>
+```
+
 ### Tags
 
 ```jsx
