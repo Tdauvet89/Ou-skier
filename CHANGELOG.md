@@ -5,6 +5,28 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [7.36.0] - 2026-04-27
+
+### Ajouté
+- **SEO — meta description** (`index.html`) : ajout de `<meta name="description">` avec le keyword cible "info météo montagne" — affiché dans les résultats Google
+- **SEO — balises Open Graph** (`index.html`) : `og:title`, `og:description`, `og:url`, `og:type`, `og:locale` pour le partage sur les réseaux sociaux
+- **SEO — Twitter Card** (`index.html`) : `twitter:card`, `twitter:title`, `twitter:description`
+- **SEO — JSON-LD structured data** (`index.html`) : schéma `WebApplication` pour Google Rich Results (nom, description, catégorie, langue, gratuité)
+- **SEO — canonical URL** (`index.html`) : `<link rel="canonical" href="https://infometeomontagne.fr/">` pour éviter le contenu dupliqué
+- **SEO — robots meta** (`index.html`) : `<meta name="robots" content="index, follow">` pour autoriser explicitement l'indexation
+- **SEO — robots.txt** (`robots.txt`) : nouveau fichier autorisant tous les crawlers et référençant le sitemap
+- **SEO — sitemap.xml** (`sitemap.xml`) : nouveau fichier avec l'URL principale, changefreq hourly, priority 1.0
+- **Accessibilité — `.sr-only`** (`design-system.css`) : classe utilitaire screen-reader-only pour les textes visibles uniquement par les moteurs de recherche
+- **SEO — H1 keyword text** (`index.html`) : ajout de `<span class="sr-only">Info Météo Montagne</span>` dans les deux `<h1>` (loading + main) — le H1 contient maintenant le keyword cible sans modifier le visuel du logo
+
+### Modifié
+- **Title** (`index.html`) : "Ski rando Météo - Dashboard Ski de Randonnée" → "Info Météo Montagne - Dashboard Ski de Randonnée" — correspond au keyword cible
+
+### Technique
+- `design-system.css` v7.35.0 → v7.36.0 (cache bust — ajout `.sr-only`)
+
+---
+
 ## [7.35.1] - 2026-04-03
 
 ### Ajouté

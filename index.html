@@ -12,7 +12,36 @@
 </script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Ski rando Météo - Dashboard Ski de Randonnée</title>
+        <title>Info Météo Montagne - Dashboard Ski de Randonnée</title>
+        <meta name="description" content="Info météo montagne en temps réel : comparaison multi-stations, bulletin neige et avalanche BERA, qualité du manteau neigeux pour le ski de randonnée." />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://infometeomontagne.fr/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://infometeomontagne.fr/" />
+        <meta property="og:title" content="Info Météo Montagne - Dashboard Ski de Randonnée" />
+        <meta property="og:description" content="Info météo montagne en temps réel : comparaison multi-stations, bulletin neige et avalanche BERA, qualité du manteau neigeux pour le ski de randonnée." />
+        <meta property="og:locale" content="fr_FR" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Info Météo Montagne - Dashboard Ski de Randonnée" />
+        <meta name="twitter:description" content="Info météo montagne en temps réel : comparaison multi-stations, bulletin neige et avalanche BERA, qualité du manteau neigeux pour le ski de randonnée." />
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Info Météo Montagne",
+            "url": "https://infometeomontagne.fr/",
+            "description": "Dashboard météo montagne pour le ski de randonnée : comparaison multi-stations, bulletins avalanche BERA, qualité du manteau neigeux en temps réel.",
+            "applicationCategory": "WeatherApplication",
+            "operatingSystem": "Web",
+            "inLanguage": "fr",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "EUR"
+            },
+            "keywords": "météo montagne, info météo montagne, ski rando, bulletin avalanche, BERA, manteau neigeux, ski de randonnée"
+        }
+        </script>
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -26,7 +55,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.35.0" />
+        <link rel="stylesheet" href="design-system.css?v=7.36.0" />
         <style>
             /* ==========================================================
              * CSS ARCHITECTURE — index.html (overrides locaux)
@@ -2889,6 +2918,7 @@
                             <header>
                                 <h1>
                                     <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                    <span className="sr-only">Info Météo Montagne</span>
                                 </h1>
                             </header>
                             <div className="main-content">
@@ -2907,6 +2937,7 @@
                         <header>
                             <h1>
                                 <span className="logo" dangerouslySetInnerHTML={{__html: logoSvg}}></span>
+                                <span className="sr-only">Info Météo Montagne</span>
                             </h1>
                             <div className="header-controls">
                                 <a
