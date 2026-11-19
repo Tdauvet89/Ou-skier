@@ -2,7 +2,7 @@
 
 | Statut | Version | Dernière mise à jour | Fichiers |
 | --- | --- | --- | --- |
-| En développement | 8.0.0 | 2026-11-19 | `index.html`, `design-system.css` (`.select`, `.icon-btn`), `design-system.html` |
+| En production | 8.0.0 | 2026-11-19 | `index.html`, `design-system.css` (`.select`, `.icon-btn`), `design-system.html` |
 
 Document de travail : [PRD — Dossiers Massif](https://claude.ai/artifact/11cD7HJwimmG1tD62f2UqQ)
 

@@ -45,7 +45,7 @@
         <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script src="icons.js?v=7.24.0"></script>
+        <script src="icons.js?v=8.0.0"></script>
         <script src="weatherCodes.js?v=7.15.0"></script>
         <script src="massifMapping.js?v=7.31.1"></script>
         <script src="peaks.js?v=1.1.0"></script>
@@ -55,7 +55,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.36.0" />
+        <link rel="stylesheet" href="design-system.css?v=8.0.0" />
         <style>
             /* ==========================================================
              * CSS ARCHITECTURE — index.html (overrides locaux)
@@ -996,6 +996,54 @@
 
             /* Tag : utilise .tag de design-system.css */
 
+            /* === MASSIFS (PRD-002) === */
+            .massif-bar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                max-width: 480px;
+            }
+            .massif-bar-label {
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1F2023;
+                flex-shrink: 0;
+            }
+            .massif-bar-controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+                min-width: 0;
+            }
+            .massif-select { flex: 1; min-width: 0; }
+
+            .tag-draggable { cursor: grab; user-select: none; }
+            .tag-draggable:active { cursor: grabbing; }
+            .tag.is-dragging { opacity: 0.4; }
+
+            .massif-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+                max-width: 560px;
+            }
+            .massif-empty-icon svg { width: 40px; height: 40px; color: var(--deep-blue); }
+
+            .massif-name-meta {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                margin-top: 8px;
+                font-family: "Inter", sans-serif;
+                font-size: 12px;
+                color: #5E7690;
+            }
+            .form-error { color: #B91C1C; }
+
             .remove-resort {
                 background: none;
                 border: none;
@@ -1186,6 +1234,15 @@
              * lisibles et utilisables sur un écran de 375px.
              * ---------------------------------------------------------- */
             @media (max-width: 640px) {
+                /* Barre Massif pleine largeur, label au-dessus */
+                .massif-bar {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 6px;
+                    max-width: none;
+                }
+                .massif-empty .title-xl { font-size: 26px; }
+
                 /* Header compact */
                 header {
                     padding: 10px 16px;
@@ -1348,69 +1405,174 @@
             const MAX_RESORTS = 5;
 
 
-            // === CACHE MÉTÉO (localStorage, TTL 4h) ===
+            // === CACHE MÉTÉO (localStorage, TTL 4h) — un cache par Massif (RF-006-03) ===
             const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 heures
-            const CACHE_KEY = "weatherCache";
+            const CACHE_PREFIX = "weatherCache_";
+            const LEGACY_CACHE_KEY = "weatherCache";
             // v11 : invalide cache v10 — vitesses vent en m/s converties en km/h (×3.6)
             // v14 : cache 4h (optimisation crédits API Météoblue)
-            const CACHE_VERSION = 14;
+            // v15 : un cache par Massif (clé weatherCache_<massifId>)
+            const CACHE_VERSION = 15;
 
-            function getWeatherCache() {
+            const cacheKeyFor = (massifId) => `${CACHE_PREFIX}${massifId}`;
+            const resortKey = (r) => `${r.name}_${r.lat}_${r.lon}_${r.altitude}`;
+
+            function getWeatherCache(key) {
                 try {
-                    const raw = localStorage.getItem(CACHE_KEY);
+                    const raw = localStorage.getItem(key);
                     if (!raw) return null;
                     const cache = JSON.parse(raw);
                     // Invalider si version différente
                     if (cache.version !== CACHE_VERSION) {
-                        localStorage.removeItem(CACHE_KEY);
+                        localStorage.removeItem(key);
                         return null;
                     }
                     const age = Date.now() - cache.timestamp;
                     if (age > CACHE_TTL_MS) {
-                        localStorage.removeItem(CACHE_KEY);
+                        localStorage.removeItem(key);
                         return null;
                     }
                     // Invalider le cache si aucun résultat ne contient de données
                     const hasData =
                         cache.results && cache.results.some((r) => r.data);
                     if (!hasData) {
-                        localStorage.removeItem(CACHE_KEY);
+                        localStorage.removeItem(key);
                         return null;
                     }
                     return cache;
                 } catch {
-                    localStorage.removeItem(CACHE_KEY);
+                    try { localStorage.removeItem(key); } catch {}
                     return null;
                 }
             }
 
-            function setWeatherCache(resorts, results, braDataObj) {
+            function setWeatherCache(key, resorts, results, braDataObj) {
                 const cache = {
                     version: CACHE_VERSION,
                     timestamp: Date.now(),
-                    resortKeys: resorts.map(
-                        (r) => `${r.name}_${r.lat}_${r.lon}_${r.altitude}`,
-                    ),
+                    resortKeys: resorts.map(resortKey),
                     results,
                     // Ne jamais cacher braData vide (BRA en échec) → évite le cache empoisonné
                     braData: Object.keys(braDataObj).length > 0 ? braDataObj : undefined,
                 };
+                const payload = JSON.stringify(cache);
                 try {
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+                    localStorage.setItem(key, payload);
                 } catch (e) {
-                    console.warn("Cache write failed:", e);
+                    // Quota dépassé : on libère les caches des autres Massifs puis on réessaie
+                    try {
+                        Object.keys(localStorage)
+                            .filter((k) => k.startsWith(CACHE_PREFIX) && k !== key)
+                            .forEach((k) => localStorage.removeItem(k));
+                        localStorage.setItem(key, payload);
+                    } catch (e2) {
+                        console.warn("Cache write failed:", e2);
+                    }
                 }
             }
 
+            /**
+             * Le cache est valide si l'ensemble des secteurs est identique,
+             * quel que soit leur ordre (réordonner ne coûte aucun appel API — RF-006-05).
+             */
             function isCacheValidForResorts(cache, resorts) {
-                if (!cache) return false;
-                const currentKeys = resorts.map(
-                    (r) => `${r.name}_${r.lat}_${r.lon}_${r.altitude}`,
+                if (!cache || !Array.isArray(cache.resortKeys)) return false;
+                const current = resorts.map(resortKey).sort();
+                const cached = [...cache.resortKeys].sort();
+                return JSON.stringify(current) === JSON.stringify(cached);
+            }
+
+            /** Remet les résultats du cache dans l'ordre courant des secteurs. */
+            function orderResultsLikeResorts(results, resorts) {
+                const byKey = {};
+                results.forEach((r) => { byKey[resortKey(r)] = r; });
+                return resorts.map((r) => byKey[resortKey(r)]).filter(Boolean);
+            }
+
+            function removeWeatherCache(massifId) {
+                try { localStorage.removeItem(cacheKeyFor(massifId)); } catch {}
+            }
+
+            // === MASSIFS (dossiers de secteurs) — PRD-002 ===
+            const MAX_MASSIFS = 3;           // RF-002-01
+            const MASSIF_NAME_MAX = 30;      // RF-002-07
+            const MASSIFS_KEY = "massifs";
+            const ACTIVE_MASSIF_KEY = "activeMassifId";
+            const LEGACY_RESORTS_KEY = "skiResorts";
+            const MIGRATED_NAME = "Mes secteurs";
+
+            const normalizeText = (str) => (str || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim();
+
+            const newMassifId = () =>
+                `m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+
+            /** Massifs triés par ordre alphabétique (RF-002-06). */
+            const sortMassifs = (list) =>
+                [...list].sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" }));
+
+            const isValidResort = (r) =>
+                r && typeof r.name === "string" && !isNaN(Number(r.lat)) && !isNaN(Number(r.lon));
+
+            /**
+             * Charge les Massifs depuis localStorage.
+             * Migration (RF-002-14) : l'ancienne liste `skiResorts` devient le Massif « Mes secteurs ».
+             * Toute donnée corrompue donne un état vide, jamais d'écran blanc (RF-006-07).
+             */
+            function loadMassifState() {
+                try {
+                    const raw = localStorage.getItem(MASSIFS_KEY);
+                    if (raw !== null) {
+                        const parsed = JSON.parse(raw);
+                        const massifs = Array.isArray(parsed)
+                            ? parsed
+                                .filter((m) => m && m.id && typeof m.name === "string")
+                                .slice(0, MAX_MASSIFS)
+                                .map((m) => ({
+                                    id: m.id,
+                                    name: m.name,
+                                    resorts: (Array.isArray(m.resorts) ? m.resorts : [])
+                                        .filter(isValidResort)
+                                        .slice(0, MAX_RESORTS),
+                                }))
+                            : [];
+                        const savedActive = localStorage.getItem(ACTIVE_MASSIF_KEY);
+                        const active = massifs.find((m) => m.id === savedActive)
+                            || sortMassifs(massifs)[0]
+                            || null;
+                        return { massifs, activeId: active ? active.id : null };
+                    }
+                } catch (e) {
+                    console.warn("Massifs illisibles, état vide :", e);
+                    return { massifs: [], activeId: null };
+                }
+
+                // Pas encore de clé `massifs` → migration éventuelle
+                let legacy = [];
+                try {
+                    const old = JSON.parse(localStorage.getItem(LEGACY_RESORTS_KEY) || "[]");
+                    if (Array.isArray(old)) legacy = old.filter(isValidResort).slice(0, MAX_RESORTS);
+                } catch {}
+                if (legacy.length > 0) {
+                    const migrated = { id: newMassifId(), name: MIGRATED_NAME, resorts: legacy };
+                    return { massifs: [migrated], activeId: migrated.id };
+                }
+                return { massifs: [], activeId: null };
+            }
+
+            /** Valide un nom de Massif. Retourne un message d'erreur ou null (RF-002-07). */
+            function validateMassifName(name, massifs, excludeId) {
+                const clean = (name || "").replace(/\s+/g, " ").trim();
+                if (!clean) return "Donne un nom à ton massif.";
+                if (clean.length > MASSIF_NAME_MAX) return `${MASSIF_NAME_MAX} caractères maximum.`;
+                const taken = massifs.some(
+                    (m) => m.id !== excludeId && normalizeText(m.name) === normalizeText(clean),
                 );
-                return (
-                    JSON.stringify(currentKeys) ===
-                    JSON.stringify(cache.resortKeys)
-                );
+                if (taken) return "Un massif porte déjà ce nom.";
+                return null;
             }
 
             // === Météo France BRA — proxifié via le Worker Cloudflare ===
@@ -1706,8 +1868,58 @@
                 return `https://www.meteoblue.com/fr/meteo/semaine/${slug}?lat=${resort.lat}&lon=${resort.lon}&asl=${resort.altitude}`;
             }
 
-            function AddResortModal({ isOpen, onClose, onAdd, isAtLimit }) {
+            /**
+             * Modale de création / renommage d'un Massif (PRD-002).
+             * onSubmit(name) retourne un message d'erreur, ou null si c'est enregistré.
+             */
+            function MassifNameModal({ mode, initialName, onSubmit, onClose }) {
+                const [name, setName] = useState(initialName || "");
+                const [error, setError] = useState(null);
+                const isCreate = mode === "create";
+
+                const submit = (e) => {
+                    e.preventDefault();
+                    const err = onSubmit(name);
+                    if (err) setError(err);
+                    else onClose();
+                };
+
+                return (
+                    <div className="modal-overlay" onClick={onClose}>
+                        <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={submit} noValidate>
+                            <h2 className="title" style={{marginBottom:'8px'}}>{isCreate ? "Nouveau massif" : "Renommer le massif"}</h2>
+                            <p className="subtitle" style={{marginBottom:'20px'}}>
+                                {isCreate
+                                    ? "Regroupe tes secteurs par zone, par exemple « Pyrénées ariégeoises »."
+                                    : "Choisis un nouveau nom pour ce massif."}
+                            </p>
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="Nom du massif"
+                                aria-label="Nom du massif"
+                                value={name}
+                                maxLength={MASSIF_NAME_MAX}
+                                onChange={(e) => { setName(e.target.value); setError(null); }}
+                                autoFocus
+                            />
+                            <div className="massif-name-meta">
+                                <span className="form-error" role="alert">{error || ""}</span>
+                                <span>{name.length}/{MASSIF_NAME_MAX}</span>
+                            </div>
+                            <div className="modal-buttons">
+                                <button type="submit" className="btn btn-primary">{isCreate ? "Créer" : "Enregistrer"}</button>
+                                <button type="button" className="btn btn-secondary" onClick={onClose}>Annuler</button>
+                            </div>
+                        </form>
+                    </div>
+                );
+            }
+
+            function AddResortModal({ isOpen, onClose, onAdd, isAtLimit, resortCount }) {
                 const [searchQuery, setSearchQuery] = useState("");
+                const [addError, setAddError] = useState(null);
+                useEffect(() => { if (!isOpen) setAddError(null); }, [isOpen]);
                 const [searchResults, setSearchResults] = useState([]);
                 const [isSearching, setIsSearching] = useState(false);
 
@@ -1801,26 +2013,31 @@
                 }, [searchQuery]);
 
                 const handleSelect = (location) => {
-                    // --- DÉBUT DE L'AJOUT GOOGLE ANALYTICS ---
+                    const candidate = {
+                        name: location.name,
+                        lat: location.lat,
+                        lon: location.lon,
+                        altitude: location.asl || 1000,
+                        mbUrl: location.url || null,
+                    };
+                    // Refus si doublon ou limite (RF-002-03) : on garde la modale ouverte avec le message
+                    const err = onAdd(candidate);
+                    if (err) {
+                        setAddError(err);
+                        return;
+                    }
                     if (typeof gtag === 'function') {
                         gtag('event', 'ajout_secteur', {
                             'nom_secteur': location.name || '(vide)',      // ex: Guzet
                             'region_secteur': location.admin1 || '(inconnue)', // ex: Occitanie
                             'altitude_secteur': location.asl || null,      // ex: 1400
                             'query_secteur': searchQuery,                  // ce que l'utilisateur a tapé
+                            'nb_secteurs': (resortCount || 0) + 1,         // secteurs du Massif après ajout
                         });
                     }
-                    // --- FIN DE L'AJOUT ---
-                    
-                    onAdd({
-                        name: location.name,
-                        lat: location.lat,
-                        lon: location.lon,
-                        altitude: location.asl || 1000,
-                        mbUrl: location.url || null,
-                    });
                     setSearchQuery("");
                     setSearchResults([]);
+                    setAddError(null);
                     onClose();
                 };
 
@@ -1867,9 +2084,16 @@
                                         className="input search-input"
                                         placeholder="Rechercher une commune (min. 3 caractères - ex: Guzet, Saint-Lary...)"
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onChange={(e) => { setSearchQuery(e.target.value); setAddError(null); }}
                                         autoFocus
                                     />
+
+                                    {addError && (
+                                        <div className="modal-limit-alert" role="alert" style={{marginTop:'12px'}}>
+                                            <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span>
+                                            <p>{addError}</p>
+                                        </div>
+                                    )}
 
                                     <div className="search-results">
                                         {/* Chargement API Météoblue */}
@@ -1934,21 +2158,6 @@
                         </div>
                     </div>
                 );
-            }
-
-            // Decode sectors from URL param ?s=BASE64
-            function decodeShareParam(param) {
-                try {
-                    const decoded = JSON.parse(atob(param));
-                    if (!Array.isArray(decoded) || decoded.length === 0) return null;
-                    return decoded.slice(0, MAX_RESORTS).map(s => ({
-                        name: s.n,
-                        lat: Number(s.la),
-                        lon: Number(s.lo),
-                        altitude: Number(s.al),
-                        mbUrl: s.u || null,
-                    })).filter(s => s.name && !isNaN(s.lat) && !isNaN(s.lon));
-                } catch (e) { return null; }
             }
 
             /**
@@ -2243,17 +2452,52 @@
             }
 
             function MountainWeatherApp() {
-                const [resorts, setResorts] = useState(() => {
-                    // Priorité aux paramètres URL (?s=...) pour les dashboards partagés
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const sharedParam = urlParams.get('s');
-                    if (sharedParam) {
-                        const fromUrl = decodeShareParam(sharedParam);
-                        if (fromUrl) return fromUrl;
-                    }
-                    const saved = localStorage.getItem("skiResorts");
-                    return saved ? JSON.parse(saved) : DEFAULT_RESORTS;
-                });
+                // --- Massifs (dossiers de secteurs) — PRD-002 ---
+                const [initialMassifState] = useState(loadMassifState);
+                const [massifs, setMassifs] = useState(initialMassifState.massifs);
+                const [activeMassifId, setActiveMassifId] = useState(initialMassifState.activeId);
+                const activeMassif = massifs.find((m) => m.id === activeMassifId) || null;
+                const resorts = activeMassif ? activeMassif.resorts : [];
+                const sortedMassifs = sortMassifs(massifs);
+                // massifModal : null | { mode: 'create' | 'rename' } — confirmDelete : bool
+                const [massifModal, setMassifModal] = useState(null);
+                const [confirmDelete, setConfirmDelete] = useState(false);
+                // Glisser-déposer des tags (desktop/tablette uniquement — RF-002-10)
+                const [dragIndex, setDragIndex] = useState(null);
+                // Numéro de chargement : ignore les réponses d'un Massif qu'on a quitté entre-temps
+                const loadSeqRef = useRef(0);
+
+                /** Remplace la liste de secteurs du Massif ouvert. */
+                const setResorts = (updater) => {
+                    setMassifs((prev) => prev.map((m) => m.id === activeMassifId
+                        ? { ...m, resorts: typeof updater === "function" ? updater(m.resorts) : updater }
+                        : m));
+                };
+
+                // Persistance (RF-006-06)
+                useEffect(() => {
+                    try { localStorage.setItem(MASSIFS_KEY, JSON.stringify(massifs)); } catch (e) { console.warn(e); }
+                }, [massifs]);
+                useEffect(() => {
+                    try {
+                        if (activeMassifId) localStorage.setItem(ACTIVE_MASSIF_KEY, activeMassifId);
+                        else localStorage.removeItem(ACTIVE_MASSIF_KEY);
+                    } catch {}
+                }, [activeMassifId]);
+
+                // Partage par lien retiré (RF-008-02) : on nettoie l'ancien paramètre ?s= et l'ancien cache global
+                useEffect(() => {
+                    try {
+                        const params = new URLSearchParams(window.location.search);
+                        if (params.has("s")) {
+                            params.delete("s");
+                            const qs = params.toString();
+                            window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash);
+                        }
+                        localStorage.removeItem(LEGACY_CACHE_KEY);
+                    } catch {}
+                }, []);
+
                 const [weatherData, setWeatherData] = useState([]);
                 const [snowData, setSnowData] = useState([]);
                 const [loading, setLoading] = useState(false);
@@ -2284,9 +2528,6 @@
                 // Jour sélectionné dans la vue horaire (mobile : affiche 1 jour à la fois)
                 const [selectedHourlyDay, setSelectedHourlyDay] = useState(0);
 
-                // --- Partage par URL ---
-                const [shareCopied, setShareCopied] = useState(false);
-
                 useEffect(() => {
                     const now = new Date();
                     setCurrentDate(
@@ -2310,11 +2551,23 @@
                         setLastUpdate(savedUpdate);
                     }
 
-                    // Charger les données au premier chargement (ignore les restrictions)
+                }, []);
+
+                // Chargement du Massif ouvert — et seulement lui (RF-002-04).
+                // Se relance à chaque changement de Massif ; le cache 4h évite les appels inutiles.
+                useEffect(() => {
+                    loadSeqRef.current += 1;
+                    setWeatherData([]);
+                    setSnowData([]);
+                    setHourlyData([]);
+                    setCloudData([]);
+                    setBraData({});
+                    setError(null);
+                    setLoading(false);
                     if (resorts.length > 0) {
                         loadInitialWeatherData();
                     }
-                }, []);
+                }, [activeMassifId]);
 
                 /**
                  * Récupère les données BRA pour tous les secteurs.
@@ -2338,13 +2591,17 @@
                 };
 
                 const loadInitialWeatherData = async () => {
-                    // Vérifier le cache avant d'appeler l'API
-                    const cache = getWeatherCache();
+                    const seq = loadSeqRef.current;
+                    const isStale = () => seq !== loadSeqRef.current;
+                    const cacheKey = cacheKeyFor(activeMassifId);
+                    // Vérifier le cache du Massif ouvert avant d'appeler l'API
+                    const cache = getWeatherCache(cacheKey);
                     if (cache && isCacheValidForResorts(cache, resorts)) {
-                        processWeatherData(cache.results);
-                        processSnowData(cache.results);
-                        processHourlyData(cache.results);
-                        processCloudData(cache.results);
+                        const orderedResults = orderResultsLikeResorts(cache.results, resorts);
+                        processWeatherData(orderedResults);
+                        processSnowData(orderedResults);
+                        processHourlyData(orderedResults);
+                        processCloudData(orderedResults);
 
                         // Si braData présent et non vide, utiliser le cache
                         if (cache.braData && Object.keys(cache.braData).length > 0) {
@@ -2353,9 +2610,10 @@
                             // BRA absent ou vide dans le cache (ex: échec lors du dernier fetch)
                             // → re-fetch en arrière-plan sans bloquer l'affichage météo
                             fetchBRAForResorts(resorts).then((braDataObj) => {
+                                if (isStale()) return;
                                 if (Object.keys(braDataObj).length > 0) {
                                     setBraData(braDataObj);
-                                    setWeatherCache(resorts, cache.results, braDataObj);
+                                    setWeatherCache(cacheKey, resorts, cache.results, braDataObj);
                                 }
                             });
                         }
@@ -2386,6 +2644,8 @@
                             fetchWeatherForResort(resort),
                         );
                         const results = await Promise.all(promises);
+                        // Massif quitté pendant le chargement : on n'affiche rien
+                        if (isStale()) return;
 
                         processWeatherData(results);
                         processSnowData(results);
@@ -2394,10 +2654,10 @@
 
                         // Charger les données BRA pour tous les secteurs
                         const braDataObj = await fetchBRAForResorts(resorts);
+                        // Sauvegarder dans le cache du Massif (même si on l'a quitté entre-temps)
+                        setWeatherCache(cacheKey, resorts, results, braDataObj);
+                        if (isStale()) return;
                         setBraData(braDataObj);
-
-                        // Sauvegarder dans le cache
-                        setWeatherCache(resorts, results, braDataObj);
 
                         // Enregistrer l'heure de mise à jour
                         const now = new Date();
@@ -2425,45 +2685,62 @@
                             `Erreur lors de la récupération des données: ${err.message}`,
                         );
                     } finally {
-                        setLoading(false);
+                        if (!isStale()) setLoading(false);
                     }
                 };
 
-                useEffect(() => {
-                    localStorage.setItem("skiResorts", JSON.stringify(resorts));
-                }, [resorts]);
+
+                const track = (event, params) => {
+                    if (typeof gtag === "function") gtag("event", event, params);
+                };
+
+                /** Massif qui contient déjà ce secteur (même nom ou mêmes coordonnées) — RF-002-03. */
+                const findResortOwner = (candidate) => massifs.find((m) => m.resorts.some((r) =>
+                    normalizeText(r.name) === normalizeText(candidate.name)
+                    || (Math.abs(Number(r.lat) - Number(candidate.lat)) < 1e-4
+                        && Math.abs(Number(r.lon) - Number(candidate.lon)) < 1e-4)));
+
+                /**
+                 * Vérifie puis ajoute un secteur au Massif ouvert.
+                 * Retourne un message d'erreur (affiché dans la modale) ou null si l'ajout est lancé.
+                 */
+                const handleAddResort = (newResort) => {
+                    if (!activeMassif) return "Crée d'abord un massif.";
+                    if (resorts.length >= MAX_RESORTS) return "Le nombre de secteurs maximum est atteint.";
+                    const owner = findResortOwner(newResort);
+                    if (owner) {
+                        return owner.id === activeMassif.id
+                            ? `${newResort.name} est déjà dans ce massif.`
+                            : `${newResort.name} est déjà dans le massif « ${owner.name} ».`;
+                    }
+                    addResort(newResort);
+                    return null;
+                };
 
                 const addResort = async (newResort) => {
-                    if (resorts.length >= MAX_RESORTS) return;
+                    const seq = loadSeqRef.current;
+                    const massifId = activeMassifId;
                     // Ajouter le secteur à la liste
-                    const updatedResorts = [...resorts, newResort];
-                    setResorts(updatedResorts);
+                    setResorts((prev) => [...prev, newResort]);
+                    // Invalider le cache du Massif (la liste de secteurs a changé — RF-006-05)
+                    removeWeatherCache(massifId);
 
-                    // Charger uniquement les données pour ce nouveau secteur (sans loading général)
+                    // Charger uniquement les données pour ce nouveau secteur (RF-001-10)
                     try {
                         const result = await fetchWeatherForResort(newResort);
+                        // L'utilisateur a changé de Massif entre-temps : rien à afficher
+                        if (seq !== loadSeqRef.current) return;
 
-                        // Ajouter les données météo du nouveau secteur
                         if (result.data) {
-                            const newWeatherData =
-                                processWeatherDataForResort(result);
-                            const newSnowData =
-                                processSnowDataForResort(result);
-                            const newHourlyData =
-                                processHourlyDataForResort(result);
+                            const newWeatherData = processWeatherDataForResort(result);
+                            const newSnowData = processSnowDataForResort(result);
+                            const newHourlyData = processHourlyDataForResort(result);
+                            const newCloudData = processCloudDataForResort(result);
 
-                            if (newWeatherData) {
-                                setWeatherData((prev) => [
-                                    ...prev,
-                                    newWeatherData,
-                                ]);
-                            }
-                            if (newSnowData) {
-                                setSnowData((prev) => [...prev, newSnowData]);
-                            }
-                            if (newHourlyData) {
-                                setHourlyData((prev) => [...prev, newHourlyData]);
-                            }
+                            if (newWeatherData) setWeatherData((prev) => [...prev, newWeatherData]);
+                            if (newSnowData) setSnowData((prev) => [...prev, newSnowData]);
+                            if (newHourlyData) setHourlyData((prev) => [...prev, newHourlyData]);
+                            if (newCloudData) setCloudData((prev) => [...prev, newCloudData]);
 
                             // Récupérer les données BRA pour ce secteur
                             const massif = getMassifFromCoords(
@@ -2473,7 +2750,7 @@
                             );
                             if (massif) {
                                 const data = await fetchBRAData(massif.id);
-                                if (data) {
+                                if (data && seq === loadSeqRef.current) {
                                     setBraData((prev) => ({
                                         ...prev,
                                         [newResort.name]: data,
@@ -2481,8 +2758,6 @@
                                 }
                             }
                         }
-                        // Invalider le cache (la liste de stations a changé)
-                        localStorage.removeItem(CACHE_KEY);
                     } catch (err) {
                         console.error(
                             "Erreur lors de l'ajout du secteur:",
@@ -2492,15 +2767,14 @@
                 };
 
                 const removeResort = (index) => {
-                    // Retirer le secteur et ses données
+                    // Retirer le secteur et ses données (aucun appel API — RF-001-09)
                     const removedName = resorts[index]?.name;
-                    const newResorts = resorts.filter((_, i) => i !== index);
-                    setResorts(newResorts);
-                    setWeatherData((prev) =>
-                        prev.filter((_, i) => i !== index),
-                    );
-                    setSnowData((prev) => prev.filter((_, i) => i !== index));
-                    setHourlyData((prev) => prev.filter((_, i) => i !== index));
+                    setResorts((prev) => prev.filter((_, i) => i !== index));
+                    const withoutRemoved = (prev) => prev.filter((d) => d && d.name !== removedName);
+                    setWeatherData(withoutRemoved);
+                    setSnowData(withoutRemoved);
+                    setHourlyData(withoutRemoved);
+                    setCloudData(withoutRemoved);
                     if (removedName) {
                         setBraData((prev) => {
                             const next = { ...prev };
@@ -2508,36 +2782,72 @@
                             return next;
                         });
                     }
-                    // Invalider le cache (la liste de stations a changé)
-                    localStorage.removeItem(CACHE_KEY);
+                    // Invalider le cache (la liste de secteurs a changé)
+                    removeWeatherCache(activeMassifId);
                 };
 
-                const shareUrl = () => {
-                    const encoded = btoa(JSON.stringify(resorts.map(r => ({
-                        n: r.name,
-                        la: r.lat,
-                        lo: r.lon,
-                        al: r.altitude,
-                        u: r.mbUrl || null,
-                    }))));
-                    const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
-                    const trackShare = () => {
-                        if (typeof gtag === 'function') {
-                            gtag('event', 'partager_dashboard', {
-                                nb_secteurs: resorts.length,
-                                secteurs: resorts.map(r => r.name).join(', ').slice(0, 100),
-                                altitudes: resorts.map(r => r.altitude).join(', '),
-                            });
-                        }
-                    };
-                    navigator.clipboard.writeText(url).then(() => {
-                        trackShare();
-                        setShareCopied(true);
-                        setTimeout(() => setShareCopied(false), 2500);
-                    }).catch(() => {
-                        trackShare();
-                        window.prompt('Copie ce lien :', url);
+                /**
+                 * Réordonne les secteurs du Massif ouvert (glisser-déposer — RF-002-10).
+                 * Les données déjà chargées sont réordonnées sur place : aucun appel API.
+                 */
+                const reorderResorts = (from, to) => {
+                    if (from === to || from == null || to == null) return;
+                    const next = [...resorts];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    setResorts(next);
+                    const order = next.map((r) => r.name);
+                    const byOrder = (prev) => [...prev].sort(
+                        (a, b) => order.indexOf(a?.name) - order.indexOf(b?.name),
+                    );
+                    setWeatherData(byOrder);
+                    setSnowData(byOrder);
+                    setHourlyData(byOrder);
+                    setCloudData(byOrder);
+                };
+
+                // --- Actions Massif (PRD-002) ---
+                const selectMassif = (id) => {
+                    if (!id || id === activeMassifId) return;
+                    const target = massifs.find((m) => m.id === id);
+                    if (!target) return;
+                    setActiveMassifId(id);
+                    track("changement_dossier", { nb_secteurs: target.resorts.length });
+                };
+
+                const createMassif = (name) => {
+                    if (massifs.length >= MAX_MASSIFS) return `${MAX_MASSIFS} massifs maximum.`;
+                    const err = validateMassifName(name, massifs, null);
+                    if (err) return err;
+                    const massif = { id: newMassifId(), name: name.replace(/\s+/g, " ").trim(), resorts: [] };
+                    setMassifs((prev) => [...prev, massif]);
+                    setActiveMassifId(massif.id); // RF-002-08
+                    track("creation_dossier", { nb_dossiers: massifs.length + 1 });
+                    return null;
+                };
+
+                const renameMassif = (name) => {
+                    if (!activeMassif) return null;
+                    const err = validateMassifName(name, massifs, activeMassif.id);
+                    if (err) return err;
+                    const clean = name.replace(/\s+/g, " ").trim();
+                    setMassifs((prev) => prev.map((m) => m.id === activeMassif.id ? { ...m, name: clean } : m));
+                    return null;
+                };
+
+                const deleteActiveMassif = () => {
+                    if (!activeMassif) return;
+                    const remaining = massifs.filter((m) => m.id !== activeMassif.id);
+                    removeWeatherCache(activeMassif.id);
+                    setMassifs(remaining);
+                    // RF-002-12 : premier Massif restant (A→Z), sinon écran d'invitation
+                    const next = sortMassifs(remaining)[0];
+                    setActiveMassifId(next ? next.id : null);
+                    track("suppression_dossier", {
+                        nb_secteurs: activeMassif.resorts.length,
+                        nb_dossiers: remaining.length,
                     });
+                    setConfirmDelete(false);
                 };
 
                 const fetchWeatherForResort = async (resort) => {
@@ -2552,58 +2862,6 @@
                     } catch (err) {
                         console.error(`Erreur météo pour ${resort.name}:`, err);
                         return { ...resort, data: null, error: err.message };
-                    }
-                };
-
-                const fetchAllWeatherData = async () => {
-                    setLoading(true);
-                    setError(null);
-
-                    try {
-                        const promises = resorts.map((resort) =>
-                            fetchWeatherForResort(resort),
-                        );
-                        const results = await Promise.all(promises);
-
-                        processWeatherData(results);
-                        processSnowData(results);
-                        processHourlyData(results);
-                        processCloudData(results);
-
-                        // Recharger les BRA aussi
-                        const braDataObj = await fetchBRAForResorts(resorts);
-                        setBraData(braDataObj);
-
-                        // Sauvegarder dans le cache
-                        setWeatherCache(resorts, results, braDataObj);
-
-                        // Enregistrer l'heure de mise à jour
-                        const now = new Date();
-                        setLastUpdate(now.toISOString());
-                        localStorage.setItem(
-                            "lastWeatherUpdate",
-                            now.toISOString(),
-                        );
-
-                        setCurrentDate(
-                            now.toLocaleDateString("fr-FR", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            }) +
-                                " à " +
-                                now.toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                }),
-                        );
-                    } catch (err) {
-                        setError(
-                            `Erreur lors de la récupération des données: ${err.message}`,
-                        );
-                    } finally {
-                        setLoading(false);
                     }
                 };
 
@@ -2956,41 +3214,121 @@
                             {error && <div className="error"><span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.alert}}></span> {error}</div>}
 
                             <div className="sectors-block">
-                                <p className="title-xl" style={{textAlign:"center",margin:0}}>Ajoute tes stations préférées pour voir d'un coup d'œil où sont les meilleures conditions de ski.</p>
-                                {resorts.length > 0 && (
-                                    <div className="resort-list">
-                                        {resorts.map((resort, index) => (
-                                            <div key={index} className="tag">
-                                                {resort.name}
+                                {activeMassif ? (
+                                    <>
+                                        <p className="title-xl" style={{textAlign:"center",margin:0}}>Ajoute tes stations préférées pour voir d'un coup d'œil où sont les meilleures conditions de ski.</p>
+
+                                        {/* Barre Massif : choix du dossier + renommer / supprimer (PRD-002) */}
+                                        <div className="massif-bar">
+                                            <label className="massif-bar-label" htmlFor="massif-select">Massif</label>
+                                            <div className="massif-bar-controls">
+                                                <select
+                                                    id="massif-select"
+                                                    className="select massif-select"
+                                                    value={activeMassifId}
+                                                    onChange={(e) => {
+                                                        if (e.target.value === "__new__") setMassifModal({ mode: "create" });
+                                                        else selectMassif(e.target.value);
+                                                    }}
+                                                >
+                                                    {sortedMassifs.map((m) => (
+                                                        <option key={m.id} value={m.id}>
+                                                            {m.name} ({m.resorts.length}/{MAX_RESORTS})
+                                                        </option>
+                                                    ))}
+                                                    <option value="__new__" disabled={massifs.length >= MAX_MASSIFS}>
+                                                        {massifs.length >= MAX_MASSIFS
+                                                            ? `+ Nouveau massif (${MAX_MASSIFS} max atteint)`
+                                                            : "+ Nouveau massif"}
+                                                    </option>
+                                                </select>
                                                 <button
-                                                    className="remove-resort"
-                                                    onClick={() => removeResort(index)}
-                                                    title="Retirer ce secteur"
-                                                >×</button>
+                                                    className="icon-btn"
+                                                    onClick={() => setMassifModal({ mode: "rename" })}
+                                                    title="Renommer ce massif"
+                                                    aria-label="Renommer ce massif"
+                                                >
+                                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.edit}}></span>
+                                                </button>
+                                                <button
+                                                    className="icon-btn"
+                                                    onClick={() => setConfirmDelete(true)}
+                                                    title="Supprimer ce massif"
+                                                    aria-label="Supprimer ce massif"
+                                                >
+                                                    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.trash}}></span>
+                                                </button>
                                             </div>
-                                        ))}
+                                        </div>
+
+                                        {resorts.length > 0 && (
+                                            <div className="resort-list">
+                                                {resorts.map((resort, index) => {
+                                                    const canDrag = !isMobile && resorts.length > 1;
+                                                    return (
+                                                        <div
+                                                            key={`${resort.name}_${resort.lat}_${resort.lon}`}
+                                                            className={`tag${canDrag ? " tag-draggable" : ""}${dragIndex === index ? " is-dragging" : ""}`}
+                                                            draggable={canDrag}
+                                                            title={canDrag ? "Glisser pour réordonner" : undefined}
+                                                            onDragStart={(e) => {
+                                                                setDragIndex(index);
+                                                                e.dataTransfer.effectAllowed = "move";
+                                                                try { e.dataTransfer.setData("text/plain", String(index)); } catch {}
+                                                            }}
+                                                            onDragOver={(e) => {
+                                                                if (dragIndex === null) return;
+                                                                e.preventDefault();
+                                                                e.dataTransfer.dropEffect = "move";
+                                                            }}
+                                                            onDrop={(e) => {
+                                                                e.preventDefault();
+                                                                reorderResorts(dragIndex, index);
+                                                                setDragIndex(null);
+                                                            }}
+                                                            onDragEnd={() => setDragIndex(null)}
+                                                        >
+                                                            {resort.name}
+                                                            <button
+                                                                className="remove-resort"
+                                                                onClick={() => removeResort(index)}
+                                                                title="Retirer ce secteur"
+                                                                aria-label={`Retirer ${resort.name}`}
+                                                            >×</button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {!isMobile && resorts.length > 1 && (
+                                            <p className="subtitle drag-hint" style={{margin:0}}>Astuce : glisse un secteur pour changer l'ordre des tableaux.</p>
+                                        )}
+                                        <div style={{display:"flex",gap:"12px",flexWrap:"wrap",justifyContent:"center"}}>
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={() => setIsModalOpen(true)}
+                                            >
+                                                <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    /* Écran d'invitation : aucun Massif (RF-002-13) */
+                                    <div className="massif-empty">
+                                        <span className="icon massif-empty-icon" dangerouslySetInnerHTML={{__html: uiSvg.mountain}}></span>
+                                        <p className="title-xl" style={{textAlign:"center",margin:0}}>Crée ton premier massif</p>
+                                        <p className="subtitle" style={{textAlign:"center",margin:0}}>Un massif regroupe tes secteurs par zone (ex. « Pyrénées ariégeoises »). Tu pourras en créer {MAX_MASSIFS}, avec {MAX_RESORTS} secteurs chacun.</p>
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() => setMassifModal({ mode: "create" })}
+                                        >
+                                            <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Créer mon premier massif
+                                        </button>
                                     </div>
                                 )}
-                                <div style={{display:"flex",gap:"12px",flexWrap:"wrap",justifyContent:"center"}}>
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => setIsModalOpen(true)}
-                                    >
-                                        <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.plus}}></span> Ajouter un Secteur
-                                    </button>
-                                    {resorts.length > 0 && (
-                                        <button
-                                            className={`btn ${shareCopied ? 'btn-primary' : 'btn-secondary'}`}
-                                            onClick={shareUrl}
-                                            title="Copier le lien de ce dashboard"
-                                        >
-                                            <span className="icon" dangerouslySetInnerHTML={{__html: shareCopied ? uiSvg.check : uiSvg.share}}></span>
-                                            {shareCopied ? ' Lien copié !' : ' Partager'}
-                                        </button>
-                                    )}
-                                </div>
                             </div>
 
+                            {activeMassif && (
                             <>
                                     <section className="section">
                                         <div className="snow-tables-row">
@@ -3779,14 +4117,49 @@
                                             </div>
                                         </section>
                                     </>
+                            )}
                         </div>
 
                         <AddResortModal
                             isOpen={isModalOpen}
                             onClose={() => setIsModalOpen(false)}
-                            onAdd={addResort}
+                            onAdd={handleAddResort}
                             isAtLimit={resorts.length >= MAX_RESORTS}
+                            resortCount={resorts.length}
                         />
+
+                        {massifModal && (
+                            <MassifNameModal
+                                mode={massifModal.mode}
+                                initialName={massifModal.mode === "rename" && activeMassif ? activeMassif.name : ""}
+                                onSubmit={massifModal.mode === "create" ? createMassif : renameMassif}
+                                onClose={() => setMassifModal(null)}
+                            />
+                        )}
+
+                        {/* Confirmation de suppression d'un Massif (RF-002-11) */}
+                        {confirmDelete && activeMassif && (
+                            <div className="modal-overlay" onClick={() => setConfirmDelete(false)}>
+                                <div
+                                    className="modal"
+                                    role="alertdialog"
+                                    aria-labelledby="delete-massif-title"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <h2 id="delete-massif-title" className="title" style={{marginBottom:'8px'}}>Supprimer « {activeMassif.name} » ?</h2>
+                                    <p className="subtitle" style={{margin:0}}>
+                                        {activeMassif.resorts.length === 0
+                                            ? "Ce massif est vide."
+                                            : `${activeMassif.resorts.length} secteur${activeMassif.resorts.length > 1 ? "s seront" : " sera"} aussi supprimé${activeMassif.resorts.length > 1 ? "s" : ""}.`}
+                                        {" "}Cette action est définitive.
+                                    </p>
+                                    <div className="modal-buttons">
+                                        <button className="btn btn-danger" onClick={deleteActiveMassif}>Supprimer</button>
+                                        <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)} autoFocus>Annuler</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Modale BERA — PDF embed */}
                         {beraModal && (

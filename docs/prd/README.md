@@ -12,7 +12,7 @@ que l'on cite dans le code, les commits et le CHANGELOG.
 | ID | PRD | Statut | Domaine |
 | --- | --- | --- | --- |
 | PRD-001 | [Gestion des secteurs](PRD-001-secteurs.md) | En production | Recherche, ajout, suppression, limite |
-| PRD-002 | [Dossiers Massif](PRD-002-massifs.md) | En développement | Regrouper les secteurs par zone |
+| PRD-002 | [Dossiers Massif](PRD-002-massifs.md) | En production | Regrouper les secteurs par zone |
 | PRD-003 | [Neige : manteau et chutes](PRD-003-neige.md) | En production | Hauteur de neige, chutes 5 jours |
 | PRD-004 | [Prévisions météo](PRD-004-previsions-meteo.md) | En production | Vues Par jour / Par heure / Nuages |
 | PRD-005 | [Bulletins avalanche (BERA)](PRD-005-bera.md) | En production | Risque, qualité de neige, PDF |

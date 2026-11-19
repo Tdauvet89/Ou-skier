@@ -185,7 +185,7 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 
 ### Boutons
 
-2 variantes uniquement — fond noir ou fond gris, pill (border-radius 50px), Inter 14px 500.
+3 variantes — fond noir, fond gris, rouge (destructif), pill (border-radius 50px), Inter 14px 500.
 
 ```jsx
 <button className="btn btn-primary">Proposer une amélioration</button>
@@ -196,6 +196,29 @@ Les classes partagées sont définies dans `design-system.css` et utilisées par
 |--------|-------|
 | `.btn-primary` | bg `#1F2023`, texte blanc |
 | `.btn-secondary` | bg `#F0F0F0`, texte `#1F2023`, bordure `#E0E0E0` |
+| `.btn-danger` | bg `#B91C1C`, texte blanc — **uniquement** dans une modale de confirmation (ex: supprimer un Massif) |
+
+### Bouton icône
+
+Bouton rond 40×40px (cible tactile mobile), bordure `#E0E0E0`, icône 18px.
+
+```jsx
+<button className="icon-btn" aria-label="Renommer ce massif">
+    <span className="icon" dangerouslySetInnerHTML={{__html: uiSvg.edit}}></span>
+</button>
+```
+
+Toujours fournir un `aria-label` (pas de texte visible).
+
+### Select (menu déroulant)
+
+`<select>` natif stylé en pill 40px, chevron SVG inline. Natif = meilleure ergonomie mobile (roue iOS / liste Android), zéro JS.
+
+```jsx
+<select className="select" value={value} onChange={...}>
+    <option value="a">Alpes du Nord (3/5)</option>
+</select>
+```
 
 ### Toggle Buttons
 
@@ -229,6 +252,8 @@ Icônes toggle : `uiSvg.toggleCalendar` (15×15 calendrier) et `uiSvg.toggleCloc
 ```jsx
 <span className="tag">Guzet</span>
 ```
+
+Override local `index.html` : `.tag-draggable` (curseur grab, desktop/tablette) et `.tag.is-dragging` (opacité 0.4) pour le glisser-déposer des secteurs (PRD-002).
 
 ### Inputs
 

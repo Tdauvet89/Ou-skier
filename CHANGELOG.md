@@ -5,6 +5,34 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [8.0.0] - 2026-11-19
+
+### Ajouté
+- **Dossiers Massif** (`index.html`, PRD-002) : jusqu'à 3 Massifs (RF-002-01) de 5 secteurs chacun pour regrouper ses secteurs par zone géographique. Menu déroulant trié A→Z (RF-002-06), création / renommage avec contrôle du nom (unique, 30 caractères — RF-002-07), suppression avec confirmation qui supprime aussi les secteurs (RF-002-11, RF-002-12)
+- **Écran d'invitation** (`index.html`) : sans Massif, l'utilisateur est invité à créer le premier ; aucun tableau ni appel API (RF-002-13)
+- **Glisser-déposer des secteurs** (`index.html`) : sur ordinateur et tablette, les tags se réordonnent ; l'ordre est enregistré et les tableaux suivent, sans appel API (RF-002-10, RF-006-05)
+- **Refus des doublons** : un secteur déjà présent dans un Massif est refusé avec le nom de ce Massif (RF-002-03)
+- **GA4** : événements `creation_dossier`, `changement_dossier`, `suppression_dossier` ; paramètre `nb_secteurs` ajouté à `ajout_secteur` (PRD-007)
+- **Design system** (`design-system.css`, `design-system.html`) : nouveaux composants `.select`, `.icon-btn`, `.btn-danger`
+- **Icône** (`icons.js`) : `uiSvg.edit` (crayon)
+- **Dossier PRD** (`docs/prd/`) : un PRD par fonctionnalité (secteurs, Massifs, neige, prévisions, BERA, cache/API, tracking, partage), règles identifiées `RF-XXX-NN`, modèle `_TEMPLATE.md` ; règle d'usage ajoutée dans `CLAUDE.md`
+
+### Modifié
+- **Chargement par Massif** : seul le Massif ouvert est chargé (météo, neige, nuages, BERA — RF-002-04) ; le dernier Massif ouvert est rouvert à la visite suivante (RF-002-05) — coût API Meteoblue inchangé (5 secteurs max par visite)
+- **Cache navigateur** : un cache 4h par Massif (`weatherCache_<id>`), valide quel que soit l'ordre des secteurs ; en cas de quota plein, les caches des autres Massifs sont libérés (RF-006-03)
+- **Ajout d'un secteur** : les données Nuages du nouveau secteur sont maintenant chargées tout de suite (auparavant seulement au rechargement)
+
+### Supprimé
+- **Partage par lien** : bouton « Partager » et événement `partager_dashboard` retirés ; un ancien lien `?s=` ouvre l'app normalement et le paramètre est nettoyé (PRD-008)
+- **Code mort** : fonction `fetchAllWeatherData` (jamais appelée)
+
+### Technique
+- **Migration** : la liste `skiResorts` existante devient le Massif « Mes secteurs » au premier lancement ; `skiResorts` est conservée en sauvegarde (RF-002-14). Nouvelles clés : `massifs`, `activeMassifId`
+- `CACHE_VERSION` 14 → 15 (un cache par Massif) ; ancienne clé `weatherCache` supprimée au démarrage
+- Les réponses d'un Massif quitté pendant son chargement sont ignorées (compteur `loadSeqRef`)
+- `design-system.css` v7.36.0 → v8.0.0, `icons.js` v7.24.0 → v8.0.0 (cache bust, `index.html` + `design-system.html`)
+- Version MAJEURE : nouveau modèle de données stocké dans le navigateur
+
 ## [7.36.0] - 2026-04-27
 
 ### Ajouté

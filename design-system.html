@@ -4,14 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Design System — Ou-skier</title>
-        <script src="icons.js?v=7.24.0"></script>
+        <script src="icons.js?v=8.0.0"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="design-system.css?v=7.36.0" />
+        <link rel="stylesheet" href="design-system.css?v=8.0.0" />
         <style>
             /* === Page-specific styles (showcase only) === */
             body {
@@ -388,6 +388,31 @@
             <div class="component-row">
                 <button class="btn btn-primary">Proposer une amélioration</button>
                 <button class="btn btn-secondary">Faire un don</button>
+                <button class="btn btn-danger">Supprimer</button>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                <code>.btn-danger</code> : action destructive, uniquement dans une modale de confirmation.
+            </div>
+
+            <h3>Bouton icône</h3>
+            <div class="component-row">
+                <button class="icon-btn" title="Renommer"><span class="icon" id="icon-btn-edit"></span></button>
+                <button class="icon-btn" title="Supprimer"><span class="icon" id="icon-btn-trash"></span></button>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classe : <code>.icon-btn</code> — 40×40px (cible tactile), icône 18px.
+            </div>
+
+            <h3>Select (menu déroulant)</h3>
+            <div class="component-row" style="max-width:400px">
+                <select class="select" aria-label="Massif">
+                    <option>Alpes du Nord (3/5)</option>
+                    <option>Pyrénées ariégeoises (5/5)</option>
+                    <option>+ Nouveau massif</option>
+                </select>
+            </div>
+            <div style="font-size:0.75rem;color:var(--storm-gray);margin-top:8px;margin-bottom:16px">
+                Classe : <code>.select</code> — select natif (meilleure ergonomie mobile), pill 40px, chevron en SVG inline.
             </div>
 
             <h3>Tags secteur</h3>
@@ -664,5 +689,13 @@
                 windDemo.appendChild(item);
             });
         </script>
-    </body>
+        <script>
+        (function () {
+            var e = document.getElementById('icon-btn-edit');
+            var t = document.getElementById('icon-btn-trash');
+            if (e && window.uiSvg) e.innerHTML = uiSvg.edit;
+            if (t && window.uiSvg) t.innerHTML = uiSvg.trash;
+        })();
+    </script>
+</body>
 </html>

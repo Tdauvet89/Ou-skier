@@ -4,7 +4,8 @@ Application web de comparaison meteo multi-stations pour le ski, avec bulletins 
 
 ## Fonctionnalites
 
-- **Comparaison multi-stations** : ajout/suppression de stations (max 5) via recherche Meteoblue
+- **Massifs (dossiers)** : jusqu'à 3 Massifs pour regrouper ses secteurs par zone ; seul le Massif ouvert est chargé (voir `docs/prd/PRD-002-massifs.md`)
+- **Comparaison multi-stations** : ajout/suppression de secteurs (max 5 par Massif) via recherche Meteoblue, réordonnables par glisser-déposer sur desktop
 - **Liens Meteoblue** : chaque secteur dans les tableaux est un lien vers sa page Meteoblue dédiée
 - **Vue jour** (5 jours) : icone meteo + description, temperature moyenne (min/max), vent moyen + direction, rafales min-max colorees, precipitations (neige cm / pluie mm), risque avalanche BERA
 - **Vue horaire** : detail heure par heure avec temperatures, vent, precipitation, neige
@@ -29,6 +30,7 @@ Ou-skier/
 │   ├── worker.js           #   Routes /weather et /search (clé API côté serveur)
 │   ├── wrangler.toml       #   Config déploiement Cloudflare
 │   └── package.json        #   Dépendance Wrangler CLI
+├── docs/prd/               # PRD — règles fonctionnelles (une fonctionnalité = un fichier)
 ├── CHANGELOG.md            # Historique des versions
 ├── DESIGN_SYSTEM.md        # Documentation technique du design system
 ├── API-LOGGING.md          # Documentation du systeme de logs API
