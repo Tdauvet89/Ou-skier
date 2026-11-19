@@ -1,5 +1,16 @@
 # Ou-skier — Instructions pour Claude
 
+## Règles fonctionnelles — PRD (OBLIGATOIRE)
+
+Le dossier `docs/prd/` est la **source unique de vérité fonctionnelle** : un PRD par fonctionnalité,
+chaque règle identifiée `RF-XXX-NN`. Index : `docs/prd/README.md`.
+
+1. **Avant de coder** une évolution fonctionnelle, lire le(s) PRD concerné(s) et respecter leurs règles.
+2. **Nouvelle fonctionnalité** : créer `docs/prd/PRD-NNN-nom.md` depuis `_TEMPLATE.md` et l'ajouter à l'index.
+3. **Règle modifiée** : mettre à jour le PRD **dans le même commit** que le code (statut, version, règle).
+4. **Ne jamais réutiliser** un ID de règle supprimé.
+5. Le CHANGELOG cite les règles touchées, ex. `(RF-002-04)`.
+
 ## Design System (OBLIGATOIRE)
 
 Le fichier `design-system.css` est la **source unique de vérité** pour les composants UI partagés.
