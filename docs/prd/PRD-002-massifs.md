@@ -16,7 +16,7 @@ par zone géographique pour gagner en lisibilité et personnaliser son dashboard
 ## Objectifs et KPIs
 | KPI | Cible | Source |
 | --- | --- | --- |
-| Massifs créés (total) | ≥ 5 | GA4 `creation_dossier` |
+| Utilisateurs distincts ayant créé un 2e Massif, 30 jours après la mise en ligne (2026-11-19 → 2026-12-19) | ≥ 5 | GA4 `creation_dossier` avec `nb_dossiers` ≥ 2, métrique « Utilisateurs totaux » |
 | Secteurs par Massif | Suivi | GA4 `nb_secteurs` |
 | Appels Meteoblue par visite | ≤ niveau actuel (5 max) | Logs Worker |
 
@@ -81,5 +81,6 @@ Ouverture ─▶ Un Massif existe ? ─ non ─▶ Invitation ─▶ Créer un M
 - Réordonner les Massifs (ordre alphabétique imposé).
 - Partage par lien (retiré, PRD-008).
 
-## Questions ouvertes
-- KPI : mesurer en utilisateurs distincts sur 30 jours plutôt qu'en total de Massifs ?
+## Décisions
+- 2026-11-19 : KPI mesuré en utilisateurs distincts sur 30 jours (et non en total de Massifs, trop facile à atteindre).
+- Prérequis GA4 : déclarer `nb_dossiers` comme dimension personnalisée (portée événement) pour pouvoir filtrer.

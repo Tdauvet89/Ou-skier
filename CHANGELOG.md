@@ -5,6 +5,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [8.0.1] - 2026-11-19
+
+### Modifié
+- **KPI Massifs** (`docs/prd/PRD-002-massifs.md`) : « ≥ 5 Massifs créés » remplacé par « ≥ 5 utilisateurs distincts ayant créé un 2e Massif en 30 jours » — mesure une vraie adoption
+
+---
+
 ## [8.0.0] - 2026-11-19
 
 ### Ajouté
