@@ -5,6 +5,17 @@ Format : [Keep a Changelog](https://keepachangelog.com/) — Versioning : `MAJEU
 
 ---
 
+## [8.0.2] - 2026-11-24
+
+### Ajouté
+- **Agent marketing réseaux sociaux** (`.claude/agents/ou-skier-social.md`) : rédige les posts Facebook (page + 1 post personnalisé par groupe) et Instagram à partir des vraies données neige/météo/BERA, valorise les pics de `peaks.js`, propose les réponses aux commentaires et fait le bilan hebdo GA4 via liens UTM — brouillons validés dans Notion, aucune publication automatique
+- **Fiche de ciblage des groupes Facebook** (`docs/marketing/groupes-facebook.md`) : massifs, public, règles promo et slug UTM par groupe
+
+### Technique
+- Aucun changement de l'application (pas de cache bust)
+
+---
+
 ## [8.0.1] - 2026-11-19
 
 ### Modifié
